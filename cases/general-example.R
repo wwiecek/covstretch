@@ -11,9 +11,9 @@ ln2[["cumV1"]] <- "Courses of vaccine used"
 gglist <- lapply(as.list(1:3), function(i) {
   pars <- mlist[[i]]
   list(
-    "Mass vaccination (no prioritsation), delta = 1/180" = list_modify(pars, delta1 = rep(1/180, Ngroups)),
+    "Mass vaccination (no prioritsation), delta = 1/360" = list_modify(pars, delta1 = rep(1/360, Ngroups)),
     # "Mass vaccination (no prioritsation), delta = 1/360" = list_modify(pars, delta1 = rep(1/360, Ngroups)),
-    "Mass vaccination (no prioritsation), delta = 1/90" = list_modify(pars, delta1 = rep(1/90, Ngroups)),
+    "Mass vaccination (no prioritsation), delta = 1/60" = list_modify(pars, delta1 = rep(1/60, Ngroups)),
     "No vaccination" = list_modify(pars, delta1 = rep(0, Ngroups))) %>%
     lapply(sr) %>%
     lapply(rescale_rcs, pop, merge=T) %>% 
@@ -30,18 +30,23 @@ ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
 # sr(list_modify(pars_le_fast, delta1 = rep(0, Ngroups))) %>% b_any(pop, "D")
 
 
-
 # Fig G2: How many infections and deaths averted with 95% efficacious vaccine -----
+d1_general <- c(60, 90, 180, 360, 730, 1460)
 df_efficacy_delta  %>%
   filter(e == .95) %>%
-  filter(d1 < 340) %>%
+  # filter(d1 < 340) %>%
+  filter(d1 %in% d1_general) %>%
   select(ri, rd) %>%
   gather(key, value, -d1, -model, -e) %>%
   mutate(key = factor(key, levels = c("ri", "rd"), 
                       labels = c("RI (infections)", "RD (deaths)"))) %>%
   ggplot(aes(x = d1, y = value, group = model, color = model)) + 
   geom_line(size=1.1) +
+  geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(~key, scales = "free") +
+  scale_x_continuous(breaks = d1_general[-1]) +
+  scale_color_discrete(name = "scenario") +
+  theme(axis.text.x = element_text(angle = 45, size = 12), legend.position = "top") +
   xlab("average time to vaccination, 1/ delta1 [days]") + ylab("proportion of cases averted")
 
 
@@ -49,7 +54,7 @@ df_efficacy_delta  %>%
 # Table G3 -----
 df_efficacy_delta %>% 
   filter(e == .95) %>%
-  filter(d1 %in% c(60, 90, 180, 360, 730, 1460, Inf)) %>% select(d1, model, i, ri) %>%
+  filter(d1 %in% c(d1_general, Inf)) %>% select(d1, model, i, ri) %>%
   gather(variable, value, -d1, -model, -e) %>%
   mutate(value = round(value, 2)) %>%
   spread(d1, value) %>% 
