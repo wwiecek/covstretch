@@ -41,8 +41,8 @@ odin_ode_2vaccines <- odin::odin({
   deriv(N1[])     <-  t_group1[i]*(1-e1)*delta1[i]*(S[i]) + kappa1[i]*V1[i]  - (beta[i] + constantrisk)*N1[i]
   deriv(V2[])     <-  t_group2[i]*delta2[i]*(e2*S[i]+R[i]*v_recovered_flag) - kappa2[i]*V2[i]
   deriv(N2[])     <-  t_group2[i]*(1-e2)*delta2[i]*(S[i]) + kappa2[i]*V2[i]  - (beta[i] + constantrisk)*N2[i]
-  deriv(cumV1[])  <-  t_group1[i]*delta1[i]*S[i]
-  deriv(cumV2[])  <-  t_group2[i]*delta2[i]*S[i]
+  deriv(cumV1[])  <-  t_group1[i]*delta1[i]*(S[i] + R[i]*v_recovered_flag)
+  deriv(cumV2[])  <-  t_group2[i]*delta2[i]*(S[i] + R[i]*v_recovered_flag)
   deriv(cumI[])   <-  (beta[i] + constantrisk)*(S[i]+N1[i]+N2[i])
   
   # PARAMETERS: general

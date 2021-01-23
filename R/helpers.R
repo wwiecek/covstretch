@@ -42,7 +42,7 @@ y0_gen <- function(Nc, Ngroups,
 }
 
 
-# Gathering outputs (burden of disease) -----
+# Gathering outputs (derived metrics of burden) -----
 
 # Infection burden (only if no loss of immunity):
 bi <- function(sr, pop, sub = 0) { 
@@ -54,7 +54,49 @@ bd <- function(sr, pop) {
   y <- sr %>% rescale_rcs(merge = T, pop_sizes = pop/sum(pop))
   y[dim(y)[1], "D", 1]
 }
-b_any <- function(sr, pop, comp) {
+b_any <- function(sr, pop, comp, t = dim(sr)[1]) {
   y <- sr %>% rescale_rcs(merge = T, pop_sizes = pop/sum(pop))
-  y[dim(y)[1], comp, 1]
+  y[t, comp, 1]
 }
+
+# Time to herd immunity
+tthi <- function(sr, pop, th=.5, r=FALSE) {
+  y <- sr %>% rescale_rcs(merge = T, pop_sizes = pop/sum(pop))
+  im <- y[, "P1", 1] + y[, "P2", 1]
+  if(r)
+    im <- im + y[, "R", 1]
+  min(which(im > th))
+}
+
+# Benefit
+benefit_p <- function(p, x1 = 0, x2=.7, y1=0) {
+  if(p < x1)
+    return(y1*(p/x1))
+  if(p < x2)
+    return((1-y1)*((p-x1)/(x2-x1)) + y1)
+  return(1)
+}
+benefit <- function(sr, pop, r = FALSE, benefit_f = benefit_p) {
+  y <- sr %>% rescale_rcs(merge = T, pop_sizes = pop/sum(pop))
+  im <- y[, "P1", 1] + y[, "P2", 1]
+  if(r)
+    im <- im + y[, "R", 1]
+  d <- dim(y)[1]
+  sum(sapply(im, benefit_f))/d
+}
+
+
+main_metrics <- function(y, pop) {
+  if("cumV1" %in% dimnames(y)[[2]])
+    v1 <- b_any(y, pop, "cumV1", 31)
+  else
+    v1 <- b_any(y, pop, "cumV", 31)
+  c("i" = 100*b_any(y, pop, "cumI"), 
+    "d" = 100*b_any(y, pop, "D"), 
+    "v1" = v1, 
+    "tt50" = tthi(y, pop),
+    # Benefit integral, over vaccinations only:
+    "harm_v"  = 1-benefit(y, pop),
+    "harm_vr" = 1-benefit(y, pop, r = TRUE))
+}
+metric_nms <- c("i", "d", "v1", "tt50", "harm_v", "harm_vr")

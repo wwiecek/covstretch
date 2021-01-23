@@ -3,7 +3,7 @@ source("cases/prep-results.R")
 # Fig LE1: general impact of rate and efficacy on infections ------
 
 par(mfrow = c(1,3))
-e <- c(.5, .8, .95)
+e <- c(.6, .8, .95)
 x <- seq(10, 360, 10)
 
 

@@ -54,6 +54,8 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   if(model == "pars_le_slow")   pars <- pars_fdf_slow
   if(model == "pars_le_fast") pars <- pars_fdf_fast
   d2 <- as.numeric(d2_default[d1_default == d1])
+  if(is.infinite(d1))
+    d2 <- Inf
   # if(d2 == 1) browser()
   if(policy == "default")
     res <- sr(f = "2d", list_modify(pars, 
@@ -61,86 +63,108 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
                    e2 = .95, 
                    ta = rep(10, Ngroups),
                    delta1 = rep(1/d1, Ngroups),
-                   delta2 = rep(1/18, Ngroups))) %>% b_any(pop, comp)
+                   delta2 = rep(1/18, Ngroups)))
   if(policy == "fdf")
     res <- sr(f = "2d", list_modify(pars, 
                    e1 = e,
                    e2 = .95,
                    ta = rep(10, Ngroups),
                    delta1 = rep(1/d2, Ngroups),
-                   delta2 = rep(1/74, Ngroups))) %>% b_any(pop, comp)
-  res
+                   delta2 = rep(1/74, Ngroups)))
+  if(policy == "no_vaccination")
+    res <- sr(f = "2d", list_modify(pars, 
+                   e1 = 0,
+                   e2 = 0,
+                   ta = rep(0, Ngroups),
+                   delta1 = rep(0, Ngroups),
+                   delta2 = rep(0, Ngroups)))
+  main_metrics(res, pop)
 }
 
 # model_fdf("pars_le_slow", 1, .8, "fdf")
 # model_fdf("pars_le_slow", 1, .8, "default")
 
-df_fdf <- expand.grid(d1 = d1_default, 
+df_fdf <- expand.grid(d1 = c(d1_default, Inf),
             model = c("pars_le_cr", "pars_le_slow", "pars_le_fast"), 
             e = c(.4, .5, .6, .7, .8), 
             policy = c("default", "fdf")) %>%
   mutate(data = pmap(list(model, d1, e, policy), 
                      function(x,y,z,a) data.frame(value = model_fdf(x,y,z,a), 
-                                                  var = c("i", "d")))) %>%
+                                                  var = metric_nms))) %>%
   unnest(data) %>%
   spread(var, value) %>%
   mutate(model = factor(model, levels = c("pars_le_cr", "pars_le_slow", "pars_le_fast"),
-                        labels = c("Constant risk", "Slow growth", "Fast growth")))
+                        labels = c("Constant risk", "Slow growth", "Fast growth"))) %>%
+  group_by(d1, model, e, policy)
   
-df_fdf_ratio <- df_fdf %>%
-  pivot_wider(values_from = c("d", "i"), names_from = "policy") %>%
-  mutate(rd = 1 - (d_fdf/d_default)) %>%
-  mutate(ri = 1 - (i_fdf/i_default)) %>%
+df_fdf_ratio <- df_fdf %>% select(d,i, harm_vr) %>%
+  pivot_wider(values_from = c("d", "i", "harm_vr"), names_from = "policy") %>%
+  # mutate(re = 1 - (harm_vr_fdf/harm_vr_default)) %>%
+  # mutate(re = harm_vr_fdf - harm_vr_default) %>%
+  # mutate(rd = d_fdf - d_default) %>%
+  # mutate(ri = i_fdf - i_default) %>%
+  mutate(re = (harm_vr_fdf/harm_vr_default)) %>%
+  mutate(rd = (d_fdf/d_default)) %>%
+  mutate(ri = (i_fdf/i_default)) %>%
+  # mutate(ri_fn = 1 - (i_fdf/i_no_vaccination)) %>%
+  # mutate(ri_dn = 1 - (i_default/i_no_vaccination)) %>%
   group_by(d1, model, e)
 
 
-filter(df_fdf_ratio, e %in% c(.5, .8)) %>%
+filter(df_fdf_ratio, e %in% c(.6, .8)) %>%
   filter(d1 %in% c(1, 45, 90, 180, 360, 730, 1460, Inf)) %>% 
-  select(d1, model, ri, i_fdf, i_default) %>%
+  # select(d1, model, ri_fd, ri_fn, ri_dn, i_fdf, i_default) %>%
+  # select(d1, model, i_fdf, i_default) %>%
   gather(variable, value, -d1, -model, -e) %>%
   mutate(value = round(value, 2)) %>%
   spread(d1, value) %>% 
   arrange(e, variable, model) %>% 
-  ungroup() %>% 
-  select(-e, -variable)
+  ungroup() 
+  # select(-e, -variable)
 
 df_fdf_ratio  %>%
-  filter(e %in% c(.5, .8)) %>%
+  filter(e %in% c(.6, .8)) %>%
   filter(d1 > 45) %>%
-  select(ri, rd) %>%
+  select(ri, rd, re) %>%
   gather(key, value, -d1, -model, -e) %>%
-  mutate(key = factor(key, levels = c("ri", "rd"), 
-                      labels = c("RI (infections)", "RD (deaths)"))) %>%
-  mutate(efficacy = ifelse(e == .8, "Efficacy after 1 dose = 80%", "Efficacy after 1 dose = 50%")) %>%
+  mutate(key = factor(key, levels = c("ri", "rd", "re"), 
+                      labels = c("RRI (infections)", "RRD (deaths)", "RRE (economic harm)"))) %>%
+  mutate(efficacy = ifelse(e == .8, "Efficacy after 1 dose = 80%", "Efficacy after 1 dose = 60%")) %>%
   ggplot(aes(x = d1, y = value, group = interaction(model, efficacy), color = model)) + 
   geom_line(size=1.1) +
   geom_point(pch = 21, size = 3, fill = "white") +
-  facet_wrap(efficacy~key, scales = "free") +
+  facet_wrap(efficacy ~ key, scales = "free_y", ncol = 3) +
   scale_x_continuous(breaks = c(90, 180, 360, 730, 1460)) +
   scale_color_discrete(name = "scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 14), legend.position = "top") +
   xlab("average time to first dose, 1/ delta1 [days]") + 
-  ylab("relative benefit R")
+  ylab("relative risk FDF vs default policy")
 
 
 
 
 # Figure FDF4: optimal choice FDF vs default depending on speed and efficacy ------
 df_fdf_ratio %>%
-  filter(d1 > 1) %>%
-  select(d1, e, model, rd) %>%
-  mutate(fdf_better = cut(rd, c(-Inf, -.05, .05, Inf), 
-                         labels = c("FDF worse by 5% or more", 
+  filter(d1 > 1, d1 < Inf) %>%
+  # mutate(rd = re) %>%
+  select(d1, e, model, ri, re, rd) %>%
+  gather(key, value, -d1, -e, -model) %>%
+  mutate(rd = value) %>%
+  mutate(fdf_better = cut(rd, c(-Inf, .95, 1.05, Inf), 
+                         labels = c("FDF better by 5% or more", 
                                     "Comparable (+-5%)", 
-                                    "FDF better by at least 5%"))) %>%
-  mutate(value = round(rd, 2)) %>%
+                                    "FDF worse by at least 5%"))) %>%
+  mutate(key = factor(key, levels = c("ri", "rd", "re"),
+                      labels = c("RRI (infections)", "RRD (deaths)", "RRE (economic harm)"))) %>%
+  mutate(efficacy = ifelse(e == .8, "Efficacy after 1 dose = 80%", "Efficacy after 1 dose = 50%")) %>%
+  mutate(value = round(value, 2)) %>%
   mutate(speedup = factor(d1)) %>%
   mutate(e = factor(e)) %>%
   ggplot(aes(x = speedup, y = e, fill = fdf_better)) + geom_tile() +
   scale_fill_manual(values = c("grey20", "grey40", "grey60"), 
                     name = "Reduction in infections RI:") +
   theme(legend.position = "bottom") +
-  facet_grid(~model) + ylab("e1 (efficacy following 1st dose)") + 
+  facet_grid(key~model) + ylab("e1 (efficacy following 1st dose)") + 
   xlab("average wait until the first dose under default policy, 1/delta1 [days]") +
   geom_text(aes(label = value), color = "white")  
 

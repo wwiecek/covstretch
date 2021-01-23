@@ -36,29 +36,29 @@ df_efficacy_delta  %>%
   filter(e == .95) %>%
   # filter(d1 < 340) %>%
   filter(d1 %in% d1_general) %>%
-  select(ri, rd) %>%
+  select(ri, rd, re) %>%
   gather(key, value, -d1, -model, -e) %>%
-  mutate(key = factor(key, levels = c("ri", "rd"), 
-                      labels = c("RI (infections)", "RD (deaths)"))) %>%
+  mutate(key = factor(key, levels = c("ri", "rd", "re"), 
+                      labels = c("RI (infections)", "RD (deaths)", "RE (economic harm)"))) %>%
   ggplot(aes(x = d1, y = value, group = model, color = model)) + 
   geom_line(size=1.1) +
   geom_point(pch = 21, size = 3, fill = "white") +
-  facet_wrap(~key, scales = "free") +
+  facet_wrap(~key, scales = "free", ncol = 2) +
   scale_x_continuous(breaks = d1_general[-1]) +
   scale_color_discrete(name = "scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 12), legend.position = "top") +
-  xlab("average time to vaccination, 1/ delta1 [days]") + ylab("proportion of cases averted")
+  xlab("average time to vaccination, 1/ delta1 [days]") + ylab("proportion of harm averted")
 
 
 
 # Table G3 -----
 df_efficacy_delta %>% 
   filter(e == .95) %>%
-  filter(d1 %in% c(d1_general, Inf)) %>% select(d1, model, i, ri) %>%
+  filter(d1 %in% c(d1_general, Inf)) %>% select(d1, model, i, ri, benefit_r, v1, tthi) %>%
   gather(variable, value, -d1, -model, -e) %>%
   mutate(value = round(value, 2)) %>%
   spread(d1, value) %>% 
   arrange(variable, model) %>% ungroup() %>%
-  select(-variable, -e)
+  select(-e)
 
 
