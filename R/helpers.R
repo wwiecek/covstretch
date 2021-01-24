@@ -12,6 +12,10 @@ sr <- function(pars, f = "2v") {
     mod <- odin_ode_2dose(user = pars)
     cnames <- c("S", "E", "I", "R", "D", "P1", "N1", "P2", "N2", "cumV", "cumI")
   }
+  if(f == "2d_v2") {
+    mod <- odin_ode_2dose_v2(user = pars)
+    cnames <- c("S", "E", "I", "R", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumV", "cumI")
+  }
   if(f == "2v") {
     mod <- odin_ode_2vaccines(user = pars)
     cnames <- c("S", "E", "I", "R", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumI")

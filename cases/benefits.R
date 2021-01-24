@@ -1,32 +1,6 @@
 
 
 # Sequencing vaccination (prevaccination scenario) ------
-
-
-pars_d <- lst(
-  Nc = 9, 
-  Ngroups, 
-  Ndays,
-  y0 = matrix(c(1-1e-05, 1e-05, rep(0, 7)), 9, Ngroups),
-  q = rep(3/(5*ev), Ngroups),
-  contacts = default_cm,
-  gamma1 = rep(.2, Ngroups),
-  gamma2 = rep(.2, Ngroups),
-  delta1 = rep(0, Ngroups),
-  delta2 = rep(0, Ngroups),
-  kappa1 = rep(0, Ngroups),
-  kappa2 = rep(0, Ngroups),
-  phi = rep(0, Ngroups), 
-  doses_y1 = rep(0, Ndays),
-  doses_y2 = rep(0, Ndays),
-  doses_x  = 1:Ndays,
-  e1 = 0,
-  e2 = 0,
-  pdeath = c(0.002, 0.006, 0.03, 0.08, 0.15, 0.60, 2.2, 5.1, 9.3)/100,
-  # pdeath = rep(.01, Ngroups),
-  pop_size = hic_pop/sum(hic_pop)
-)
-
 vac_top_p <- function(p, pop) {
   pop <- pop/sum(pop)
   w <- rev(pop)
@@ -46,12 +20,8 @@ benefits_curve <- function(e = .95, pop = hic_pop/sum(hic_pop)){
     seq(0,1,length=21),
     function(p) {
       v <- vac_top_p(p, pop)
-      # y0_v <- matrix(c(1-1e-05, 1e-05, rep(0, 10)), 12, Ngroups)
-      # y0_v[6,] <- v
-      # y0_v[1,] <- (1-v) - (1-v)*ii
-      # y0_v[2,] <- (1-v)*ii
-      y0_v <- y0_gen(12, Ngroups, pre_immunity = pre_immunity*v + (1-pre_immunity)*e*v)
-      sr <- sr(list_modify(pars_le_cr, 
+      y0_v <- y0_gen(12, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e*v)
+      sr <- sr(list_modify(pars_le_fast, 
                            y0 = y0_v))
       c(p = p,
         bd = bd(sr, pop),
@@ -63,14 +33,56 @@ bf <- rbind(
   benefits_curve(.8) %>% mutate(scenario = "80% efficacy"),
   benefits_curve(.6) %>% mutate(scenario = "60% efficacy"),
   benefits_curve(.4) %>% mutate(scenario = "40% efficacy"),
-  benefits_curve(.95) %>% mutate(scenario = "95% efficacy")) %>%
+  benefits_curve(1) %>% mutate(scenario = "100% efficacy")) %>%
   mutate(bi = 1-(bi/max(bi))) %>%
   mutate(bd = 1-(bd/max(bd)))
 
-theme_set(theme_minimal(base_size = 14))
+# theme_set(theme_minimal(base_size = 14))
+
 bf %>% 
+  # mutate(both = .5*bi + .5*bd) %>%
   setNames(c("p", "Deaths averted", "Infections averted", "scenario")) %>%
   gather(var, value, -p, -scenario) %>%
+  # filter(!(scenario != "100% efficacy" & var == "Total benefit")) %>%
   ggplot(aes(x = p, y = value, group = scenario, lty = scenario)) + 
   geom_line() + facet_wrap(~var, scales = "free") + xlab("Fraction vaccinated") + ylab("Fraction averted")
+
+
+
+
+
+# Construct risk functions for different age groups -----
+epi <- sr(list_modify(pars_le_fast, delta1 = rep(0, Ngroups), y0 = y0_gen(12, Ngroups, c(0.5, 0.5, rep(0,7)), 1e-03))) 
+risk_age <- epi[360, c("cumI", "D"),]
+risk_age_i <- as.numeric(risk_age[1,])
+risk_age_d <- as.numeric(risk_age[2,])
+normalising_f_i <- sum(risk_age_i*pop)
+normalising_f_d <- sum(risk_age_d*pop)
+
+atrisk <- c(rep(1,8), 1)
+0.5*sum(risk_age_i*atrisk*pop)/normalising_f_i + 0.5*sum(risk_age_d*atrisk*pop)/normalising_f_d 
+
+contribution <- sapply(1:9, function(i) {
+  atrisk <- rep(0, 9)
+  atrisk[i] <- 1
+  0.5*sum(risk_age_i*atrisk*pop)/normalising_f_i + 0.5*sum(risk_age_d*atrisk*pop)/normalising_f_d 
+})
+
+rbind("Group size" = pop,
+      "Infection risk q" = risk_age_i,
+      "Fatality risk r" = risk_age_d,
+      "Total contributon" = contribution) %>% 
+  as.data.frame() %>% setNames(colnames(pbc_spread)) %>% print(digits = 2)
+
+
+
+
+bf %>% mutate(both = .5*bi + .5*bd) %>% filter(scenario == "100% efficacy") %>% select(p, both, scenario) %>%
+  rbind(data.frame(scenario = "Assumption", 
+                   both = cumsum(rev(contribution)),
+                   # both = c(0, .55, .9, 1, 1), 
+                   # p = c(0, .25, .5, .7, 1))) %>%
+                   p = c(cumsum(rev(pop))))) %>%
+  ggplot(aes(x = p, y = both, group = scenario, lty = scenario)) + 
+  geom_line() + xlab("Fraction vaccinated") + ylab("Fraction averted")
 
