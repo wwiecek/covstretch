@@ -3,8 +3,11 @@
 # Running the model function -----
 
 # Single run = sr()
-sr <- function(pars, f = "2v") { 
+sr <- function(pars, f = "2v_v2") { 
   gnames <- 1:pars$Ngroups
+  times <- 1:(pars$Ndays)
+  pars$Ndays <- NULL
+  
   if(pars$Ngroups == 9)
     gnames <- colnames(pbc_spread)
   
@@ -20,9 +23,13 @@ sr <- function(pars, f = "2v") {
     mod <- odin_ode_2vaccines(user = pars)
     cnames <- c("S", "E", "I", "R", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumI")
   }
-  times <- 1:(pars$Ndays)
+  if(f == "2v_v2") {
+    mod <- odin_ode_2vaccines_v2(user = pars)
+    cnames <- c("S", "E", "I", "R", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumV", "cumI")
+  }
+  
   y <- array(mod$run(times)[,-1], 
-             dim = c(pars$Ndays, pars$Ngroups, pars$Nc), 
+             dim = c(max(times), pars$Ngroups, pars$Nc), 
              dimnames = list(times, gnames, cnames)) %>%
     aperm(c(1, 3, 2))
 }
@@ -89,18 +96,14 @@ benefit <- function(sr, pop, r = FALSE, benefit_f = benefit_p) {
   sum(sapply(im, benefit_f))/d
 }
 
-
-main_metrics <- function(y, pop) {
-  if("cumV1" %in% dimnames(y)[[2]])
-    v1 <- b_any(y, pop, "cumV1", 31)
-  else
-    v1 <- b_any(y, pop, "cumV", 31)
+main_metrics <- function(y, pop, vat = 31) {
+  v1 <- b_any(y, pop, "cumV", vat)
   c("i" = 100*b_any(y, pop, "cumI"), 
     "d" = 100*b_any(y, pop, "D"), 
     "v1" = v1, 
     "tt50" = tthi(y, pop),
     # Benefit integral, over vaccinations only:
-    "harm_v"  = 1-benefit(y, pop),
-    "harm_vr" = 1-benefit(y, pop, r = TRUE))
+    # "harm_v"  = 1-benefit(y, pop),
+    "harm_vr" = harm(y))
 }
-metric_nms <- c("i", "d", "v1", "tt50", "harm_v", "harm_vr")
+metric_nms <- c("i", "d", "v1", "tt50", "harm")

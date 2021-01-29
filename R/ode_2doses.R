@@ -26,21 +26,21 @@ odin_ode_2dose <- odin::odin({
   deriv(E[])      <-  (beta[i] + constantrisk)*(S[i]+N1[i]+N2[i]) - gamma1[i]*E[i]
   deriv(I[])      <-  gamma1[i]*E[i] - gamma2[i]*I[i]
   deriv(D[])      <-  pdeath[i]*gamma2[i]*I[i]
-  deriv(R[])      <-  (1-pdeath[i])*gamma2[i]*I[i] - phi[i]*R[i] - trt_avl*delta1[i]*R[i]*t_group[i]*v_recovered_flag
+  deriv(R[])      <-  (1-pdeath[i])*gamma2[i]*I[i] - phi[i]*R[i] - trt_avl*delta1[i]*R[i]*t_group[i]*vrf
   
-  deriv(P1[])     <-  trt_avl*t_group[i]*delta1[i]*(e1*S[i]+R[i]*v_recovered_flag) - trt_avl*delta2[i]*P1[i] - kappa1[i]*P1[i]
+  deriv(P1[])     <-  trt_avl*t_group[i]*delta1[i]*(e1*S[i]+R[i]*vrf) - trt_avl*delta2[i]*P1[i] - kappa1[i]*P1[i]
   deriv(N1[])     <-  (1-e1)*trt_avl*t_group[i]*delta1[i]*(S[i]) - trt_avl*delta2[i]*N1[i] - (beta[i] + constantrisk)*N1[i] + kappa1[i]*N1[i]
   deriv(P2[])     <-  trt_avl*t_group[i]*e2*delta2[i]*(P1[i]+N1[i]) - kappa2[i]*P2[i]
   deriv(N2[])     <-  trt_avl*t_group[i]*(1-e2)*delta2[i]*(P1[i]+N1[i]) + kappa2[i]*N2[i] - (beta[i] + constantrisk)*N2[i] 
   
-  deriv(cumV[])   <-  trt_avl*t_group[i]*(delta1[i]*(S[i] + R[i]*v_recovered_flag) + delta2[i]*(P1[i]+N1[i]))
+  deriv(cumV[])   <-  trt_avl*t_group[i]*(delta1[i]*(S[i] + R[i]*vrf) + delta2[i]*(P1[i]+N1[i]))
   deriv(cumI[])   <-  gamma1[i]*E[i]
   
   # PARAMETERS: general
   Ndays            <- user()
   Ngroups          <- user()
   Nc               <- user()
-  v_recovered_flag <- user()
+  vrf <- user()
   constantrisk     <- user()
   y0[,]            <- user()
   pop_size[]       <- user()

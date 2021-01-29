@@ -51,14 +51,9 @@ bf %>%
 
 
 
-# Construct risk functions for different age groups -----
-epi <- sr(list_modify(pars_le_fast, delta1 = rep(0, Ngroups), y0 = y0_gen(12, Ngroups, c(0.5, 0.5, rep(0,7)), 1e-03))) 
-risk_age <- epi[360, c("cumI", "D"),]
-risk_age_i <- as.numeric(risk_age[1,])
-risk_age_d <- as.numeric(risk_age[2,])
-normalising_f_i <- sum(risk_age_i*pop)
-normalising_f_d <- sum(risk_age_d*pop)
+# Illustration -----
 
+# sr(list_modify(pars_le_fast, delta1 = rep(0, Ngroups), y0 = y0_gen(13, Ngroups, c(0.5, 0.5, rep(0,7)), 0))) %>% harm()
 atrisk <- c(rep(1,8), 1)
 0.5*sum(risk_age_i*atrisk*pop)/normalising_f_i + 0.5*sum(risk_age_d*atrisk*pop)/normalising_f_d 
 

@@ -17,31 +17,31 @@ odin_ode_2dose_v2 <- odin::odin({
   beta_matrix[,] <- contacts[i,j]*q[j]*I[j]
   beta[] <- sum(beta_matrix[i,])
   
-  ta1[] <- (cumV1[i] <= 1)*(t > ta[i])
-  ta2[] <- (cumV2[i] <= 1)*(t > ta[i])
-    
+  va1[] <- (cumV1[i] <= 1)/(1 + exp(ta[i] - t))
+  va2[] <- (cumV2[i] <= 1)/(1 + exp(ta[i] - t))
+  
   # ODE equations are here:
-  deriv(S[])      <- -(beta[i] + constantrisk)*S[i] + phi[i]*R[i] - ta1[i]*delta1[i]*S[i]/(S[i]+R[i])
+  deriv(S[])      <- -(beta[i] + constantrisk)*S[i] + phi[i]*R[i] - va1[i]*delta1[i]*S[i]/(S[i]+R[i]*vrf)
   deriv(E[])      <-  (beta[i] + constantrisk)*(S[i]+N1[i]+N2[i]) - gamma1[i]*E[i]
   deriv(I[])      <-  gamma1[i]*E[i] - gamma2[i]*I[i]
   deriv(D[])      <-  pdeath[i]*gamma2[i]*I[i]
-  deriv(R[])      <-  (1-pdeath[i])*gamma2[i]*I[i] - phi[i]*R[i] - ta1[i]*delta1[i]*R[i]/(S[i]+R[i])
+  deriv(R[])      <-  (1-pdeath[i])*gamma2[i]*I[i] - phi[i]*R[i] - va1[i]*delta1[i]*R[i]*vrf/(S[i]+R[i]*vrf)
   
-  deriv(P1[])     <-  ta1[i]*delta1[i]*(e1*S[i]+R[i])/(S[i]+R[i]) - ta2[i]*delta2[i]*P1[i] - kappa1[i]*P1[i]
-  deriv(N1[])     <-  ta1[i]*delta1[i]*(1-e1)*S[i]/(S[i]+R[i]) - ta2[i]*delta2[i]*N1[i] - (beta[i] + constantrisk)*N1[i] + kappa1[i]*N1[i]
-  deriv(P2[])     <-  ta2[i]*e2*delta2[i]*(P1[i]+N1[i]) - kappa2[i]*P2[i]
-  deriv(N2[])     <-  ta2[i]*(1-e2)*delta2[i]*(P1[i]+N1[i]) + kappa2[i]*N2[i] - (beta[i] + constantrisk)*N2[i] 
+  deriv(P1[])     <-  va1[i]*delta1[i]*(e1*S[i]+R[i]*vrf)/(S[i]+R[i]*vrf) - va2[i]*delta2[i]*P1[i] - kappa1[i]*P1[i]
+  deriv(N1[])     <-  va1[i]*delta1[i]*(1-e1)*S[i]/(S[i]+R[i]*vrf) - va2[i]*delta2[i]*N1[i] - (beta[i] + constantrisk)*N1[i] + kappa1[i]*N1[i]
+  deriv(P2[])     <-  va2[i]*e2*delta2[i]*(P1[i]+N1[i]) - kappa2[i]*P2[i]
+  deriv(N2[])     <-  va2[i]*(1-e2)*delta2[i]*(P1[i]+N1[i]) + kappa2[i]*N2[i] - (beta[i] + constantrisk)*N2[i] 
   
-  deriv(cumV1[])   <-  ta1[i]*delta1[i]
-  deriv(cumV2[])   <-  ta2[i]*(delta2[i]*(P1[i]+N1[i]))
-  deriv(cumV[])    <-  ta1[i]*delta1[i] + ta2[i]*(delta2[i]*(P1[i]+N1[i]))
+  deriv(cumV1[])   <-  va1[i]*delta1[i]
+  deriv(cumV2[])   <-  va2[i]*(delta2[i]*(P1[i]+N1[i]))
+  deriv(cumV[])    <-  va1[i]*delta1[i] + va2[i]*(delta2[i]*(P1[i]+N1[i]))
   deriv(cumI[])    <-  gamma1[i]*E[i]
   
   # PARAMETERS: general
   Ngroups          <- user()
   Nc               <- user()
-  v_recovered_flag <- user()
   constantrisk     <- user()
+  vrf <- user()
   y0[,]            <- user()
   contacts[,]      <- user()
   ta[]             <- user()
@@ -58,7 +58,7 @@ odin_ode_2dose_v2 <- odin::odin({
   e2             <- user()
   phi[]          <- user()
   pdeath[]       <- user()
-
+  
   # Parameters: ODE system
   dim(gamma1)       <- Ngroups
   dim(gamma2)       <- Ngroups
@@ -70,8 +70,8 @@ odin_ode_2dose_v2 <- odin::odin({
   dim(pdeath)       <- Ngroups
   
   dim(ta)          <- Ngroups
-  dim(ta1)          <- Ngroups
-  dim(ta2)          <- Ngroups
+  dim(va1)          <- Ngroups
+  dim(va2)          <- Ngroups
   dim(q)           <- Ngroups
   dim(beta)        <- Ngroups
   dim(beta_matrix) <- c(Ngroups, Ngroups)
