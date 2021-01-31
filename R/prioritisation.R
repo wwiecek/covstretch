@@ -20,7 +20,7 @@ apap_2d <- function(pars, len, d2 = 18) {
 apap_2v <- function(pars, len1, len2=Inf, n = pop) {
   prop <- sum(n[7:9])
   list_modify(pars, 
-              ta1 = 10+c(rep(len1*prop, 6), 0, 0, 0),
+              ta1 = 10 + c(rep(len1*prop, 6), 0, 0, 0),
               delta1 = c(rep(1/len1/(1-prop), 6), rep(1/len1/prop, 3)))
 }
 

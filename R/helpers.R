@@ -98,8 +98,8 @@ benefit <- function(sr, pop, r = FALSE, benefit_f = benefit_p) {
 
 main_metrics <- function(y, pop, vat = 31) {
   v1 <- b_any(y, pop, "cumV", vat)
-  c("i" = 100*b_any(y, pop, "cumI"), 
-    "d" = 100*b_any(y, pop, "D"), 
+  c("i" = b_any(y, pop, "cumI"), 
+    "d" = b_any(y, pop, "D"), 
     "v1" = v1, 
     "tt50" = tthi(y, pop),
     # Benefit integral, over vaccinations only:

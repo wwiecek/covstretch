@@ -4,25 +4,21 @@ pop <- hic_pop/sum(hic_pop)
 pre_immunity <- c(.5, .5, rep(.2, 7))
 pre_immunity_prop <- sum(pre_immunity*pop)
 
-
 # Two doses model -----
 pars_fdf_slow <- lst(
   Nc = 13, 
   Ngroups, 
   Ndays,
-  y0 = y0_gen(13, 9, pre_immunity, 1e-02),
-  q = rep(1.5/(5*ev), Ngroups),
+  y0 = y0_gen(13, 9, pre_immunity, 5e-03),
+  q = rep(1.6/(5*ev), Ngroups),
   contacts = default_cm,
   gamma1 = rep(.2, Ngroups),
   gamma2 = rep(.2, Ngroups), #duration of infectious period
-  delta1 = rep(1/360, Ngroups),
+  delta1 = rep(0, Ngroups),
   delta2 = rep(0, Ngroups),
   kappa1 = rep(0, Ngroups),
   kappa2 = rep(0, Ngroups),
   phi = rep(0, Ngroups), 
-  # doses_y = rep(2, Ndays),
-  # doses_x  = 1:Ndays,
-  # pop_size = hic_pop/sum(hic_pop),
   ta = rep(0, Ngroups),
   e1 = .8,
   e2 = .95,
@@ -35,23 +31,21 @@ pars_fdf_fast <- list_modify(pars_fdf_slow,
                                  y0 = y0_gen(13, 9, pre_immunity, 1e-03),
                                  q = rep(3/(5*ev), Ngroups))
 pars_fdf_cr <- list_modify(pars_fdf_slow,
-                               y0 = y0_gen(13, 9, pre_immunity, 0),
+                               y0 = y0_gen(13, 9, pre_immunity, .1/30.5),
                                q = rep(0, Ngroups),
                                constantrisk = .01/30.5)
 
 # Two vaccines model -----
 pars_le_slow <- list_modify(pars_fdf_slow,
                           e1 = 0.95, e2 = 0, 
-                          Nc = 13, 
-                          y0 = y0_gen(13, 9, pre_immunity, 1e-02),
                           ta1 = rep(0, Ngroups), 
                           ta2 = rep(0, Ngroups), 
                           ts1 = rep(Ndays, Ngroups))
-pars_le_slow$doses_y <- pars_le_slow$ta  <- NULL
+pars_le_slow$ta  <- NULL
 pars_le_fast <- list_modify(pars_le_slow,
                             y0 = y0_gen(13, 9, pre_immunity, 1e-03),
                             q = rep(3/(5*ev), Ngroups))
 pars_le_cr <- list_modify(pars_le_slow,
-                          y0 = y0_gen(13, 9, pre_immunity, 0),
+                          y0 = y0_gen(13, 9, pre_immunity, .1/30.5),
                           q = rep(0, Ngroups),
                           constantrisk = .01/30.5)

@@ -17,8 +17,8 @@ odin_ode_2vaccines_v2 <- odin::odin({
   beta_matrix[,] <- contacts[i,j]*q[j]*I[j]
   beta[] <- sum(beta_matrix[i,])
   
-  va1[] <- (cumV1[i] <= 1)*(t > ta1[i])*(t < ts1[i])
-  va2[] <- (cumV2[i] <= 1)*(t > ta2[i])
+  va1[] <- (cumV1[i] <= 1)/(1 + exp(ta1[i] - t))*(t < ts1[i])
+  va2[] <- (cumV2[i] <= 1)/(1 + exp(ta2[i] - t))
   
   # ODE equations are here:
   deriv(S[])      <- -(beta[i] + constantrisk)*S[i] + phi[i]*R[i] - 
