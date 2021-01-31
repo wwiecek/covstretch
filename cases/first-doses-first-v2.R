@@ -19,45 +19,6 @@ delay_default <- 18
 delay_fdf <- 74
 delay_hybrid <- c(rep(delay_fdf, 6), rep(delay_default, 3))
 
-# S1: Base case (Figure 1) ------
-rescale_and_bind(list(
-  "Default (4 weeks)"      = sr(apap_2d(pars_fdf_cr, 360, delay_default) %>% list_modify(e1 = .8), f = "2d_v2"),
-  "FDF (12 weeks)"         = sr(apap_2d(pars_fdf_cr, 318, delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2"),
-  "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, c(rep(325, 6), rep(360,3)), delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
-  # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
-), pop) %>% 
-  plot_rcs(comp_to_display, long_names = ln, ncol = 3) + 
-  ylab("Proportion of population") + theme(legend.position = "top") + 
-  scale_color_discrete(name = "2nd dose delay policy:")
-
-sr(apap_2d(pars_fdf_fast, 180, delay_default) %>% list_modify(e1 = .5), f = "2d_v2") %>% harm()
-sr(apap_2d(pars_fdf_fast, 145, delay_fdf) %>% list_modify(e1 = .5), f = "2d_v2") %>% harm()
-
-
-
-# Total doses used -----
-
-
-
-
-lapply(as.list(1:11), function(i) {
-  x <- d_default[,i]
-  w <- rescale_and_bind(list(
-    "Default (4 weeks)"      = sr(apap_2d(pars_fdf_cr, x[1], delay_default) %>% list_modify(e1 = .8), f = "2d_v2"),
-    "FDF (12 weeks)"         = sr(apap_2d(pars_fdf_cr, x[2], delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2"),
-    "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, c(rep(x[3], 6), rep(x[1],3)), delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
-    # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
-  ), pop)
-  as.data.frame(w[,"cumV",]) %>% rownames_to_column("time")
-}) %>% 
-  setNames(d_default[1,]) %>%
-  bind_rows(.id = "d") %>%
-  mutate(time = as.numeric(time)) %>%
-  mutate(d = as.numeric(d)) %>%
-  gather(policy, value, -d, -time) %>%
-  filter(d > 1) %>%
-  ggplot(aes(x=time, y=value, color=policy)) + geom_line() + facet_wrap(~d) + ylim(0, .75)
-
 
 
 # FINDING VALUES FOR DELTA2 that fit DELTA1 -----
@@ -66,11 +27,13 @@ d1_default <- c(1, 60, 90, 120, 150, 180, 270, 360, 540, 730, 1460)
 
 # d1_default <- c("4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "49%" = 45, "100%" = 1)
 d_default <- sapply(d1_default, function(d){
+  print(d)
   bsl <- sr(apap_2d(pars_fdf_slow, d, delay_default), f = "2d_v2") %>% 
     rescale_rcs(pop, merge = T)
   # bsl_vaccinated <- bsl[c(30, 60, 90, 180, 360),"cumV",1]
   
-  d_start <- floor(d*.25)
+  # d_start <- floor(d*.25)
+  d_start <- 1
   bsl_vaccinated <- bsl[d_start:min(d, 360),"cumV",1]
   
   sse <- sapply(ceiling(d/2):d, function(d2){
@@ -82,7 +45,7 @@ d_default <- sapply(d1_default, function(d){
   })
   sse_h <- sapply(ceiling(d/2):d, function(d2){
     fdf <- sr(apap_2d(pars_fdf_slow, c(rep(d2, 6), rep(d,3)), delay_hybrid), f = "2d_v2") %>% 
-    # fdf <- sr(apap_2d(pars_fdf_slow, d2, delay_hybrid), f = "2d_v2") %>% 
+      # fdf <- sr(apap_2d(pars_fdf_slow, d2, delay_hybrid), f = "2d_v2") %>% 
       rescale_rcs(pop, merge = T)
     fdf_v <- fdf[d_start:min(d, 360),"cumV",1]
     sum((fdf_v - bsl_vaccinated)^2)
@@ -98,14 +61,9 @@ d_default <- sapply(d1_default, function(d){
 # [3,]    1   52   77  102  128  155  239  325  496   680  1460
 # > 
 
-# 2%   4%   8%  15%  28%  49% 100% 
-# 1300  650  318  145   69   46    1 
-# > d_default
-# 2%  4%  8% 15% 28% 49% 100%
-# [1,] 1460 730 360 180  90  60    1
-# [2,] 1300 650 318 145  69  46    1
-# [3,] 1460 688 326 156  77  53    1
-# c("2%" = 1460, "4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "40%" = 60, "49%" = 45)
+
+# FDF model function (generating main metrics for all results) -----
+
 model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   if(model == "pars_le_cr")   pars <- pars_fdf_cr
   if(model == "pars_le_slow")   pars <- pars_fdf_slow
@@ -137,6 +95,10 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   main_metrics(res, pop, vat = 91)
 }
 
+
+
+# Generate a data frame with all values -----
+
 df_fdf <- expand.grid(d1 = c(d1_default, Inf),
                       model = c("pars_le_cr", "pars_le_slow", "pars_le_fast"), 
                       e = c(.4, .5, .6, .7, .8, .9, .95), 
@@ -150,6 +112,104 @@ df_fdf <- expand.grid(d1 = c(d1_default, Inf),
                         labels = c("Constant risk", "Slow growth", "Fast growth"))) %>%
   group_by(d1, model, e, policy)
 
+
+
+
+# Total doses used: illustration -----
+lapply(as.list(1:length(d1_default)), function(i) {
+  x <- d_default[,i]
+  w <- rescale_and_bind(list(
+    "Default (4 weeks)"      = sr(apap_2d(pars_fdf_cr, x[1], delay_default) %>% list_modify(e1 = .8), f = "2d_v2"),
+    "FDF (12 weeks)"         = sr(apap_2d(pars_fdf_cr, x[2], delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2"),
+    "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, c(rep(x[3], 6), rep(x[1],3)), delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
+    # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
+  ), pop)
+  as.data.frame(w[,"cumV",]) %>% rownames_to_column("time")
+}) %>% 
+  setNames(d_default[1,]) %>%
+  bind_rows(.id = "d") %>%
+  mutate(time = as.numeric(time)) %>%
+  mutate(d = as.numeric(d)) %>%
+  gather(policy, value, -d, -time) %>%
+  filter(d > 1) %>%
+  ggplot(aes(x=time, y=value, color=policy)) + geom_line() + facet_wrap(~d) + ylim(0, .75)
+
+
+
+# Fig 1: Base case example ------
+rescale_and_bind(list(
+  "Default (4 weeks)"      = sr(apap_2d(pars_fdf_cr, d_default[1,6], delay_default) %>% list_modify(e1 = .8), f = "2d_v2"),
+  "FDF (12 weeks)"         = sr(apap_2d(pars_fdf_cr, d_default[2,6], delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2"),
+  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, c(rep(d_default[3,6], 6), rep(d_default[1,6],3)), delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
+  # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
+), pop) %>% 
+  plot_rcs(comp_to_display, long_names = ln, ncol = 3) + 
+  ylab("Proportion of population") + theme(legend.position = "top") + 
+  scale_color_discrete(name = "2nd dose delay policy:")
+
+sr(apap_2d(pars_fdf_fast, 180, delay_default) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
+sr(apap_2d(pars_fdf_fast, 145, delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
+
+
+
+df_fdf %>% filter(e %in% c(.8)) %>% 
+  filter(d1 > 60, d1 < 1000) %>% 
+  select(d1, model, e, policy, d, harm, i) %>%
+  gather(var, value, -d1, -model, -e, -policy) %>%
+  # mutate(d1 = factor(d1)) %>%
+  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
+                         labels = c("Default (4 wks delay)", 
+                                    "FDF (12 wks for all)", 
+                                    "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
+  mutate(var = factor(var, levels = c("i", "d", "harm"),
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
+  mutate(e = factor(e)) %>%
+  ggplot(aes(x = d1, y = value, color = policy)) + 
+  geom_line(size=1.1) +
+  geom_point(pch = 21, size = 3, fill = "white") +
+  facet_wrap(var~model, scales = "free") +
+  theme(legend.position = "top", axis.text.x = element_text(angle = 45)) +
+  scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
+  xlab("time") + ylab("")
+
+
+
+# Fig 4: optimal solution -----
+
+fig4 <- df_fdf %>% 
+  filter(d1 > 1, d1 < Inf) %>%
+  select(d1, model, e, policy, d, harm, i) %>%
+  gather(var, value, -d1, -model, -e, -policy) %>%
+  group_by(d1, model, e, var) %>% 
+  summarise(value_m = min(value[policy != "default"])/value[policy == "default"], 
+            policy = policy[which.min(value)]
+  ) %>%
+  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
+                         labels = c("Default (4 wks delay)", 
+                                    "FDF (12 wks for all)", 
+                                    "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
+  mutate(var = factor(var, levels = c("i", "d", "harm"),
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
+  # mutate(efficacy = ifelse(e == .8, "Efficacy after 1 dose = 80%", "Efficacy after 1 dose = 50%")) %>%
+  mutate(speedup = factor(d1)) %>%
+  mutate(e = factor(e)) %>%
+  mutate(value_m = round(value_m, 2)) %>%
+  ggplot(aes(x = speedup, y = e, fill = policy)) + 
+  geom_tile() +
+  scale_fill_manual(values = c("grey20", "grey40", "grey60"), 
+                    name = "") +
+  theme(legend.position = "bottom") +
+  facet_grid(var~model) + 
+  ylab("e1 (efficacy following 1st dose)") +
+  theme(axis.text.x = element_text(angle = 45)) +
+  xlab("vaccination speed delta [days]")
+
+fig4
+fig4 + geom_text(aes(label = value_m), color = "white")
+
+
+
+# Table with all results -----
 df_fdf_ratio <- df_fdf %>% select(d, i, harm) %>%
   pivot_wider(values_from = c("d", "i", "harm"), names_from = "policy") %>%
   # mutate(re = 1 - (harm_vr_fdf/harm_vr_default)) %>%
@@ -175,18 +235,21 @@ filter(df_fdf_ratio, e %in% c(.6, .8)) %>%
   ungroup() 
 # select(-e, -variable)
 
+
+
+# Dependence between speed of vaccination and magniutude of benefits -----
 df_fdf_ratio  %>%
   filter(e %in% c(.6, .8)) %>%
-  filter(d1 > 60, d1 < Inf) %>%
+  filter(d1 > 60, d1 < 1000) %>%
   select(ri, rd, re) %>%
   gather(key, value, -d1, -model, -e) %>%
   mutate(key = factor(key, levels = c("ri", "rd", "re"), 
                       labels = c("RRI (infections)", "RRD (deaths)", "RRE (economic harm)"))) %>%
   mutate(efficacy = ifelse(e == .8, "Efficacy after 1 dose = 80%", "Efficacy after 1 dose = 60%")) %>%
-  ggplot(aes(x = d1, y = value, group = interaction(model, efficacy), color = model)) + 
+  ggplot(aes(x = d1, y = value, group = interaction(model, efficacy), lty = efficacy, color = model)) + 
   geom_line(size=1.1) +
   geom_point(pch = 21, size = 3, fill = "white") +
-  facet_wrap(efficacy ~ key, scales = "free_y", ncol = 3) +
+  facet_wrap( ~ key, scales = "free_y", ncol = 3) +
   scale_x_continuous(breaks = c(90, 180, 360, 730, 1460)) +
   scale_color_discrete(name = "scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 14), legend.position = "top") +
@@ -221,39 +284,6 @@ df_fdf_ratio %>%
   xlab("average wait until the first dose under default policy, 1/delta1 [days]") +
   geom_text(aes(label = value), color = "white")  
 
-df_fdf %>% 
-  filter(d1 > 1, d1 < Inf) %>%
-  select(d1, model, e, policy, d, harm, i) %>%
-  gather(var, value, -d1, -model, -e, -policy) %>%
-  group_by(d1, model, e, var) %>% 
-  summarise(value_m = min(value[policy != "default"])/value[policy == "default"], 
-            policy = policy[which.min(value)]
-            ) %>%
-            # value = min(value)) %>%
-  # summarise(d = policy[which.min(d)],
-  #           i = policy[which.min(i)],
-  #           harm = policy[which.min(harm)]) %>%
-  # gather(key, value, -model, -e, -d1) %>%
-  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
-                         labels = c("Default (4 wks delay)", 
-                                    "FDF (12 wks for all)", 
-                                    "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
-  mutate(var = factor(var, levels = c("i", "d", "harm"),
-                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
-  mutate(efficacy = ifelse(e == .8, "Efficacy after 1 dose = 80%", "Efficacy after 1 dose = 50%")) %>%
-  mutate(speedup = factor(d1)) %>%
-  mutate(e = factor(e)) %>%
-  mutate(value_m = round(value_m, 2)) %>%
-  ggplot(aes(x = speedup, y = e, fill = policy)) + 
-  geom_tile() +
-  scale_fill_manual(values = c("grey20", "grey40", "grey60"), 
-                    name = "") +
-  theme(legend.position = "bottom") +
-  facet_grid(var~model) + 
-  ylab("e1 (efficacy following 1st dose)") +
-  theme(axis.text.x = element_text(angle = 45)) +
-  xlab("vaccination speed delta [days]")
-  # geom_text(aes(label = value_m), color = "white")
 
 
 
