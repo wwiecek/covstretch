@@ -16,7 +16,7 @@ source("R/prioritisation.R")
 
 # Table with BI and BD for various efficacy and delta1 values -----
 # Reference columns for RI and RD are severity of epidemic without vaccination
-model_i <- function(model, d1, e) {
+model_i <- function(model, d1, e, rm = FALSE) {
   if(model == "pars_le_cr")   pars <- pars_le_cr
   if(model == "pars_le_slow") pars <- pars_le_slow
   if(model == "pars_le_fast") pars <- pars_le_fast
@@ -24,30 +24,36 @@ model_i <- function(model, d1, e) {
   pars <- apap_2v(pars, d1)
   # pars <- list_modify(pars, delta1 = rep(1/d1, Ngroups))
   y <- sr(list_modify(pars, e1 = e), "2v_v2")
+  if(rm) return(y)
   main_metrics(y, pop)
 }
 
 # c("2%" = 1460, "4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "40%" = 60, "49%" = 45)
 
 # df_efficacy_delta_raw <- expand_grid(d1 = c(1, seq(90, 360, 10), 730, 1460, Inf),
-df_efficacy_delta_raw <- expand_grid(d1 = c(90, 180, 360, 730, 1460, Inf),
+# df_efficacy_delta_raw <- expand_grid(d1 = c(60, 90, 120, 150, 180, 270, 360, 540, 730, 1460, Inf),
+df_efficacy_delta_raw <- expand_grid(d1 = c(seq(60, 360, 10), 450, 540, 630, 730, 1460, Inf),
                                      e = seq(.5, .95, .05),
                                      model = c("pars_le_cr", "pars_le_slow", "pars_le_fast")) %>%
   mutate(data = pmap(list(model, d1, e), function(x,y, z) data.frame(value = model_i(x,y, z), 
                                                                      var = metric_nms))) %>%
   unnest(data) %>%
   spread(var, value) %>%
-  group_by(model, e) 
+  group_by(model, e)  %>%
+  mutate(model = factor(model, levels = c("pars_le_cr", "pars_le_slow", "pars_le_fast"),
+                        labels = c("Constant risk", "Slow growth", "Fast growth"))) 
+
+d1_general <- c(90, 120, 180, 360, 730, 1460)
 
 df_efficacy_delta <- 
   df_efficacy_delta_raw %>%
+  # filter(d1 %in% c(90, 180, 360, 730, 1460, Inf)) %>%
+  filter(d1 %in% c(d1_general, Inf)) %>%
   # mutate(benefit_vr = 1 - harm_vr) %>%
   mutate(ref_e = harm[d1 > 1460]) %>%
   mutate(ref_i = i[d1 > 1460]) %>%
   mutate(ref_d = d[d1 > 1460]) %>%
   ungroup() %>%
-  mutate(model = factor(model, levels = c("pars_le_cr", "pars_le_slow", "pars_le_fast"),
-                        labels = c("Constant risk", "Slow growth", "Fast growth"))) %>%
   mutate(re = 1 - (harm/ref_e)) %>%
   mutate(ri = 1 - (i/ref_i)) %>%
   mutate(rd = 1 - (d/ref_d)) %>%
@@ -87,7 +93,6 @@ ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
 
 
 # Fig G2B: How many infections and deaths averted with 95% efficacious vaccine -----
-d1_general <- c(60, 90, 180, 360, 730, 1460)
 g2b <- df_efficacy_delta  %>%
   filter(e == .95) %>%
   # filter(d1 < 340) %>%
@@ -100,7 +105,7 @@ g2b <- df_efficacy_delta  %>%
   geom_line(size=1.1) +
   geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(~key, scales = "free", ncol = 3) +
-  scale_x_continuous(breaks = d1_general[-1]) +
+  scale_x_continuous(breaks = d1_general[-2]) +
   scale_color_discrete(name = "scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 12), legend.position = "top") +
   xlab("length of vaccination campaign, 1/delta") + 
@@ -119,7 +124,7 @@ g2a <- df_efficacy_delta  %>%
   geom_line(size=1.1) +
   geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(~key, scales = "free", ncol = 3) +
-  scale_x_continuous(breaks = d1_general[-1]) +
+  scale_x_continuous(breaks = d1_general[-2]) +
   scale_color_discrete(name = "scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 12), legend.position = "top") +
   xlab("length of vaccination campaign, 1/delta") + 

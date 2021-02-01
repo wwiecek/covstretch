@@ -138,22 +138,26 @@ lapply(as.list(1:length(d1_default)), function(i) {
 
 # Fig 1: Base case example ------
 rescale_and_bind(list(
-  "Default (4 weeks)"      = sr(apap_2d(pars_fdf_cr, d_default[1,6], delay_default) %>% list_modify(e1 = .8), f = "2d_v2"),
-  "FDF (12 weeks)"         = sr(apap_2d(pars_fdf_cr, d_default[2,6], delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2"),
-  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, c(rep(d_default[3,6], 6), rep(d_default[1,6],3)), delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
+  "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, d_default[1,6], delay_default) %>% 
+                                    list_modify(e1 = .8), f = "2d_v2"),
+  "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, d_default[2,6], delay_fdf) %>% 
+                                    list_modify(e1 = .8), f = "2d_v2"),
+  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_slow, c(rep(d_default[3,6], 6), rep(d_default[1,6],3)), delay_hybrid) %>% 
+                                    list_modify(e1 = .8), f = "2d_v2")
   # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
 ), pop) %>% 
-  plot_rcs(comp_to_display, long_names = ln, ncol = 3) + 
+  plot_rcs(c("P1", "P2", "cumV"), long_names = ln, ncol = 3) + 
   ylab("Proportion of population") + theme(legend.position = "top") + 
   scale_color_discrete(name = "2nd dose delay policy:")
 
-sr(apap_2d(pars_fdf_fast, 180, delay_default) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
-sr(apap_2d(pars_fdf_fast, 145, delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
+# sr(apap_2d(pars_fdf_fast, 180, delay_default) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
+# sr(apap_2d(pars_fdf_fast, 145, delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
 
 
 
-df_fdf %>% filter(e %in% c(.8)) %>% 
-  filter(d1 > 60, d1 < 1000) %>% 
+df_gg <- df_fdf %>% 
+  filter(e %in% c(.5, .8)) %>% 
+  filter(d1 > 60, d1 < 540) %>% 
   select(d1, model, e, policy, d, harm, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   # mutate(d1 = factor(d1)) %>%
@@ -163,21 +167,35 @@ df_fdf %>% filter(e %in% c(.8)) %>%
                                     "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
   mutate(var = factor(var, levels = c("i", "d", "harm"),
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
-  mutate(e = factor(e)) %>%
-  ggplot(aes(x = d1, y = value, color = policy)) + 
+  mutate(e = factor(e))
+
+df_gg %>%
+  ggplot(aes(x = d1, y = value, lty = e, color = policy)) + 
   geom_line(size=1.1) +
-  geom_point(pch = 21, size = 3, fill = "white") +
+  # geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(var~model, scales = "free") +
   theme(legend.position = "top", axis.text.x = element_text(angle = 45)) +
   scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
-  xlab("time") + ylab("")
+  scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dotted")) +
+  xlab("targeted vaccination speed (1/delta1 under default policy)") + ylab("")
+
+df_gg %>%
+  filter(model == "Slow growth", var %in% c("Infections", "Deaths")) %>%
+  ggplot(aes(x = d1, y = value, lty = e, color = policy)) + 
+  geom_line(size=1.1) +
+  # geom_point(pch = 21, size = 3, fill = "white") +
+  facet_wrap(var~model, scales = "free") +
+  theme(legend.position = "top", legend.direction = "vertical", axis.text.x = element_text(angle = 45)) +
+  scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
+  scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dotted")) +
+  xlab("targeted vaccination speed (1/delta1 under default policy)") + ylab("")
 
 
 
 # Fig 4: optimal solution -----
 
 fig4 <- df_fdf %>% 
-  filter(d1 > 1, d1 < Inf) %>%
+  filter(d1 > 60, d1 < 1000) %>%
   select(d1, model, e, policy, d, harm, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   group_by(d1, model, e, var) %>% 
@@ -202,7 +220,7 @@ fig4 <- df_fdf %>%
   facet_grid(var~model) + 
   ylab("e1 (efficacy following 1st dose)") +
   theme(axis.text.x = element_text(angle = 45)) +
-  xlab("vaccination speed delta [days]")
+  xlab("vaccination speed 1/delta1 [days]")
 
 fig4
 fig4 + geom_text(aes(label = value_m), color = "white")
