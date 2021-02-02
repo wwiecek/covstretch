@@ -1,47 +1,4 @@
-# Base case settings -----
-library(tidyverse)
-library(ggpubr)
-theme_set(theme_minimal(base_size = 18))
-source("R/ode_2doses.R")
-source("R/ode_2doses_v2.R")
-source("R/ode_2vaccines.R")
-source("R/ode_2vaccines_v2.R")
-source("R/helpers.R")
-source("R/output-helpers.R")
-source("R/config.R")
-source("R/config-pars.R")
-source("R/harm_function.R")
-source("R/prioritisation.R")
-
-
-# Table with BI and BD for various efficacy and delta1 values -----
-# Reference columns for RI and RD are severity of epidemic without vaccination
-model_i <- function(model, d1, e, rm = FALSE) {
-  if(model == "pars_le_cr")   pars <- pars_le_cr
-  if(model == "pars_le_slow") pars <- pars_le_slow
-  if(model == "pars_le_fast") pars <- pars_le_fast
-  
-  pars <- apap_2v(pars, d1)
-  # pars <- list_modify(pars, delta1 = rep(1/d1, Ngroups))
-  y <- sr(list_modify(pars, e1 = e), "2v_v2")
-  if(rm) return(y)
-  main_metrics(y, pop)
-}
-
-# c("2%" = 1460, "4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "40%" = 60, "49%" = 45)
-
-# df_efficacy_delta_raw <- expand_grid(d1 = c(1, seq(90, 360, 10), 730, 1460, Inf),
-# df_efficacy_delta_raw <- expand_grid(d1 = c(60, 90, 120, 150, 180, 270, 360, 540, 730, 1460, Inf),
-df_efficacy_delta_raw <- expand_grid(d1 = c(seq(60, 360, 10), 450, 540, 630, 730, 1460, Inf),
-                                     e = seq(.5, .95, .05),
-                                     model = c("pars_le_cr", "pars_le_slow", "pars_le_fast")) %>%
-  mutate(data = pmap(list(model, d1, e), function(x,y, z) data.frame(value = model_i(x,y, z), 
-                                                                     var = metric_nms))) %>%
-  unnest(data) %>%
-  spread(var, value) %>%
-  group_by(model, e)  %>%
-  mutate(model = factor(model, levels = c("pars_le_cr", "pars_le_slow", "pars_le_fast"),
-                        labels = c("Constant risk", "Slow growth", "Fast growth"))) 
+source("cases/prep-results.R")
 
 d1_general <- c(90, 120, 180, 360, 730, 1460)
 

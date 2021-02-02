@@ -17,11 +17,16 @@ apap_2d <- function(pars, len, d2 = 18) {
 }
 
 
-apap_2v <- function(pars, len1, len2=Inf, n = pop) {
+apap_2v <- function(pars, len, switch=Inf, delay = 10, n = pop) {
   prop <- sum(n[7:9])
+  d1 <- c(rep(1/len/(1-prop), 6), rep(1/len/prop, 3))
+  t1 <- delay + c(rep(len*prop, 6), 0, 0, 0)
   list_modify(pars, 
-              ta1 = 10 + c(rep(len1*prop, 6), 0, 0, 0),
-              delta1 = c(rep(1/len1/(1-prop), 6), rep(1/len1/prop, 3)))
+              ta1 = t1,
+              ta2 = sapply(t1, function(x) max(x, switch+delay)),
+              ts1 = rep(switch+delay, Ngroups),
+              delta1 = d1,
+              delta2 = d1)
 }
 
 # apap <- function(pars, len, d2 = 18) {
