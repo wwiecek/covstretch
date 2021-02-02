@@ -196,6 +196,7 @@ df_gg %>%
 
 fig4 <- df_fdf %>% 
   filter(d1 > 60, d1 < 1000) %>%
+  filter(e >= .5) %>%
   select(d1, model, e, policy, d, harm, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   group_by(d1, model, e, var) %>% 

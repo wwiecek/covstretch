@@ -9,18 +9,18 @@ df_efficacy_delta_raw %>%
   mutate(e = as.numeric(e)) %>%
   mutate(lab_e = paste("e =", e)) %>%
   # mutate(t = as.numeric(t)) %>%
-  group_by(e, model) %>% #
+  group_by(e, model, var) %>% #
   mutate(lab_y = tail(value, 1)) %>%
   filter(var == "i") %>%
   ggplot(aes(x = d1, y = value, color = lab_e)) + 
   # geom_point() +
   geom_line(size = 1.1) +
-  # geom_text(aes(x = 370, y = lab_y, label = lab_e), hjust = 0) +
+  geom_text(aes(x = 370, y = lab_y, label = lab_e), hjust = 0) +
   ylab("fraction infected in 1 year") + 
-  xlab("1/delta [days]") +
+  xlab("length of mass vaccination program, 1/delta [days]") +
   # geom_hline(yintercept = 0, lty = "dashed") +
-  facet_wrap(~model, ncol = 3, scales = "free") + 
-  # xlim(60, 450) +
+  facet_wrap(~model, ncol = 3, scales = "free") +
+  xlim(60, 500) +
   scale_color_discrete(guide = NULL)
 
 
@@ -169,7 +169,7 @@ gg_df %>%
   scale_fill_manual(values = c("grey20", "grey40", "grey60"), 
                     name = "RI for using less effective now vs waiting") +
   theme(legend.position = "bottom") +
-  facet_grid(switch ~ model) + ylab("e1 (efficacy for the worse vaccine)") + 
+  facet_grid(switch ~ model) + ylab("e2 (efficacy for the worse vaccine)") + 
   xlab("time until better vaccine available [months]") +
   geom_text(aes(label = value), color = "white") 
 
@@ -180,5 +180,6 @@ gg_df %>%
                     name = "RI for using less effective now vs waiting") +
   theme(legend.position = "bottom", legend.direction = "vertical") +
   xlab("time until better vaccine available [months]") +
+  ylab("e2 (efficacy for the worse vaccine)") + 
   geom_text(aes(label = value), color = "white")  +
   ggtitle("Constant risk, no switching")
