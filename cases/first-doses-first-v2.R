@@ -1,18 +1,4 @@
-# Base case settings -----
-library(tidyverse)
-library(ggpubr)
-theme_set(theme_minimal(base_size = 18))
-source("R/ode_2doses.R")
-source("R/ode_2doses_v2.R")
-source("R/ode_2vaccines.R")
-source("R/ode_2vaccines_v2.R")
-source("R/helpers.R")
-source("R/output-helpers.R")
-source("R/config.R")
-source("R/config-pars.R")
-source("R/harm_function.R")
-source("R/prioritisation.R")
-
+source("setup.R")
 
 comp_to_display <- c("I", "D", "cumV", "cumI", "P1", "P2")
 delay_default <- 18
@@ -178,7 +164,7 @@ fig1b<-df_gg %>%
   theme(legend.position = "top", axis.text.x = element_text(angle = 45)) +
   scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dotted")) +
-  xlab("targeted vaccination speed (1/delta1 under default policy)") + ylab("")
+  xlab("vaccination speed (1/delta1 under default policy)") + ylab("")
 
 df_gg %>%
   filter(model == "Slow growth", var %in% c("Infections", "Deaths")) %>%
@@ -189,7 +175,7 @@ df_gg %>%
   theme(legend.position = "top", legend.direction = "vertical", axis.text.x = element_text(angle = 45)) +
   scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dotted")) +
-  xlab("targeted vaccination speed (1/delta1 under default policy)") + ylab("")
+  xlab("vaccination speed (1/delta1 under default policy)") + ylab("")
 
 ggsave("figures/f1b.pdf",f1b, width = 19, height=12)
 
@@ -223,7 +209,7 @@ fig4 <- df_fdf %>%
   facet_grid(var~model) + 
   ylab("e1 (efficacy following 1st dose)") +
   theme(axis.text.x = element_text(angle = 45)) +
-  xlab("Vaccination speed 1/delta1 [days]")
+  xlab("vaccination speed 1/delta1 [days]")
 
 fig4
 fig4<- fig4 + geom_text(aes(label = value_m), color = "white")

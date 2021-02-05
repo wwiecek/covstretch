@@ -1,4 +1,4 @@
-source("cases/prep-results.R")
+source("setup.R")
 
 # Fig LE1: general impact of rate and efficacy on infections ------
 le1<-df_efficacy_delta_raw %>%
