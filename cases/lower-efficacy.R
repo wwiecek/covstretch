@@ -174,6 +174,14 @@ gg_df %>%
   geom_text(aes(label = value), color = "white") 
 
 gg_df %>% 
+  ggplot(aes(x = delay, y = efficacy, fill = az_better)) + geom_tile() +
+  scale_fill_manual(values = c("grey20", "grey40", "grey60"), 
+                    name = "RI for using less effective now vs waiting") +
+  theme(legend.position = "bottom") +
+  facet_grid(switch ~ model) + ylab("e2 (efficacy for the worse vaccine)") + 
+  xlab("time until better vaccine available [months]")
+
+gg_df %>% 
   filter(switch == "SWITCH = No", model == "Constant risk") %>%
   ggplot(aes(x = delay, y = efficacy, fill = az_better)) + geom_tile() +
   scale_fill_manual(values = c("grey20", "grey40", "grey60"), 
