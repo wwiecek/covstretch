@@ -1,7 +1,7 @@
 source("cases/prep-results.R")
 
 # Fig LE1: general impact of rate and efficacy on infections ------
-df_efficacy_delta_raw %>%
+le1<-df_efficacy_delta_raw %>%
   filter(e %in% c(.5, .75, .95)) %>%
   filter(d1 > 50, d1 < 370) %>%
   select(d1, d, i, harm, model, e) %>%
@@ -16,18 +16,19 @@ df_efficacy_delta_raw %>%
   # geom_point() +
   geom_line(size = 1.1) +
   geom_text(aes(x = 370, y = lab_y, label = lab_e), hjust = 0) +
-  ylab("fraction infected in 1 year") + 
-  xlab("length of mass vaccination program, 1/delta [days]") +
+  ylab("Fraction infected in 1 year") + 
+  xlab("Vaccination speed, 1/delta") +
   # geom_hline(yintercept = 0, lty = "dashed") +
   facet_wrap(~model, ncol = 3, scales = "free") +
   xlim(60, 500) +
   scale_color_discrete(guide = NULL)
 
+ggsave("figures/le1.pdf", le1,width = 19, height=12)
 
 
 # Fig LE2 -----
 
-df_efficacy_delta_raw %>%
+le2<-df_efficacy_delta_raw %>%
   filter(d1 %in% c(60, 90, 180, 240, 300, 360)) %>%
   # filter(d1 %in% seq(30, 360, 30)) %>%
   # filter(d1 <= 360) %>%
@@ -55,6 +56,7 @@ df_efficacy_delta_raw %>%
   geom_text(aes(label = value), color = "white")  
 # ggtitle("When to choose less efficacious vaccine?")
 
+ggsave("figures/le2.pdf", le2,width = 19, height=6)
 
 
 
@@ -104,6 +106,7 @@ plot_low_eff(pars_le_cr, "Constant risk")
 plot_low_eff(pars_le_slow, "Slow growth")
 plot_low_eff(pars_le_fast, "Fast growth")
 title(outer = TRUE, "SWITCH to more effective once available = No")
+
 
 plot_low_eff(pars_le_cr, "Constant risk", TRUE)
 plot_low_eff(pars_le_slow, "Slow growth", TRUE)
