@@ -137,7 +137,7 @@ lapply(as.list(1:length(d1_default)), function(i) {
 
 
 # Fig 1: Base case example ------
-rescale_and_bind(list(
+f1<-rescale_and_bind(list(
   "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, d_default[1,6], delay_default) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
   "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, d_default[2,6], delay_fdf) %>% 
@@ -152,6 +152,7 @@ rescale_and_bind(list(
 
 # sr(apap_2d(pars_fdf_fast, 180, delay_default) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
 # sr(apap_2d(pars_fdf_fast, 145, delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
+ggsave("figures/f1.pdf",f1, width = 19, height=12)
 
 
 
@@ -169,7 +170,7 @@ df_gg <- df_fdf %>%
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   mutate(e = factor(e))
 
-df_gg %>%
+fig1b<-df_gg %>%
   ggplot(aes(x = d1, y = value, lty = e, color = policy)) + 
   geom_line(size=1.1) +
   # geom_point(pch = 21, size = 3, fill = "white") +
@@ -190,6 +191,7 @@ df_gg %>%
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dotted")) +
   xlab("targeted vaccination speed (1/delta1 under default policy)") + ylab("")
 
+ggsave("figures/f1b.pdf",f1b, width = 19, height=12)
 
 
 # Fig 4: optimal solution -----
@@ -221,10 +223,12 @@ fig4 <- df_fdf %>%
   facet_grid(var~model) + 
   ylab("e1 (efficacy following 1st dose)") +
   theme(axis.text.x = element_text(angle = 45)) +
-  xlab("vaccination speed 1/delta1 [days]")
+  xlab("Vaccination speed 1/delta1 [days]")
 
 fig4
-fig4 + geom_text(aes(label = value_m), color = "white")
+fig4<- fig4 + geom_text(aes(label = value_m), color = "white")
+
+ggsave("figures/fig4.pdf",fig4, width = 19, height=12)
 
 
 
@@ -279,7 +283,7 @@ df_fdf_ratio  %>%
 
 
 # Figure FDF4: optimal choice FDF vs default depending on speed and efficacy ------
-df_fdf_ratio %>%
+FDF4<-df_fdf_ratio %>%
   filter(d1 > 1, d1 < Inf) %>%
   # mutate(rd = re) %>%
   select(d1, e, model, ri, re, rd) %>%
@@ -303,6 +307,7 @@ df_fdf_ratio %>%
   xlab("average wait until the first dose under default policy, 1/delta1 [days]") +
   geom_text(aes(label = value), color = "white")  
 
+ggsave("figures/fdf4.pdf",FDF4, width = 19, height=12)
 
 
 

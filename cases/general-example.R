@@ -45,8 +45,8 @@ gglist <- lapply(as.list(1:3), function(i) {
     ggtitle(names(mlist)[i])
 })
 
-ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
-
+g1<-ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
+ggsave("figures/g1.pdf",g1, width = 19, height=12)
 
 
 # Fig G2B: How many infections and deaths averted with 95% efficacious vaccine -----
@@ -57,16 +57,19 @@ g2b <- df_efficacy_delta  %>%
   select(ri, rd, re) %>%
   gather(key, value, -d1, -model, -e) %>%
   mutate(key = factor(key, levels = c("ri", "rd", "re"), 
-                      labels = c("infections", "deaths", "economic harm"))) %>%
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
   ggplot(aes(x = d1, y = value, group = model, color = model)) + 
   geom_line(size=1.1) +
   geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(~key, scales = "free", ncol = 3) +
   scale_x_continuous(breaks = d1_general[-2]) +
-  scale_color_discrete(name = "scenario") +
+  scale_color_discrete(name = "Scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 12), legend.position = "top") +
-  xlab("length of vaccination campaign, 1/delta") + 
-  ylab("fraction of harm averted")
+  xlab("Vaccination speed, 1/delta") + 
+  ylab("Fraction of harm averted")
+
+
+#ggsave("figures/g2b.pdf",g1, width = 19, height=12)
 
 # Fig G2A: absolute harm
 g2a <- df_efficacy_delta  %>%
@@ -76,20 +79,22 @@ g2a <- df_efficacy_delta  %>%
   select(i, d, harm) %>%
   gather(key, value, -d1, -model, -e) %>%
   mutate(key = factor(key, levels = c("i", "d", "harm"), 
-                      labels = c("infections", "deaths", "economic harm"))) %>%
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
   ggplot(aes(x = d1, y = value, group = model, color = model)) + 
   geom_line(size=1.1) +
   geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(~key, scales = "free", ncol = 3) +
   scale_x_continuous(breaks = d1_general[-2]) +
-  scale_color_discrete(name = "scenario") +
+  scale_color_discrete(name = "Scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 12), legend.position = "top") +
-  xlab("length of vaccination campaign, 1/delta") + 
-  ylab("total harm")
+  xlab("Vaccination speed, 1/delta") + 
+  ylab("Total harm")
 
-ggarrange(g2a+ggtitle("A"), 
+g2<-ggarrange(g2a+ggtitle("A"), 
           g2b+ggtitle("B"), 
           common.legend = TRUE, ncol = 1, legend = "top")
+
+ggsave("figures/g2.pdf",g2, width = 19, height=12)
 
 # Table G3 -----
 df_efficacy_delta %>% 
