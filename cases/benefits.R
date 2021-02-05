@@ -37,8 +37,6 @@ bf <- rbind(
   mutate(bi = 1-(bi/max(bi))) %>%
   mutate(bd = 1-(bd/max(bd)))
 
-# theme_set(theme_minimal(base_size = 14))
-
 bf %>% 
   # mutate(both = .5*bi + .5*bd) %>%
   setNames(c("p", "Deaths averted", "Infections averted", "scenario")) %>%

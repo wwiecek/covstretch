@@ -41,32 +41,18 @@ gglist <- lapply(as.list(1:3), function(i) {
     abind::abind() %>% 
     # plot_rcs(c("S", "I", "cumV1", "D"), ncol = 5, long_names = ln2,
     plot_rcs(c("S", "I", "cumV1", "D"), ncol = 5, long_names = ln2,
-             end_date = as.Date("01-01-2021", format="%d-%m-%Y") + 300) + ylab("") +
-    ggtitle(names(mlist)[i])
+             start_date = NULL
+             # end_date = as.Date("01-01-2021", format="%d-%m-%Y") + 300
+             ) + ylab("") +
+    ggtitle(names(mlist)[i]) + 
+    xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120))
 })
 
 g1<-ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
-ggsave("figures/g1.pdf",g1, width = 19, height=12)
+ggsave("figures/g1.pdf",g1, width = 8, height=7)
 
 
-# Fig G2B: How many infections and deaths averted with 95% efficacious vaccine -----
-g2b <- df_efficacy_delta  %>%
-  filter(e == .95) %>%
-  # filter(d1 < 340) %>%
-  filter(d1 %in% d1_general) %>%
-  select(ri, rd, re) %>%
-  gather(key, value, -d1, -model, -e) %>%
-  mutate(key = factor(key, levels = c("ri", "rd", "re"), 
-                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
-  ggplot(aes(x = d1, y = value, group = model, color = model)) + 
-  geom_line(size=1.1) +
-  geom_point(pch = 21, size = 3, fill = "white") +
-  facet_wrap(~key, scales = "free", ncol = 3) +
-  scale_x_continuous(breaks = d1_general[-2]) +
-  scale_color_discrete(name = "Scenario") +
-  theme(axis.text.x = element_text(angle = 45, size = 12), legend.position = "top") +
-  xlab("Vaccination speed, 1/delta") + 
-  ylab("Fraction of harm averted")
+
 
 
 #ggsave("figures/g2b.pdf",g1, width = 19, height=12)
@@ -76,25 +62,44 @@ g2a <- df_efficacy_delta  %>%
   filter(e == .95) %>%
   # filter(d1 < 340) %>%
   filter(d1 %in% d1_general) %>%
-  select(i, d, harm) %>%
+  select(i, d) %>%
   gather(key, value, -d1, -model, -e) %>%
   mutate(key = factor(key, levels = c("i", "d", "harm"), 
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   ggplot(aes(x = d1, y = value, group = model, color = model)) + 
   geom_line(size=1.1) +
-  geom_point(pch = 21, size = 3, fill = "white") +
+  geom_point(pch = 21, size = 2, fill = "white") +
   facet_wrap(~key, scales = "free", ncol = 3) +
   scale_x_continuous(breaks = d1_general[-2]) +
   scale_color_discrete(name = "Scenario") +
-  theme(axis.text.x = element_text(angle = 45, size = 12), legend.position = "top") +
+  theme(axis.text.x = element_text(angle = 45, size = 9), legend.position = "top") +
   xlab("Vaccination speed, 1/delta") + 
   ylab("Total harm")
 
-g2<-ggarrange(g2a+ggtitle("A"), 
-          g2b+ggtitle("B"), 
+# Fig G2B: How many infections and deaths averted with 95% efficacious vaccine -----
+g2b <- df_efficacy_delta  %>%
+  filter(e == .95) %>%
+  # filter(d1 < 340) %>%
+  filter(d1 %in% d1_general) %>%
+  select(ri, rd) %>%
+  gather(key, value, -d1, -model, -e) %>%
+  mutate(key = factor(key, levels = c("ri", "rd", "re"), 
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
+  ggplot(aes(x = d1, y = value, group = model, color = model)) + 
+  geom_line(size=1.1) +
+  geom_point(pch = 21, size = 2, fill = "white") +
+  facet_wrap(~key, scales = "free", ncol = 3) +
+  scale_x_continuous(breaks = d1_general[-2]) +
+  scale_color_discrete(name = "Scenario") +
+  theme(axis.text.x = element_text(angle = 45, size = 9), legend.position = "top") +
+  xlab("Vaccination speed, 1/delta") + 
+  ylab("Fraction of harm averted")
+
+g2<-ggarrange(g2a+ggtitle("Burden"), 
+          g2b+ggtitle("Reductions"), 
           common.legend = TRUE, ncol = 1, legend = "top")
 
-ggsave("figures/g2.pdf",g2, width = 19, height=12)
+ggsave("figures/g2.pdf",g2, width = 6, height=6)
 
 # Table G3 -----
 df_efficacy_delta %>% 

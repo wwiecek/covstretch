@@ -28,9 +28,10 @@ plot_rcs <- function(y, compartment = "R",
       gg_data$compartment <- gg_data$group_name
   }
   
-  if(!is.null(start_date))
+  if(!is.null(start_date)){
     gg_data$time <- as.Date(gg_data$time, origin = start_date)
-  gg_data <- gg_data[gg_data$time <= as.Date(end_date),]
+    gg_data <- gg_data[gg_data$time <= as.Date(end_date),]
+  }
   
   if(max(gg_data$value, na.rm=T) > 1)
     xl <- "N individuals"

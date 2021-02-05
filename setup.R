@@ -1,7 +1,7 @@
 # Base case settings -----
 library(tidyverse)
 library(ggpubr)
-theme_set(theme_minimal(base_size = 18))
+theme_set(theme_minimal(base_size = 10))
 source("R/ode_2doses.R")
 source("R/ode_2doses_v2.R")
 source("R/ode_2vaccines.R")
