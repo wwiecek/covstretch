@@ -14,14 +14,15 @@ le1<-df_efficacy_delta_raw %>%
   filter(var == "i") %>%
   ggplot(aes(x = d1, y = value, color = lab_e)) + 
   # geom_point() +
-  geom_line(size = 1.1) +
-  geom_text(aes(x = 370, y = lab_y, label = lab_e), hjust = 0) +
+  geom_line() +
+  geom_text(aes(x = 370, y = lab_y, label = lab_e), hjust = 0, size = 2) +
   ylab("Fraction infected in 1 year") + 
   xlab("Vaccination speed, 1/delta") +
   # geom_hline(yintercept = 0, lty = "dashed") +
   facet_wrap(~model, ncol = 3, scales = "free") +
-  xlim(60, 500) +
-  scale_color_discrete(guide = NULL)
+  # xlim(60, 500) +
+  scale_color_discrete(guide = NULL) + 
+  scale_x_continuous(breaks = seq(0, 360, 120), limits = c(60,500))
 
 ggsave("figures/le1.pdf", le1,width = 19, height=12)
 
@@ -53,13 +54,16 @@ le2<-df_efficacy_delta_raw %>%
   theme(legend.position = "bottom") +
   facet_grid(~model) + ylab("e2 (efficacy for the worse vaccine)") + 
   xlab("Speed-up factor (delta2/delta1 = 360*delta2)") +
-  geom_text(aes(label = value), color = "white")  
+  geom_text(aes(label = value), color = "white", size = 2)  
 # ggtitle("When to choose less efficacious vaccine?")
 
 ggsave("figures/le2.pdf", le2,width = 19, height=6)
 
 
-
+le12 <- ggpubr::ggarrange(le1 + ggtitle("Burden"), 
+                  le2 + ggtitle("Optimal policy") + theme(legend.direction = "vertical"), 
+                  ncol = 1, heights = c(.7,1))
+ggsave("figures/le_both.pdf", le12, width = 6, height = 7)
 
 
 # Fig LE3: Lower efficacy vaccine now vs higher efficacy later ----
