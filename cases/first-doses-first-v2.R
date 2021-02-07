@@ -86,7 +86,7 @@ f1<-rescale_and_bind(list(
 ), pop) %>% 
   plot_rcs(c("P1", "P2", "cumV"), long_names = ln, ncol = 3, start_date = NULL) + 
   ylab("Proportion of population") + theme(legend.position = "top") + 
-  scale_color_discrete(name = "2nd dose delay policy:") +
+  scale_color_manual(values = fdf_palette, name = "2nd dose delay policy:") +
   scale_x_continuous(name = "time [days]", breaks = seq(0, 360, 120))
 
 # sr(apap_2d(pars_fdf_fast, 180, delay_default) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
@@ -213,7 +213,7 @@ fig4 <- df_fdf %>%
 fig4
 ggsave("figures/fdf4.pdf", fig4, width = 6, height=6)
 
-fig4s <- fig4 + geom_text(aes(label = value_m), size = 1.5, color = "white")
+fig4s <- fig4 + geom_text(aes(label = value_m), size = 2, color = "white")
 
 ggsave("figures/sfdf4.pdf", fig4s, width = 9, height=6)
 
@@ -310,6 +310,6 @@ df_fdf %>% filter(model == "Constant risk", e == .95) %>% select(d1, model, poli
 w <- ggpubr::ggarrange(fdf_reductions +ggtitle("Reductions"), 
                        fig4s + ggtitle("Optimal policy (relative burden)"), ncol = 1, heights = c(2, 2),
      common.legend = TRUE)
-ggsave("figures/fdf4.pdf",w , width = 6, height=8)
+ggsave("figures/fdf4.pdf",w , width = 6.5, height=8)
 
 
