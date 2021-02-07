@@ -1,5 +1,5 @@
 source("setup.R")
-
+fdf_palette <- c("grey20", "#E69F00", "#56B4E9")
 # FDF model function (generating main metrics for all results) -----
 model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   if(model == "pars_le_cr")   pars <- pars_fdf_cr
@@ -116,6 +116,7 @@ df_gg %>%
   # geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(var~model, scales = "free") +
   theme(legend.position = "top", axis.text.x = element_text(angle = 45)) +
+  scale_color_manual(values = fdf_palette) +
   scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
   xlab("vaccination speed (1/delta1 under default policy)") + ylab("")
@@ -129,12 +130,13 @@ fdf_burden <- df_gg %>%
   # geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(var~model, scales = "free") +
   theme(legend.position = "top", legend.direction = "vertical", axis.text.x = element_text(angle = 45)) +
+  scale_color_manual(values = fdf_palette) +
   scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
   xlab("vaccination speed (1/delta1 under default policy)") + ylab("") +
   guides(linetype = FALSE, color = FALSE)
 
-# ggsave("figures/fdf_burden.pdf", width = 4, height=2)
+ggsave("figures/fdf_burden.pdf", width = 4, height=2)
 
 
 
@@ -164,6 +166,7 @@ fdf_reductions <- df_fdf %>%
   theme(legend.position = "top", 
         legend.box = "vertical",
         axis.text.x = element_text(angle = 45)) +
+  scale_color_manual(values = fdf_palette) +
   scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
   xlab("vaccination speed (1/delta1 under default policy)") + ylab("Fraction of harm averted")+
@@ -181,7 +184,7 @@ fig4 <- df_fdf %>%
   select(d1, model, e, policy, d, harm, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   group_by(d1, model, e, var) %>% 
-  summarise(value_m = 1 - min(value[policy != "default"])/value[policy == "default"], 
+  summarise(value_m = min(value[policy != "default"])/value[policy == "default"], 
             policy = policy[which.min(value)]
   ) %>%
   mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
@@ -197,8 +200,10 @@ fig4 <- df_fdf %>%
   filter(var != "Economic harm") %>%
   ggplot(aes(x = speedup, y = e, fill = policy)) + 
   geom_tile() +
-  scale_fill_manual(values = c("grey20", "grey40", "grey60"), 
-                    name = "") +
+  # scale_fill_viridis_d(name="") +  
+  # scale_fill_manual(values = c("grey20", "grey40", "grey60"),
+  #                   name = "") +
+  scale_fill_manual(values = fdf_palette, name = "") +
   theme(legend.position = "bottom") +
   facet_grid(var~model) + 
   ylab("e1 (efficacy following 1st dose)") +
@@ -303,7 +308,8 @@ df_fdf %>% filter(model == "Constant risk", e == .95) %>% select(d1, model, poli
 # One big figure for FDF section -----
 
 w <- ggpubr::ggarrange(fdf_reductions +ggtitle("Reductions"), 
-                       fig4s + ggtitle("Optimal policy"), ncol = 1, heights = c(2, 2))
+                       fig4s + ggtitle("Optimal policy (relative burden)"), ncol = 1, heights = c(2, 2),
+     common.legend = TRUE)
 ggsave("figures/fdf4.pdf",w , width = 6, height=8)
 
 

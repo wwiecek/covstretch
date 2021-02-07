@@ -8,8 +8,8 @@ source("R/ode_2vaccines.R")
 source("R/ode_2vaccines_v2.R")
 source("R/helpers.R")
 source("R/output-helpers.R")
-# source("R/harm_function.R")
-# source("R/prioritisation.R")
+source("R/harm_function.R")
+source("R/prioritisation.R")
 
 # Basic inputs for deriving parameters -----
 # We use pbc_spread and default_cm from the default data inputs file:
