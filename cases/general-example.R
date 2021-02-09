@@ -49,7 +49,7 @@ gglist <- lapply(as.list(1:3), function(i) {
 })
 
 g1<-ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
-ggsave("figures/g1.pdf",g1, width = 8, height=7)
+# ggsave("figures/g1.pdf",g1, width = 8, height=7)
 
 
 
@@ -95,8 +95,9 @@ gg2 <- as.data.frame(ll[,"cumV",]) %>%
   scale_color_discrete(name = "") +
   theme(legend.position = "top")
 
-gga <- ggarrange(gg1 + ggtitle("Infections"), 
-          gg2 + ggtitle("Vaccinations"), common.legend = TRUE, widths = c(2.5,1))
+gga <- ggarrange(gg2 + ggtitle("Vaccinations"), common.legend = TRUE, 
+                 gg1 + ggtitle("Infections"), 
+                 widths = c(1,2.5))
 ggsave("figures/g1_joint.pdf",gga, width = 7, height=2.5)
 
 # Fig G2A: absolute harm
