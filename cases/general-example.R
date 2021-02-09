@@ -54,8 +54,50 @@ ggsave("figures/g1.pdf",g1, width = 8, height=7)
 
 
 
+gg1 <- lapply(mlist, function(pars) {
+  ll <- list(
+    "Mass vaccination: 360 days" = apap_2v(pars, 360),
+    # "Mass vaccination (no prioritsation), delta = 1/360" = list_modify(pars, delta1 = rep(1/360, Ngroups)),
+    "Mass vaccination: 180 days" = apap_2v(pars, 180),
+    "Mass vaccination: 90 days" = apap_2v(pars, 90),
+    "No vaccination" = list_modify(pars, delta1 = rep(0, Ngroups))) %>%
+    lapply(sr, f = "2v_v2") %>%
+    lapply(rescale_rcs, pop, merge=T) %>% 
+    abind::abind()
+  as.data.frame(ll[,"I",]) %>%
+    mutate(time = 1:nrow(.))
+}) %>%
+  bind_rows(.id = "scenario") %>%
+  gather(var, value, -time, -scenario) %>%
+  ggplot(aes(x = time, y = value, color = var)) + geom_line() + facet_wrap(.~scenario, scales = "free") +
+  xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120)) + ylab("fraction infected") +
+  scale_color_discrete(name = "") +
+  theme(legend.position = "top")
+# ggsave("figures/g1_mini.pdf", width = 7, height=2.5)
 
-#ggsave("figures/g2b.pdf",g1, width = 19, height=12)
+
+ll <- list(
+  "Mass vaccination: 360 days" = apap_2v(mlist[[1]], 360),
+  # "Mass vaccination (no prioritsation), delta = 1/360" = list_modify(pars, delta1 = rep(1/360, Ngroups)),
+  "Mass vaccination: 180 days" = apap_2v(mlist[[1]], 180),
+  "Mass vaccination: 90 days" = apap_2v(mlist[[1]], 90),
+  "No vaccination" = list_modify(mlist[[1]], delta1 = rep(0, Ngroups))) %>%
+  lapply(sr, f = "2v_v2") %>%
+  lapply(rescale_rcs, pop, merge=T) %>% 
+  abind::abind()
+gg2 <- as.data.frame(ll[,"cumV",]) %>%
+  mutate(time = 1:nrow(.)) %>%
+  gather(var, value, -time) %>%
+  ggplot(aes(x = time, y = value, color = var)) + geom_line() + 
+  # facet_wrap(.~scenario, scales = "free") +
+  xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120)) + 
+  ylab("fraction vaccinated") +
+  scale_color_discrete(name = "") +
+  theme(legend.position = "top")
+
+gga <- ggarrange(gg1 + ggtitle("Infections"), 
+          gg2 + ggtitle("Vaccinations"), common.legend = TRUE, widths = c(2.5,1))
+ggsave("figures/g1_joint.pdf",gga, width = 7, height=2.5)
 
 # Fig G2A: absolute harm
 g2a <- df_efficacy_delta  %>%
