@@ -60,7 +60,7 @@ le2 <- df_efficacy_delta_raw %>%
   xlab("Speed-up factor (delta2/delta1 = 360*delta2)") +
   geom_text(aes(label = value), color = "white", size = 2.5)  
 
-ggsave("figures/le2.pdf", le2,width = 6, height=4)
+# ggsave("figures/le2.pdf", le2,width = 6, height=4)
 
 
 le12 <- ggpubr::ggarrange(le1 + ggtitle("Burden"), 
