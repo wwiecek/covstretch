@@ -1,5 +1,3 @@
-source("setup.R")
-
 # Fig LE1: general impact of rate and efficacy on infections ------
 le1 <- df_efficacy_delta_raw %>%
   filter(e %in% c(.5, .75, .95)) %>%

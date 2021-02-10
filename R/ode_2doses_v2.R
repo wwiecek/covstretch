@@ -17,7 +17,9 @@ odin_ode_2dose_v2 <- odin::odin({
   beta_matrix[,] <- contacts[i,j]*q[j]*I[j]
   beta[] <- sum(beta_matrix[i,])
   
-  va1[] <- (cumV1[i] <= 1)/(1 + exp(ta[i] - t))
+  # va1[] <- (cumV1[i] <= 1)/(1 + exp(ta[i] - t))*(1 + exp(10*(cumV1[i] - vstop)))
+  # va2[] <- (cumV2[i] <= 1)/(1 + exp(ta[i] - t))
+  va1[] <- (cumV1[i] <= vstop)/(1 + exp(ta[i] - t))
   va2[] <- (cumV2[i] <= 1)/(1 + exp(ta[i] - t))
   
   # ODE equations are here:
@@ -41,7 +43,8 @@ odin_ode_2dose_v2 <- odin::odin({
   Ngroups          <- user()
   Nc               <- user()
   constantrisk     <- user()
-  vrf <- user()
+  vstop <- user()
+  vrf   <- user()
   y0[,]            <- user()
   contacts[,]      <- user()
   ta[]             <- user()

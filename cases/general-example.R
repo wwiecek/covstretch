@@ -1,5 +1,3 @@
-source("setup.R")
-
 d1_general <- c(90, 120, 180, 360, 730, 1460)
 
 df_efficacy_delta <- 

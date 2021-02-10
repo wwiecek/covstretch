@@ -1,5 +1,3 @@
-source("setup.R")
-
 # FINDING VALUES FOR DELTA2 that fit DELTA1 -----
 # d1_default <- c("2%" = 1460, "4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "49%" = 60, "100%" = 1)
 d1_default <- c(1, 60, 90, 120, 150, 180, 270, 360, 540, 730, 1460)

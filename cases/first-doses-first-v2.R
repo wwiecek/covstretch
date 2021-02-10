@@ -1,4 +1,3 @@
-source("setup.R")
 fdf_palette <- c("grey20", "#E69F00", "#56B4E9")
 # FDF model function (generating main metrics for all results) -----
 model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {

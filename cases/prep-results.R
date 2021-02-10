@@ -1,5 +1,3 @@
-source("setup.R")
-
 model_i <- function(model, d1, e, rm = FALSE) {
   if(model == "pars_le_cr")   pars <- pars_le_cr
   if(model == "pars_le_slow") pars <- pars_le_slow

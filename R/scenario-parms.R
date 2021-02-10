@@ -42,6 +42,7 @@ pars_fdf_slow <- lst(
   e2 = .95,
   pdeath = c(0.002, 0.006, 0.03, 0.08, 0.15, 0.60, 2.2, 5.1, 9.3)/100,
   vrf = 1,
+  vstop = .8, #around 80% vaccinated we slow down
   constantrisk = 0
 )
 pars_fdf_fast <- list_modify(pars_fdf_slow,

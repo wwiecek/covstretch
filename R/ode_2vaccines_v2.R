@@ -23,8 +23,9 @@ odin_ode_2vaccines_v2 <- odin::odin({
   # va2[] <- (1-cumV2[i])/(1 + exp(ta2[i] - t))
   # va1[] <- (t < ts1[i])/((1 + exp(ta1[i] - t))*(1 + exp(cumV1[i] - .5)))
   # va2[] <- 1/((1 + exp(ta2[i] - t))*(1 + exp(cumV2[i] - .5)))
-  va1[] <- (t < ts1[i])/((1 + exp(ta1[i] - t))*(1 + exp(1e03*cumV[i] - 9e02)))
-  va2[] <- 1/((1 + exp(ta2[i] - t))*(1 + exp(1e03*cumV[i] - 9e02)))
+  va1[] <- 1/((1 + exp(ta1[i] - t))*(1 + exp(1e03*cumV[i] - vstop*1e03))*(1 + exp(t - ts1[i])))
+  # va1[] <- (t < ts1[i])/((1 + exp(ta1[i] - t))*(1 + exp(1e03*cumV[i] - vstop*1e03)))
+  va2[] <- 1/((1 + exp(ta2[i] - t))*(1 + exp(1e03*cumV[i] - vstop*1e03)))
   
   # ODE equations are here:
   deriv(S[])      <- -(beta[i] + constantrisk)*S[i] + phi[i]*R[i] - 
@@ -47,7 +48,8 @@ odin_ode_2vaccines_v2 <- odin::odin({
   Ngroups        <- user()
   Nc             <- user()
   constantrisk   <- user()
-  vrf <- user()
+  vrf            <- user()
+  vstop          <- user()
   y0[,]          <- user()
   contacts[,]    <- user()
   q[]            <- user()
