@@ -6,7 +6,12 @@ library(tidyverse)
 load("data/default_inputs.Rdata")
 hic_pop <- pbc_spread[countries["High-income countries"],] %>% as.numeric()
 lic_pop <- pbc_spread[countries["Low-income countries"],] %>% as.numeric()
+ifr_hic <- c(0.002, 0.006, 0.03, 0.08, 0.15, 0.60, 2.2, 5.1, 9.3)/100
+ifr_lic <- ifr_hic*(3.2/2)^(5:(-3))
+
 pop <- hic_pop/sum(hic_pop)
+default_pdeath <- ifr_hic
+
 use_delta <- TRUE
 kappa_default <- 0
 delay_default <- 28 - 10

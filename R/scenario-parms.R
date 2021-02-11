@@ -36,7 +36,7 @@ pars_fdf_slow <- lst(
   ta = rep(0, Ngroups),
   e1 = .8,
   e2 = .95,
-  pdeath = c(0.002, 0.006, 0.03, 0.08, 0.15, 0.60, 2.2, 5.1, 9.3)/100,
+  pdeath = default_pdeath,
   vrf = 1,
   vstop = .8, #around 80% vaccinated we slow down
   constantrisk = 0

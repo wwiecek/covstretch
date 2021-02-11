@@ -22,16 +22,16 @@ odin_ode_2vaccines_v2 <- odin::odin({
   
   # ODE equations are here:
   deriv(S[])      <- -(beta[i] + constantrisk)*S[i] + phi[i]*R[i] - 
-    (va1[i]*delta1[i] + va2[i]*delta2[i])*S[i]/(S[i]+R[i]) 
+    (va1[i]*delta1[i] + va2[i]*delta2[i])*S[i]/(S[i]+R[i]*vrf) 
   deriv(E[])      <-  (beta[i] + constantrisk)*(S[i]+N1[i]+N2[i]) - gamma1[i]*E[i]
   deriv(I[])      <-  gamma1[i]*E[i] - gamma2[i]*I[i]
   deriv(R[])      <-  (1-pdeath[i])*gamma2[i]*I[i] - phi[i]*R[i] - 
     R[i]*vrf*(va1[i]*delta1[i] + va2[i]*delta2[i])/(S[i]+R[i])
   deriv(D[])      <-  pdeath[i]*gamma2[i]*I[i]
-  deriv(V1[])     <-  va1[i]*delta1[i]*(e1*S[i] + R[i]*vrf)/(S[i]+R[i]) - kappa1[i]*V1[i]
-  deriv(N1[])     <-  va1[i]*delta1[i]*(1-e1)*S[i]/(S[i]+R[i]) + kappa1[i]*V1[i]  - (beta[i] + constantrisk)*N1[i]
+  deriv(V1[])     <-  va1[i]*delta1[i]*(e1*S[i] + R[i]*vrf)/(S[i]+R[i]*vrf) - kappa1[i]*V1[i]
+  deriv(N1[])     <-  va1[i]*delta1[i]*(1-e1)*S[i]/(S[i]+R[i]*vrf) + kappa1[i]*V1[i]  - (beta[i] + constantrisk)*N1[i]
   deriv(V2[])     <-  va2[i]*delta2[i]*(e2*S[i]+R[i]*vrf)/(S[i]+R[i]) - kappa2[i]*V2[i]
-  deriv(N2[])     <-  va2[i]*delta2[i]*(1-e2)*S[i]/(S[i]+R[i]) + kappa2[i]*V2[i]  - (beta[i] + constantrisk)*N2[i]
+  deriv(N2[])     <-  va2[i]*delta2[i]*(1-e2)*S[i]/(S[i]+R[i]*vrf) + kappa2[i]*V2[i]  - (beta[i] + constantrisk)*N2[i]
   deriv(cumV1[])  <-  va1[i]*delta1[i]
   deriv(cumV2[])  <-  va2[i]*delta2[i]
   deriv(cumV[])   <-  va1[i]*delta1[i] + va2[i]*delta2[i]
@@ -74,12 +74,12 @@ odin_ode_2vaccines_v2 <- odin::odin({
   
   dim(va1)          <- Ngroups
   dim(va2)          <- Ngroups
-  dim(ta1)               <- Ngroups
-  dim(ts1)               <- Ngroups
-  dim(ta2)               <- Ngroups
-  dim(q)                 <- Ngroups
-  dim(beta)              <- Ngroups
-  dim(beta_matrix)       <- c(Ngroups, Ngroups)
+  dim(ta1)          <- Ngroups
+  dim(ts1)          <- Ngroups
+  dim(ta2)          <- Ngroups
+  dim(q)            <- Ngroups
+  dim(beta)         <- Ngroups
+  dim(beta_matrix)  <- c(Ngroups, Ngroups)
   dim(y0) <- c(Nc, Ngroups)
   dim(contacts) <- c(Ngroups, Ngroups)
   
