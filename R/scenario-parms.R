@@ -1,13 +1,10 @@
 # Basic inputs for deriving parameters -----
-# We use pbc_spread and default_cm from the default data inputs file:
-load("data/default_inputs.Rdata")
 # Nc <- 9
 # Ngroups <- 9
 # Ndays <- 1000
 r0 <- 2.5
 # Use realistic age structure and infection structure
 # For now in the HICs
-hic_pop <- pbc_spread[countries["High-income countries"],] %>% as.numeric()
 ev <- eigen(default_cm)$values[1]
 
 
@@ -15,7 +12,6 @@ ev <- eigen(default_cm)$values[1]
 # Parameters for each scenario -----
 Ndays <- 360
 Ngroups <- 9
-pop <- hic_pop/sum(hic_pop)
 pre_immunity <- c(.5, .5, rep(.2, 7))
 pre_immunity_prop <- sum(pre_immunity*pop)
 
@@ -34,8 +30,8 @@ pars_fdf_slow <- lst(
   gamma2 = rep(.2, Ngroups), #duration of infectious period
   delta1 = rep(0, Ngroups),
   delta2 = rep(0, Ngroups),
-  kappa1 = rep(0, Ngroups),
-  kappa2 = rep(0, Ngroups),
+  kappa1 = rep(kappa_default, Ngroups),
+  kappa2 = rep(kappa_default, Ngroups),
   phi = rep(0, Ngroups), 
   ta = rep(0, Ngroups),
   e1 = .8,

@@ -12,7 +12,7 @@ model_i <- function(model, d1, e, rm = FALSE) {
 
 # c("2%" = 1460, "4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "40%" = 60, "49%" = 45)
 
-df_efficacy_delta_raw <- expand_grid(d1 = c(seq(60, 360, 10), 450, 540, 630, 730, 1460, Inf),
+df_efficacy_delta_raw <- expand_grid(d1 = default_speeds,
                                      e = seq(.5, .95, .05),
                                      model = c("pars_le_cr", "pars_le_slow", "pars_le_fast")) %>%
   mutate(data = pmap(list(model, d1, e), function(x,y, z) data.frame(value = model_i(x,y, z), 

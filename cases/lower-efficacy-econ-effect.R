@@ -32,7 +32,7 @@ fdf2<-list(y0, y1, y2) %>% lapply(as.data.frame) %>% lapply(rownames_to_column, 
   geom_line() +
   # geom_text(aes(x = 400, y = lab_y, label = lab_e)) +
   ylab("BE (yearly economic harm)") + 
-  xlab("Vaccination speed, 1/delta")  +
+  xlab(def_labels$speed)  +
   theme(legend.position = "top", legend.direction = "vertical") +
   # geom_hline(yintercept = 0, lty = "dashed") +
   # facet_wrap(~model, ncol = 3) + xlim(0, 450) +

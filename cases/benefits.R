@@ -14,7 +14,7 @@ vac_top_p <- function(p, pop) {
   rev(vrev)/pop
 }
 
-benefits_curve <- function(e = .95, pop = hic_pop/sum(hic_pop)){
+benefits_curve <- function(e = .95, pop = pop){
   ii <- 1e-04
   sapply(
     seq(0,1,length=21),

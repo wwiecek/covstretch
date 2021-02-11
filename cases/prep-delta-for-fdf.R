@@ -1,9 +1,7 @@
 # FINDING VALUES FOR DELTA2 that fit DELTA1 -----
-# d1_default <- c("2%" = 1460, "4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "49%" = 60, "100%" = 1)
-d1_default <- c(1, 60, 90, 120, 150, 180, 270, 360, 540, 730, 1460)
 
 # d1_default <- c("4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "49%" = 45, "100%" = 1)
-d_default <- sapply(d1_default, function(d){
+fdf_deltas <- sapply(fdf_speeds, function(d){
   print(d)
   bsl <- sr(apap_2d(pars_fdf_slow, d, delay_default), f = "2d_v2") %>% 
     rescale_rcs(pop, merge = T)
@@ -38,4 +36,4 @@ d_default <- sapply(d1_default, function(d){
 # [3,]    1   52   77  102  128  155  239  325  496   680  1460
 # > 
 
-save(d1_default, d_default, file = "results/fdf-deltas.Rdata")
+save(fdf_speeds, fdf_deltas, file = "results/fdf-deltas.Rdata")

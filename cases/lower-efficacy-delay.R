@@ -15,15 +15,15 @@ model_delay <- function(model, delay, e, scenario, rm = FALSE) {
   
   if(scenario == "v1only")
     y <- sr(f="2v_v2", list_modify(
-      apap_2v(pars, len = 360, delay = 10+delay), e1 = .95, e2 = 0))
+      apap_2v(pars, len = 1/default_delta_value, delay = 10+delay), e1 = .95, e2 = 0))
   
   if(scenario == "noswitch")
     y <- sr(f="2v_v2", list_modify(
-      apap_2v(pars, len = 360), e1 = e, e2 = 0))
+      apap_2v(pars, len = 1/default_delta_value), e1 = e, e2 = 0))
   
   if(scenario == "switch")
     y <-   sr(f="2v_v2", list_modify(
-      apap_2v(pars, len = 360, switch = delay), e1 = e, e2 = .95))
+      apap_2v(pars, len = 1/default_delta_value, switch = delay), e1 = e, e2 = .95))
   
   if(rm) return(y)
   main_metrics(y, pop)

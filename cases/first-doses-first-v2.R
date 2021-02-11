@@ -4,8 +4,8 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   if(model == "pars_le_cr")   pars <- pars_fdf_cr
   if(model == "pars_le_slow")   pars <- pars_fdf_slow
   if(model == "pars_le_fast") pars <- pars_fdf_fast
-  d2 <- as.numeric(d_default[2, d1_default == d1])
-  d3 <- as.numeric(d_default[3, d1_default == d1])
+  d2 <- as.numeric(fdf_deltas[2, fdf_speeds == d1])
+  d3 <- as.numeric(fdf_deltas[3, fdf_speeds == d1])
   if(is.infinite(d1)){
     d2 <- Inf; d3 <- Inf
   }
@@ -36,7 +36,7 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
 # Generate a data frame with all values -----
 
 # KEEP AN EYE OUT FOR NUMERICAL ISSUES WITH THE ODEs HERE
-df_fdf <- expand.grid(d1 = c(d1_default, Inf),
+df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
                       model = c("pars_le_cr", "pars_le_slow", "pars_le_fast"), 
                       e = c(.4, .5, .6, .7, .8, .9, .95), 
                       policy = c("default", "fdf", "hybrid")) %>%
@@ -53,8 +53,8 @@ df_fdf <- expand.grid(d1 = c(d1_default, Inf),
 
 
 # Total doses used: illustration -----
-lapply(as.list(1:length(d1_default)), function(i) {
-  x <- d_default[,i]
+lapply(as.list(1:length(fdf_speeds)), function(i) {
+  x <- fdf_deltas[,i]
   w <- rescale_and_bind(list(
     "Default (4 weeks)"      = sr(apap_2d(pars_fdf_cr, x[1], delay_default) %>% list_modify(e1 = .8), f = "2d_v2"),
     "FDF (12 weeks)"         = sr(apap_2d(pars_fdf_cr, x[2], delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2"),
@@ -63,7 +63,7 @@ lapply(as.list(1:length(d1_default)), function(i) {
   ), pop)
   as.data.frame(w[,"cumV",]) %>% rownames_to_column("time")
 }) %>% 
-  setNames(d_default[1,]) %>%
+  setNames(fdf_deltas[1,]) %>%
   bind_rows(.id = "d") %>%
   mutate(time = as.numeric(time)) %>%
   mutate(d = as.numeric(d)) %>%
@@ -75,11 +75,11 @@ lapply(as.list(1:length(d1_default)), function(i) {
 
 # Fig 1: Base case example ------
 f1<-rescale_and_bind(list(
-  "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, d_default[1,6], delay_default) %>% 
+  "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, fdf_deltas[1,6], delay_default) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
-  "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, d_default[2,6], delay_fdf) %>% 
+  "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas[2,6], delay_fdf) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
-  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_slow, c(rep(d_default[3,6], 6), rep(d_default[1,6],3)), delay_hybrid) %>% 
+  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas[3,6], 6), rep(fdf_deltas[1,6],3)), delay_hybrid) %>% 
                                     list_modify(e1 = .8), f = "2d_v2")
   # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
 ), pop) %>% 
@@ -110,29 +110,31 @@ df_gg <- df_fdf %>%
   mutate(e = factor(e))
 
 df_gg %>%
-  ggplot(aes(x = d1, y = value, lty = e, color = policy)) + 
+  mutate(delta1 = 1/d1) %>%
+  ggplot(aes(x = delta1, y = value, lty = e, color = policy)) + 
   geom_line(size=1) +
   # geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(var~model, scales = "free") +
   theme(legend.position = "top", axis.text.x = element_text(angle = 45)) +
   scale_color_manual(values = fdf_palette) +
-  scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
+  scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
-  xlab("vaccination speed (1/delta1 under default policy)") + ylab("")
+  xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Burden")
 
 ggsave("figures/sfdf2.pdf", width = 10, height=6)
 
 fdf_burden <- df_gg %>%
   filter(model == "Slow growth", var %in% c("Infections", "Deaths")) %>%
-  ggplot(aes(x = d1, y = value, lty = e, color = policy)) + 
+  mutate(delta1 = 1/d1) %>%
+  ggplot(aes(x = delta1, y = value, lty = e, color = policy)) + 
   geom_line(size=1) +
   # geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(var~model, scales = "free") +
   theme(legend.position = "top", legend.direction = "vertical", axis.text.x = element_text(angle = 45)) +
   scale_color_manual(values = fdf_palette) +
-  scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
+  scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
-  xlab("vaccination speed (1/delta1 under default policy)") + ylab("") +
+  xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("") +
   guides(linetype = FALSE, color = FALSE)
 
 # ggsave("figures/fdf_burden.pdf", width = 4, height=2)
@@ -147,7 +149,7 @@ fdf_reductions <- df_fdf %>%
   group_by(model, e, policy) %>%
   mutate(d = 1- d/d[is.infinite(d1)], i = 1 - i/i[is.infinite(d1)]) %>%
   ungroup() %>%
-  filter(d1 > 60, d1 < 540) %>%
+  filter(d1 > 60, d1 <= 1000) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   # mutate(d1 = factor(d1)) %>%
   mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
@@ -158,7 +160,8 @@ fdf_reductions <- df_fdf %>%
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   mutate(e = factor(e)) %>%
   filter(model == "Slow growth", var %in% c("Infections", "Deaths")) %>%
-  ggplot(aes(x = d1, y = value, lty = e, color = policy)) + 
+  mutate(delta1 = 1/d1) %>%
+  ggplot(aes(x = delta1, y = value, lty = e, color = policy)) + 
   geom_line(size=1) +
   # geom_point(pch = 21, size = 3, fill = "white") +
   facet_wrap(var~model, scales = "free") +
@@ -166,9 +169,9 @@ fdf_reductions <- df_fdf %>%
         legend.box = "vertical",
         axis.text.x = element_text(angle = 45)) +
   scale_color_manual(values = fdf_palette) +
-  scale_x_continuous(breaks = d1_default[c(3,6:10)]) +
+  scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
-  xlab("vaccination speed (1/delta1 under default policy)") + ylab("Fraction of harm averted")+
+  xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Fraction of harm averted")+
   guides(linetype=FALSE)
 
 # ggsave("figures/fdf_reductions.pdf", width = 6, height=3)
@@ -178,7 +181,7 @@ fdf_reductions <- df_fdf %>%
 # optimal solution -----
 
 fig2 <- df_fdf %>% 
-  filter(d1 > 60, d1 < 1000) %>%
+  filter(d1 > 60, d1 <= 1000) %>%
   filter(e >= .5) %>%
   select(d1, model, e, policy, d, harm, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
@@ -193,11 +196,12 @@ fig2 <- df_fdf %>%
   mutate(var = factor(var, levels = c("i", "d", "harm"),
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   # mutate(efficacy = ifelse(e == .8, "Efficacy after 1 dose = 80%", "Efficacy after 1 dose = 50%")) %>%
-  mutate(speedup = factor(d1)) %>%
+  mutate(delta1 = factor(1/d1,
+                          labels = as.percent(unique(1/d1, 1)))) %>%
   mutate(e = factor(e)) %>%
   mutate(value_m = round(value_m, 2)) %>%
   filter(var != "Economic harm") %>%
-  ggplot(aes(x = speedup, y = e, fill = policy)) + 
+  ggplot(aes(x = delta1, y = e, fill = policy)) + 
   geom_tile() +
   # scale_fill_viridis_d(name="") +  
   # scale_fill_manual(values = c("grey20", "grey40", "grey60"),
@@ -207,7 +211,7 @@ fig2 <- df_fdf %>%
   facet_grid(var~model) + 
   ylab("e1 (efficacy following 1st dose)") +
   theme(axis.text.x = element_text(angle = 45)) +
-  xlab("vaccination speed 1/delta1 [days]")
+  xlab(paste0(def_labels, " (1st dose, default policy)"))
 
 fig2
 # ggsave("figures/fdf4.pdf", fig4, width = 6, height=6)

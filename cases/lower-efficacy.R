@@ -1,42 +1,39 @@
 # Fig LE1: general impact of rate and efficacy on infections ------
 le1 <- df_efficacy_delta_raw %>%
   filter(e %in% c(.5, .75, .95)) %>%
-  filter(d1 > 50, d1 < 370) %>%
-  select(d1, d, i, harm, model, e) %>%
-  gather(var, value, -model, -e, -d1) %>%
+  mutate(delta1 = 1/d1) %>%
+  # filter(d1 > 50, d1 < 370) %>%
+  filter(delta1 >= .0005, delta1 <= .01) %>%
+  select(delta1, d, i, harm, model, e) %>%
+  gather(var, value, -model, -e, -delta1) %>%
   mutate(e = as.numeric(e)) %>%
   mutate(lab_e = paste("e =", e)) %>%
-  # mutate(t = as.numeric(t)) %>%
   group_by(e, model, var) %>% #
-  mutate(lab_y = tail(value, 1)) %>%
+  mutate(lab_y = head(value, 1)) %>%
   filter(var == "i") %>%
-  ggplot(aes(x = d1, y = value, group = lab_e)) + 
-  # geom_point() +
+  ggplot(aes(x = delta1, y = value, group = lab_e)) + 
   geom_line() +
-  geom_text(aes(x = 370, y = lab_y, label = lab_e), hjust = 0, size = 2) +
+  geom_text(aes(x = max(1/d1_general), y = lab_y, label = lab_e), hjust = 0, size = 2) +
   ylab("Fraction infected in 1 year") + 
-  xlab("Vaccination speed, 1/delta") +
-  # geom_hline(yintercept = 0, lty = "dashed") +
+  xlab(def_labels$speed) +
   facet_wrap(~model, ncol = 3, scales = "free") +
-  # xlim(60, 500) +
-  # scale_color_discrete(guide = NULL) + 
-  scale_x_continuous(breaks = seq(0, 360, 120), limits = c(60,500))
-# ggsave("figures/le1.pdf", le1, width = 19, height=12)
+  scale_x_continuous(breaks = 1/d1_general, 
+                     labels = as.percent(1/d1_general), 
+                     limits = c(0,1.2*max(1/d1_general)))
+  # scale_x_continuous(breaks = seq(0, 360, 120), limits = c(60,500))
 
 
 # Fig LE2 -----
 
 le2 <- df_efficacy_delta_raw %>%
-  filter(d1 %in% c(60, 90, 180, 240, 300, 360)) %>%
-  # filter(d1 %in% seq(30, 360, 30)) %>%
-  # filter(d1 <= 360) %>%
-  select(d1, e, model, i,d,harm) %>%
-  gather(var, value, -d1, -e, -model) %>%
+  filter(d1 %in% le_speeds) %>%
+  mutate(delta1 = 1/d1) %>% 
+  select(delta1, e, model, i,d,harm) %>%
+  gather(var, value, -delta1, -e, -model) %>%
   group_by(model,var) %>%
-  mutate(ref = value[e == .95 & d1 == 360]) %>%
-  ungroup() %>%
-  # filter(d1 < 360) %>%
+  mutate(ref = value[e == .95 & delta1 == default_delta_value]) %>%
   filter(e %in% seq(.5, .9, .1)) %>%
+  ungroup() %>%
   mutate(r = (value/ref)) %>% 
   mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
                          labels = c("Less effective better by 5% or more",
@@ -47,7 +44,8 @@ le2 <- df_efficacy_delta_raw %>%
   mutate(var = factor(var, levels = c("i", "d", "harm"),
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   mutate(value = round(r, 2)) %>%
-  mutate(speedup = factor(360/d1)) %>%
+  # mutate(speedup = factor(round(delta1/default_delta_value, 1))) %>%
+  mutate(speedup = factor(as.percent(delta1, 1))) %>%
   mutate(e = factor(e)) %>%
   filter(var != "Economic harm") %>%
   ggplot(aes(x = speedup, y = e, fill = le_better)) + geom_tile() +
@@ -55,8 +53,11 @@ le2 <- df_efficacy_delta_raw %>%
                     name = "") +
   theme(legend.position = "bottom") +
   facet_grid(var~model) + ylab("e2 (efficacy for the less effective vaccine)") + 
-  xlab("Speed-up factor (delta2/delta1 = 360*delta2)") +
-  geom_text(aes(label = value), color = "white", size = 2.5)  
+  # xlab("Speed-up factor (delta2/delta1 = 360*delta2)") 
+  xlab(def_labels$speed) 
+  # scale_x_continuous(breaks = 1/d1_general,
+                     # labels = as.percent(1/d1_general))
+  # geom_text(aes(label = value), color = "white", size = 2.5)  
 
 # ggsave("figures/le2.pdf", le2,width = 6, height=4)
 
