@@ -109,20 +109,6 @@ df_gg <- df_fdf %>%
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   mutate(e = factor(e))
 
-df_gg %>%
-  mutate(delta1 = 1/d1) %>%
-  ggplot(aes(x = delta1, y = value, lty = e, color = policy)) + 
-  geom_line(size=1) +
-  # geom_point(pch = 21, size = 3, fill = "white") +
-  facet_wrap(var~model, scales = "free") +
-  theme(legend.position = "top", axis.text.x = element_text(angle = 45)) +
-  scale_color_manual(values = fdf_palette) +
-  scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
-  scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
-  xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Burden")
-
-ggsave("figures/sfdf2.pdf", width = 10, height=6)
-
 fdf_burden <- df_gg %>%
   filter(model == "Slow growth", var %in% c("Infections", "Deaths")) %>%
   mutate(delta1 = 1/d1) %>%
@@ -197,7 +183,8 @@ fig2 <- df_fdf %>%
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   # mutate(efficacy = ifelse(e == .8, "Efficacy after 1 dose = 80%", "Efficacy after 1 dose = 50%")) %>%
   mutate(delta1 = factor(1/d1,
-                          labels = as.percent(unique(1/d1, 1)))) %>%
+                         levels = rev(1/fdf_speeds),
+                         labels = as.percent(rev(1/fdf_speeds)))) %>%
   mutate(e = factor(e)) %>%
   mutate(value_m = round(value_m, 2)) %>%
   filter(var != "Economic harm") %>%
@@ -218,15 +205,70 @@ fig2
 
 fig2s <- fig2 + geom_text(aes(label = value_m), size = 2, color = "white")
 fig2s
-# ggsave("figures/sfdf4.pdf", fig4s, width = 9, height=6)
+
 
 # One big figure for FDF section -----
 
-w <- ggpubr::ggarrange(fdf_reductions + ggtitle("Reductions"), 
+w <- ggpubr::ggarrange(#fdf_reductions + ggtitle("Reductions"), 
                        fig2s + ggtitle("Optimal policy (relative burden)"), ncol = 1, heights = c(2, 2),
                        common.legend = TRUE)
-ggsave("figures/fdf2.pdf",w , width = 6.5, height=8)
+ggsave("figures/fdf2.pdf",w , width = 6.5, height=4)
 
 
 
 
+
+
+# All reductions and all burden -----
+
+gg_all_burden <- df_gg %>%
+  mutate(delta1 = 1/d1) %>%
+  ggplot(aes(x = delta1, y = value, lty = e, color = policy)) + 
+  geom_line(size=1) +
+  # geom_point(pch = 21, size = 3, fill = "white") +
+  facet_wrap(var~model, scales = "free") +
+  theme(legend.position = "top", axis.text.x = element_text(angle = 45)) +
+  scale_color_manual(values = fdf_palette) +
+  scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
+  scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
+  xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Burden")
+
+gg_all_reductions <- df_fdf %>% 
+  filter(e %in% c(.5, .8)) %>% 
+  # select(d1, model, e, policy, d, harm, i) %>%
+  select(d1, model, e, policy, d, i) %>%
+  group_by(model, e, policy) %>%
+  mutate(d = 1- d/d[is.infinite(d1)], i = 1 - i/i[is.infinite(d1)]) %>%
+  ungroup() %>%
+  filter(d1 > 60, d1 <= 1000) %>%
+  gather(var, value, -d1, -model, -e, -policy) %>%
+  # mutate(d1 = factor(d1)) %>%
+  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
+                         labels = c("Default (4 wks delay)", 
+                                    "FDF (12 wks for all)", 
+                                    "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
+  mutate(var = factor(var, levels = c("i", "d", "harm"),
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
+  mutate(e = factor(e)) %>%
+  # filter(model == "Slow growth", var %in% c("Infections", "Deaths")) %>%
+  mutate(delta1 = 1/d1) %>%
+  ggplot(aes(x = delta1, y = value, lty = e, color = policy)) + 
+  geom_line(size=1) +
+  # geom_point(pch = 21, size = 3, fill = "white") +
+  facet_wrap(var~model, scales = "free") +
+  theme(legend.position = "top", 
+        legend.box = "vertical",
+        axis.text.x = element_text(angle = 45)) +
+  scale_color_manual(values = fdf_palette) +
+  scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
+  scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
+  xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Fraction of harm averted")
+  # guides(linetype=TRUE)
+
+w <- ggpubr::ggarrange(
+  gg_all_reductions + ggtitle("Reductions"),
+  # gg_all_reductions + ggtitle("Optimal policy (relative burden)"), 
+  ncol = 1, heights = c(2, 2),
+  common.legend = TRUE)
+
+ggsave("figures/sfdf.pdf", w, width = 6, height=6)

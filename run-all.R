@@ -26,14 +26,15 @@ fdf_speeds <- rev(round(100/c(.1, .25, .35, .5, .75, 1), 5))
 # d1_general <- c(90, 120, 180, 360, 730, 1460)
 d1_general <- 100/c(1, .75, .5, .25, .1) # % per day
 default_delta_value <- .0025 #for LE scenario
-le_speeds <- round(100/c(.25, .3, .4, .5, .75, 1), 5)
+# le_speeds <- round(100/c(.25, .3, .4, .5, .75, 1), 5)
+le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1), 5)
 
 source("setup.R")
 
 source("cases/prep-delta-for-fdf.R")
 source("cases/first-doses-first-v2.R")
 
-  source("cases/prep-results.R")
+source("cases/prep-results.R")
 source("cases/general-example.R")
 source("cases/lower-efficacy.R")
 source("cases/lower-efficacy-delay.R")

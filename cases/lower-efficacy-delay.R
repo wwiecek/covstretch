@@ -109,13 +109,13 @@ gg_delay %>%
   facet_grid(var~model) + ylab("e2 (efficacy for the less effective vaccine)") + 
   xlab("Months until 95% effective vaccine available") +
   geom_text(aes(label = value), color = "white", size = 2.5)  +
-  ggtitle("Optimal policy if switching allowed")
+  ggtitle("Optimal policy if switching allowed, 0.25% vaccinated/day")
 
 ggsave("figures/delay_switch.pdf", delay_optimal_switch, width = 6, height = 4)
 
 
-delay_plot <- ggpubr::ggarrange(delay_burden + ggtitle("Burden"), 
-                                delay_optimal + ggtitle("Optimal policy if no switching allowed"),
+delay_plot <- ggpubr::ggarrange(delay_burden + ggtitle("Burden, 0.25% vaccinated/day"), 
+                                delay_optimal + ggtitle("Optimal policy, no switching allowed, 0.25% vaccinated/day"),
                                 ncol = 1, heights = c(.7,1))
 
 ggsave("figures/delay_both.pdf", delay_plot, width = 6, height = 7)

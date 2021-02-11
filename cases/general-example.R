@@ -10,7 +10,9 @@ df_efficacy_delta <-
   ungroup() %>%
   mutate(re = 1-(harm/ref_e)) %>%
   mutate(ri = 1-(i/ref_i)) %>%
+  mutate(diffi = (i-ref_i)) %>%
   mutate(rd = 1-(d/ref_d)) %>%
+  mutate(diffd = (d-ref_d)) %>%
   group_by(d1, model, e)
 
 
@@ -28,9 +30,9 @@ ln2[["cumV1"]] <- "Courses of vaccine used"
 gglist <- lapply(as.list(1:3), function(i) {
   pars <- mlist[[i]]
   list(
-    "Vaccinate 3 per 1000 per day" = apap_2v(pars, 100/.3),
-    "Vaccinate 5 per 1000 per day" = apap_2v(pars, 100/.5),
-    "Vaccinate 1 per 100 per day" = apap_2v(pars, 100/1),
+    "Vaccinate 3/1000 per day" = apap_2v(pars, 100/.3),
+    "Vaccinate 5/1000 per day" = apap_2v(pars, 100/.5),
+    "Vaccinate 10/1000 per day"  = apap_2v(pars, 100/1),
     "No vaccination" = list_modify(pars, delta1 = rep(0, Ngroups))) %>%
     lapply(sr, f = "2v_v2") %>%
     lapply(rescale_rcs, pop, merge=T) %>% 
@@ -48,9 +50,9 @@ g1<-ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
 
 gg1 <- lapply(mlist, function(pars) {
   ll <- list(
-    "Vaccinate 3 per 1000 per day" = apap_2v(pars, 100/.3),
-    "Vaccinate 5 per 1000 per day" = apap_2v(pars, 100/.5),
-    "Vaccinate 1 per 100 per day" = apap_2v(pars, 100/1),
+    "Vaccinate 3/1000 per day" = apap_2v(pars, 100/.3),
+    "Vaccinate 5/1000 per day" = apap_2v(pars, 100/.5),
+    "Vaccinate 10/1000 per day"  = apap_2v(pars, 100/1),
     "No vaccination" = list_modify(pars, delta1 = rep(0, Ngroups))) %>%
     lapply(sr, f = "2v_v2") %>%
     lapply(rescale_rcs, pop, merge=T) %>% 
@@ -67,10 +69,10 @@ gg1 <- lapply(mlist, function(pars) {
 
 
 ll <- list(
-  "Vaccinate 3 per 1000 per day" = apap_2v(pars, 100/.3),
-  "Vaccinate 5 per 1000 per day" = apap_2v(pars, 100/.5),
-  "Vaccinate 1 per 100 per day" = apap_2v(pars, 100/1),
-  "No vaccination" = list_modify(pars, delta1 = rep(0, Ngroups))) %>%
+  "Vaccinate 3/1000 per day"   = apap_2v(mlist[[1]], 100/.3),
+  "Vaccinate 5/1000 per day"   = apap_2v(mlist[[1]], 100/.5),
+  "Vaccinate 10/1000 per day"  = apap_2v(mlist[[1]], 100/1),
+  "No vaccination" = list_modify(mlist[[1]], delta1 = rep(0, Ngroups))) %>%
   lapply(sr, f = "2v_v2") %>%
   lapply(rescale_rcs, pop, merge=T) %>% 
   abind::abind()
@@ -146,14 +148,16 @@ ggsave("figures/g2.pdf",g2, width = 6, height=6)
 df_efficacy_delta %>% 
   filter(e == .95) %>%
   filter(d1 %in% c(d1_general, Inf)) %>% 
-  select(d1, model, i, ri, d, rd) %>%
+  mutate(d1 = as.percent(1/d1)) %>%
+  select(d1, model, i, ri, d, rd, diffi, diffd) %>%
   mutate(d = round(d*1e05)) %>%
+  mutate(diffd = round(diffd*1e05)) %>%
   # mutate(i = i*1e05) %>%
   gather(variable, value, -d1, -model, -e) %>%
   mutate(variable = factor(variable, 
-                           levels = c("i", "d", "harm", "ri", "rd", "re"),
+                           levels = c("i", "d", "harm", "ri", "rd", "re", "diffd", "diffi"),
                            labels = c("Infections", "Deaths per 100,000", "Economic harm",
-                                      "RI", "RD", "RE"))) %>%
+                                      "RI", "RD", "RE", "Difference in deaths", "Difference in infections"))) %>%
   mutate(value = round(value, 2)) %>%
   spread(d1, value) %>% 
   arrange(variable, model) %>% ungroup() %>%

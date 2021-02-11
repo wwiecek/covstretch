@@ -16,6 +16,7 @@ le1 <- df_efficacy_delta_raw %>%
   geom_text(aes(x = max(1/d1_general), y = lab_y, label = lab_e), hjust = 0, size = 2) +
   ylab("Fraction infected in 1 year") + 
   xlab(def_labels$speed) +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
   facet_wrap(~model, ncol = 3, scales = "free") +
   scale_x_continuous(breaks = 1/d1_general, 
                      labels = as.percent(1/d1_general), 
@@ -44,20 +45,19 @@ le2 <- df_efficacy_delta_raw %>%
   mutate(var = factor(var, levels = c("i", "d", "harm"),
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   mutate(value = round(r, 2)) %>%
-  # mutate(speedup = factor(round(delta1/default_delta_value, 1))) %>%
-  mutate(speedup = factor(as.percent(delta1, 1))) %>%
+  mutate(speedup = factor(round(delta1/default_delta_value, 1))) %>%
+  # mutate(speedup = factor(as.percent(delta1, 2))) %>%
   mutate(e = factor(e)) %>%
   filter(var != "Economic harm") %>%
   ggplot(aes(x = speedup, y = e, fill = le_better)) + geom_tile() +
   scale_fill_manual(values = c("grey60", "grey40", "grey20"), 
                     name = "") +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
   facet_grid(var~model) + ylab("e2 (efficacy for the less effective vaccine)") + 
-  # xlab("Speed-up factor (delta2/delta1 = 360*delta2)") 
-  xlab(def_labels$speed) 
+  xlab("delta2/delta1 (speed-up factor vs 0.25% base case)") + 
   # scale_x_continuous(breaks = 1/d1_general,
                      # labels = as.percent(1/d1_general))
-  # geom_text(aes(label = value), color = "white", size = 2.5)  
+  geom_text(aes(label = value), color = "white", size = 2.5)
 
 # ggsave("figures/le2.pdf", le2,width = 6, height=4)
 
