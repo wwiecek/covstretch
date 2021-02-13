@@ -72,10 +72,6 @@ FDF4<-df_fdf_ratio %>%
   xlab("average wait until the first dose under default policy, 1/delta1 [days]") +
   geom_text(aes(label = value), color = "white")  
 
-ggsave("figures/fdf4.pdf",FDF4, width = 19, height=12)
-
-
-
 
 df_fdf %>% filter(model == "Constant risk", e == .95) %>% select(d1, model, policy, v1) %>% spread(policy, v1)
 

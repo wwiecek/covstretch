@@ -59,11 +59,9 @@ le2 <- df_efficacy_delta_raw %>%
                      # labels = as.percent(1/d1_general))
   geom_text(aes(label = value), color = "white", size = 2.5)
 
-# ggsave("figures/le2.pdf", le2,width = 6, height=4)
 
-
-le12 <- ggpubr::ggarrange(le1 + ggtitle("Burden"), 
+le_both <- ggpubr::ggarrange(le1 + ggtitle("Burden"), 
                   le2 + ggtitle("Optimal policy (relative burden)"),# + theme(legend.direction = "vertical"), 
                   ncol = 1, heights = c(.7,1))
-ggsave("figures/le_both.pdf", le12, width = 6, height = 7)
+
 

@@ -17,7 +17,9 @@ y2 <- sapply(e, function(e) sapply(x, function(d1) sr(list_modify(pars_le_fast, 
 colnames(y0) <- colnames(y1) <- colnames(y2) <- e
 rownames(y0) <- rownames(y1) <- rownames(y2) <- x
 
-fdf2<-list(y0, y1, y2) %>% lapply(as.data.frame) %>% lapply(rownames_to_column, "t") %>%
+fig_fdf2 <- 
+  list(y0, y1, y2) %>% lapply(as.data.frame) %>% 
+  lapply(rownames_to_column, "t") %>%
   lapply(function(x) gather(x, e, value, -t)) %>%
   setNames(scenario_names) %>%
   bind_rows(.id = "model") %>%
@@ -39,4 +41,4 @@ fdf2<-list(y0, y1, y2) %>% lapply(as.data.frame) %>% lapply(rownames_to_column, 
   scale_color_discrete(name = "") + 
   scale_linetype_discrete(name = "") 
 
-ggsave("figures/fdf2.pdf", fdf2,width = 19, height=12)
+

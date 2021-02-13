@@ -74,7 +74,7 @@ lapply(as.list(1:length(fdf_speeds)), function(i) {
 
 
 # Fig 1: Base case example ------
-f1<-rescale_and_bind(list(
+fig_fdf1 <-rescale_and_bind(list(
   "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, fdf_deltas[1,6], delay_default) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
   "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas[2,6], delay_fdf) %>% 
@@ -90,7 +90,7 @@ f1<-rescale_and_bind(list(
 
 # sr(apap_2d(pars_fdf_fast, 180, delay_default) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
 # sr(apap_2d(pars_fdf_fast, 145, delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
-ggsave("figures/fdf1.pdf",f1, width = 6, height=2.5)
+
 
 
 
@@ -122,8 +122,6 @@ fdf_burden <- df_gg %>%
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
   xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("") +
   guides(linetype = FALSE, color = FALSE)
-
-# ggsave("figures/fdf_burden.pdf", width = 4, height=2)
 
 
 
@@ -159,8 +157,6 @@ fdf_reductions <- df_fdf %>%
   scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
   xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Fraction of harm averted")+
   guides(linetype=FALSE)
-
-# ggsave("figures/fdf_reductions.pdf", width = 6, height=3)
 
 
 
@@ -201,18 +197,16 @@ fig2 <- df_fdf %>%
   xlab(paste0(def_labels, " (1st dose, default policy)"))
 
 fig2
-# ggsave("figures/fdf4.pdf", fig4, width = 6, height=6)
-
 fig2s <- fig2 + geom_text(aes(label = value_m), size = 2, color = "white")
 fig2s
 
 
 # One big figure for FDF section -----
 
-w <- ggpubr::ggarrange(#fdf_reductions + ggtitle("Reductions"), 
+fig_fdf2 <- ggpubr::ggarrange(#fdf_reductions + ggtitle("Reductions"), 
                        fig2s + ggtitle("Optimal policy (relative burden)"), ncol = 1, heights = c(2, 2),
                        common.legend = TRUE)
-ggsave("figures/fdf2.pdf",w , width = 6.5, height=4)
+
 
 
 

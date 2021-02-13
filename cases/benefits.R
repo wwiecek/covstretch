@@ -14,15 +14,14 @@ vac_top_p <- function(p, pop) {
   rev(vrev)/pop
 }
 
-benefits_curve <- function(e = .95, pop = pop){
+benefits_curve <- function(e, pop){
   ii <- 1e-04
   sapply(
     seq(0,1,length=21),
     function(p) {
       v <- vac_top_p(p, pop)
-      y0_v <- y0_gen(12, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e*v)
-      sr <- sr(list_modify(pars_le_fast, 
-                           y0 = y0_v))
+      y0_v <- y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e*v)
+      sr <- sr(list_modify(pars_le_fast, y0 = y0_v))
       c(p = p,
         bd = bd(sr, pop),
         bi = b_any(sr, pop, "cumI"))
@@ -30,20 +29,23 @@ benefits_curve <- function(e = .95, pop = pop){
 }
 
 bf <- rbind(
-  benefits_curve(.8) %>% mutate(scenario = "80% efficacy"),
-  benefits_curve(.6) %>% mutate(scenario = "60% efficacy"),
-  benefits_curve(.4) %>% mutate(scenario = "40% efficacy"),
-  benefits_curve(1) %>% mutate(scenario = "100% efficacy")) %>%
+  benefits_curve(.8, pop) %>% mutate(scenario = " 80% efficacy"),
+  benefits_curve(.6, pop) %>% mutate(scenario = " 60% efficacy"),
+  benefits_curve(.4, pop) %>% mutate(scenario = " 40% efficacy"),
+  benefits_curve(1, pop) %>% mutate(scenario = "100% efficacy")) %>%
   mutate(bi = 1-(bi/max(bi))) %>%
   mutate(bd = 1-(bd/max(bd)))
 
-bf %>% 
+benefits_gg <- bf %>% 
   # mutate(both = .5*bi + .5*bd) %>%
   setNames(c("p", "Deaths averted", "Infections averted", "scenario")) %>%
   gather(var, value, -p, -scenario) %>%
   # filter(!(scenario != "100% efficacy" & var == "Total benefit")) %>%
-  ggplot(aes(x = p, y = value, group = scenario, lty = scenario)) + 
-  geom_line() + facet_wrap(~var, scales = "free") + xlab("Fraction vaccinated") + ylab("Fraction averted")
+  ggplot(aes(x = p, y = value, group = scenario, color = scenario, lty = scenario)) + 
+  geom_line() + 
+  # scale_color_viridis_d() +
+  facet_wrap(~var, scales = "free") + xlab("Fraction vaccinated before epidemic") + ylab("Fraction of harm averted") +
+  theme(legend.position = "top", legend.title = element_blank())
 
 
 

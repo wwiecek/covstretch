@@ -50,9 +50,9 @@ g1<-ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
 
 gg1 <- lapply(mlist, function(pars) {
   ll <- list(
-    "Vaccinate 3/1000 per day" = apap_2v(pars, 100/.3),
-    "Vaccinate 5/1000 per day" = apap_2v(pars, 100/.5),
-    "Vaccinate 10/1000 per day"  = apap_2v(pars, 100/1),
+    "Vaccinate 0.3% per day" = apap_2v(pars, 100/.3),
+    "Vaccinate 0.5% per day" = apap_2v(pars, 100/.5),
+    "Vaccinate 1% per day"  = apap_2v(pars, 100/1),
     "No vaccination" = list_modify(pars, delta1 = rep(0, Ngroups))) %>%
     lapply(sr, f = "2v_v2") %>%
     lapply(rescale_rcs, pop, merge=T) %>% 
@@ -67,12 +67,12 @@ gg1 <- lapply(mlist, function(pars) {
   scale_color_discrete(name = "") +
   theme(legend.position = "top")
 
-
+pars <- mlist[[1]]
 ll <- list(
-  "Vaccinate 3/1000 per day"   = apap_2v(mlist[[1]], 100/.3),
-  "Vaccinate 5/1000 per day"   = apap_2v(mlist[[1]], 100/.5),
-  "Vaccinate 10/1000 per day"  = apap_2v(mlist[[1]], 100/1),
-  "No vaccination" = list_modify(mlist[[1]], delta1 = rep(0, Ngroups))) %>%
+  "Vaccinate 0.3% per day" = apap_2v(pars, 100/.3),
+  "Vaccinate 0.5% per day" = apap_2v(pars, 100/.5),
+  "Vaccinate 1% per day"  = apap_2v(pars, 100/1),
+  "No vaccination" = list_modify(pars, delta1 = rep(0, Ngroups))) %>%
   lapply(sr, f = "2v_v2") %>%
   lapply(rescale_rcs, pop, merge=T) %>% 
   abind::abind()
@@ -81,24 +81,23 @@ gg2 <- as.data.frame(ll[,"cumV",]) %>%
   gather(var, value, -time) %>%
   ggplot(aes(x = time, y = value, color = var)) + geom_line() + 
   xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120)) + 
-  ylab("fraction vaccinated") +
+  ylab("fraction currently vaccinated (I)") +
   scale_color_discrete(name = "") +
   theme(legend.position = "top")
 gg2
-gga <- ggarrange(gg2 + ggtitle("Vaccinations"), common.legend = TRUE, 
+g1_joint <- ggarrange(gg2 + ggtitle("Vaccinations"), common.legend = TRUE, 
                  gg1 + ggtitle("Infections"), 
                  widths = c(1,2.5))
-ggsave("figures/g1_joint.pdf",gga, width = 7.5, height=2.5)
+
 
 # Age-specific dynamics -----
-gg_age <- sr(f="2v_v2", apap_2v(mlist[[2]], 360)) %>% plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
+sgg_age <- sr(f="2v_v2", apap_2v(mlist[[2]], 360)) %>% plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
   ylab("Proportion of age group")
-ggsave("figures/sgg_age.pdf", width = 7.5, height=2.5)
+
 
 
 # library(scales)
 
-as.percent <- function(x, d=2) paste0(round(100*x, d), "%")
 # Fig G2A: absolute harm
 g2a <- df_efficacy_delta  %>%
   filter(e == .95) %>%
@@ -138,11 +137,10 @@ g2b <- df_efficacy_delta  %>%
   xlab(def_labels$speed) + 
   ylab("Fraction of harm averted")
 
-g2<-ggarrange(g2a+ggtitle("Burden"), 
+fig_g2<-ggarrange(g2a+ggtitle("Burden"), 
           g2b+ggtitle("Reductions"), 
           common.legend = TRUE, ncol = 1, legend = "top")
 
-ggsave("figures/g2.pdf",g2, width = 6, height=6)
 
 # Table G3 -----
 df_efficacy_delta %>% 

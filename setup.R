@@ -12,7 +12,7 @@ source("R/scenario-parms.R")
 source("R/harm_function.R")
 source("R/prioritisation.R")
 
-
+as.percent <- function(x, d=2) paste0(round(100*x, d), "%")
 
 # Names of compartments ------
 ln <- c(

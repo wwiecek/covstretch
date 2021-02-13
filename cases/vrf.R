@@ -58,7 +58,7 @@ df2 %>%
                            levels = c("i", "d", "harm", "ri", "rd", "re", "diffd", "diffi"),
                            labels = c("Infections", "Deaths per 100,000", "Economic harm",
                                       "RI", "RD", "RE", "Difference in deaths", "Difference in infections"))) %>%
-  mutate(value = round(value, 2)) %>%
+  mutate(value = round(value, 3)) %>%
   spread(d1, value) %>% 
   arrange(variable, model) %>% ungroup() %>%
   select(-e) %>%

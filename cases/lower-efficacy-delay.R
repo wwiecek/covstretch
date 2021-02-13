@@ -88,7 +88,7 @@ gg_delay %>%
   xlab("Months until 95% effective vaccine available") +
   geom_text(aes(label = value), color = "white", size = 2.5)  
 
-delay_optimal_switch <- 
+delay_switch <- 
 gg_delay %>% 
   filter(delay %in% (30.5*(0:6))) %>%
   spread(scenario, value) %>%
@@ -111,13 +111,8 @@ gg_delay %>%
   geom_text(aes(label = value), color = "white", size = 2.5)  +
   ggtitle("Optimal policy if switching allowed, 0.25% vaccinated/day")
 
-ggsave("figures/delay_switch.pdf", delay_optimal_switch, width = 6, height = 4)
 
 
-delay_plot <- ggpubr::ggarrange(delay_burden + ggtitle("Burden, 0.25% vaccinated/day"), 
+delay_both <- ggpubr::ggarrange(delay_burden + ggtitle("Burden, 0.25% vaccinated/day"), 
                                 delay_optimal + ggtitle("Optimal policy, no switching allowed, 0.25% vaccinated/day"),
                                 ncol = 1, heights = c(.7,1))
-
-ggsave("figures/delay_both.pdf", delay_plot, width = 6, height = 7)
-
-

@@ -23,7 +23,6 @@ def_labels <- list(
   "speed" = "Fraction vaccinated each day, delta"
 )
 
-
 # default_speeds <- c(seq(60, 360, 10), 450, 540, 630, 730, 1460, Inf)
 # main3speeds <- c(360, 180, 90)
 default_speeds <- round(100/c(2, rev(seq(.05, 1, .05)), .025, .01, 0), 5) # % per day
@@ -35,6 +34,7 @@ default_delta_value <- .0025 #for LE scenario
 le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1), 5)
 
 source("setup.R")
+source("cases/benefits.R")
 
 source("cases/prep-delta-for-fdf.R")
 source("cases/first-doses-first-v2.R")
