@@ -43,3 +43,8 @@ source("cases/prep-results.R")
 source("cases/general-example.R")
 source("cases/lower-efficacy.R")
 source("cases/lower-efficacy-delay.R")
+
+source("cases/kappa-impact.R")
+
+fig_folder <- "figures"
+source("cases/generate-figures.R")

@@ -30,12 +30,12 @@ odin_ode_2vaccines_v2 <- odin::odin({
   deriv(D[])      <-  pdeath[i]*gamma2[i]*I[i]
   deriv(V1[])     <-  va1[i]*delta1[i]*(e1*S[i] + R[i]*vrf)/(S[i]+R[i]*vrf) - kappa1[i]*V1[i]
   deriv(N1[])     <-  va1[i]*delta1[i]*(1-e1)*S[i]/(S[i]+R[i]*vrf) + kappa1[i]*V1[i]  - (beta[i] + constantrisk)*N1[i]
-  deriv(V2[])     <-  va2[i]*delta2[i]*(e2*S[i]+R[i]*vrf)/(S[i]+R[i]) - kappa2[i]*V2[i]
+  deriv(V2[])     <-  va2[i]*delta2[i]*(e2*S[i]+R[i]*vrf)/(S[i]+R[i]*vrf) - kappa2[i]*V2[i]
   deriv(N2[])     <-  va2[i]*delta2[i]*(1-e2)*S[i]/(S[i]+R[i]*vrf) + kappa2[i]*V2[i]  - (beta[i] + constantrisk)*N2[i]
   deriv(cumV1[])  <-  va1[i]*delta1[i]
   deriv(cumV2[])  <-  va2[i]*delta2[i]
   deriv(cumV[])   <-  va1[i]*delta1[i] + va2[i]*delta2[i]
-  deriv(cumI[])   <-  (beta[i] + constantrisk)*(S[i]+N1[i]+N2[i])
+  deriv(cumI[])   <-  gamma1[i]*E[i]
   
   # PARAMETERS: general
   Ngroups        <- user()
