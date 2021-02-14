@@ -60,7 +60,7 @@ le2 <- df_efficacy_delta_raw %>%
   geom_text(aes(label = value), color = "white", size = 2.5)
 
 
-le_both <- ggpubr::ggarrange(le1 + ggtitle("Burden"), 
+le_both <- ggpubr::ggarrange(le1 + ggtitle("Burden of infections"), 
                   le2 + ggtitle("Optimal policy (relative burden)"),# + theme(legend.direction = "vertical"), 
                   ncol = 1, heights = c(.7,1))
 
