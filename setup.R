@@ -42,7 +42,6 @@ df_efficacy_delta_raw <- readRDS(file = "results/df_efficacy_delta_raw.rds")
 
 
 # Settings for FDF -----
-load("results/fdf-deltas.Rdata")
 comp_to_display <- c("I", "D", "cumV", "cumI", "P1", "P2")
 
 

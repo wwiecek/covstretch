@@ -26,17 +26,18 @@ def_labels <- list(
 # default_speeds <- c(seq(60, 360, 10), 450, 540, 630, 730, 1460, Inf)
 # main3speeds <- c(360, 180, 90)
 default_speeds <- round(100/c(2, rev(seq(.05, 1, .05)), .025, .01, 0), 5) # % per day
-fdf_speeds <- rev(round(100/c(.1, .25, .35, .5, .75, 1), 5))
+fdf_speeds <- rev(round(100/c(.1, .25, .5, .75, 1, 2), 5))
 # d1_general <- c(90, 120, 180, 360, 730, 1460)
-d1_general <- 100/c(1, .75, .5, .25, .1) # % per day
+d1_general <- 100/c(2, 1, .75, .5, .25, .1) # % per day
 default_delta_value <- .0025 #for LE scenario
 # le_speeds <- round(100/c(.25, .3, .4, .5, .75, 1), 5)
-le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1), 5)
+le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1, 2), 5)
 
 source("setup.R")
 source("cases/benefits.R")
 
 source("cases/prep-delta-for-fdf.R")
+load("results/fdf-deltas.Rdata")
 source("cases/first-doses-first-v2.R")
 
 source("cases/prep-results.R")

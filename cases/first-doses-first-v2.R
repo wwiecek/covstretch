@@ -98,7 +98,7 @@ fig_fdf1 <-rescale_and_bind(list(
 
 df_gg <- df_fdf %>% 
   filter(e %in% c(.5, .95)) %>% 
-  filter(d1 > 60, d1 < 540) %>% 
+  filter(d1 > 40, d1 < 540) %>% 
   # select(d1, model, e, policy, d, harm, i) %>%
   select(d1, model, e, policy, d, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
@@ -165,7 +165,7 @@ fdf_reductions <- df_fdf %>%
 # optimal solution -----
 
 fig2 <- df_fdf %>% 
-  filter(d1 > 60, d1 <= 1000) %>%
+  filter(d1 > 40, d1 <= 1000) %>%
   filter(e >= .5) %>%
   select(d1, model, e, policy, d, harm, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
