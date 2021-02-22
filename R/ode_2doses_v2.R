@@ -17,8 +17,7 @@ odin_ode_2dose_v2 <- odin::odin({
   beta_matrix[,] <- contacts[i,j]*q[j]*I[j]
   beta[] <- sum(beta_matrix[i,])
   
-  # va1[] <- (cumV1[i] <= vstop)/(1 + exp(ta[i] - t))
-  va1[] <- 1/((1 + exp(ta[i] - t))*(1 + exp(50*(cumV1[i] - vstop))))
+  va1[] <- 1/((1 + exp(ta[i] - t))*(1 + exp(50*(cumV1[i] - vstop[i]))))
   
   # ODE equations are here:
   deriv(S[])       <- -(beta[i] + constantrisk)*S[i] + phi[i]*R[i] - va1[i]*delta1[i]*S[i]/(S[i]+R[i]*vrf)
@@ -41,10 +40,10 @@ odin_ode_2dose_v2 <- odin::odin({
   Ngroups          <- user()
   Nc               <- user()
   constantrisk     <- user()
-  vstop <- user()
-  vrf   <- user()
+  vrf              <- user()
   y0[,]            <- user()
   contacts[,]      <- user()
+  vstop[]          <- user()
   ta[]             <- user()
   q[]              <- user()
   
@@ -70,6 +69,7 @@ odin_ode_2dose_v2 <- odin::odin({
   dim(phi)          <- Ngroups
   dim(pdeath)       <- Ngroups
   
+  dim(vstop)       <- Ngroups
   dim(ta)          <- Ngroups
   dim(va1)         <- Ngroups
   dim(q)           <- Ngroups

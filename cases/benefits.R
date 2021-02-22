@@ -1,18 +1,6 @@
 
 
 # Sequencing vaccination (prevaccination scenario) ------
-vac_top_p <- function(p, pop) {
-  pop <- pop/sum(pop)
-  w <- rev(pop)
-  ptemp <- p
-  vrev <- vector(length = 9)
-  for(j in 1:9){
-    if(ptemp > 0)
-      vrev[j] <- min(ptemp, w[j])
-    ptemp <- ptemp - w[j]
-  }
-  rev(vrev)/pop
-}
 
 benefits_curve <- function(e, pop){
   ii <- 1e-04

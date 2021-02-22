@@ -2,6 +2,23 @@
 
 # Running the model function -----
 
+# Vaccinate top p of the population, starting from the oldest
+# Returns a vector of what proportion of each age group was vaccinated
+vac_top_p <- function(p, pop) {
+  pop <- pop/sum(pop)
+  w <- rev(pop)
+  ptemp <- p
+  vrev <- vector(length = 9)
+  for(j in 1:9){
+    if(ptemp > 0)
+      vrev[j] <- min(ptemp, w[j])
+    ptemp <- ptemp - w[j]
+  }
+  rev(vrev)/pop
+}
+
+
+
 # Single run = sr()
 sr <- function(pars, f = "2v_v2") { 
   gnames <- 1:pars$Ngroups

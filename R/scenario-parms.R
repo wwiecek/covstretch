@@ -38,7 +38,8 @@ pars_fdf_slow <- lst(
   e2 = .95,
   pdeath = default_pdeath,
   vrf = 1,
-  vstop = .8, #around 80% vaccinated we slow down
+  vstop = rep(.8, Ngroups), #around 80% vaccinated we slow down
+                            #this may be modified in apap() function(s)
   constantrisk = 0
 )
 pars_fdf_fast <- list_modify(pars_fdf_slow,

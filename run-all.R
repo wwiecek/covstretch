@@ -1,23 +1,31 @@
 # Generate all results
 
-# Sensitivity analyses (global parameters to modify) ------
-# We use pbc_spread and default_cm from the default data inputs file:
+# A few inputs needed to generate other parameters -----
+# We use pbc_spread and default_cm from the default data inputs file
 library(tidyverse)
 load("data/default_inputs.Rdata")
-hic_pop <- pbc_spread[countries["High-income countries"],] %>% as.numeric()
-lic_pop <- pbc_spread[countries["Low-income countries"],] %>% as.numeric()
-ifr_hic <- c(0.002, 0.006, 0.03, 0.08, 0.15, 0.60, 2.2, 5.1, 9.3)/100
-ifr_lic <- ifr_hic*(3.2/2)^(5:(-3))
 
-pop <- hic_pop/sum(hic_pop)
-default_pdeath <- ifr_hic
 
-use_delta <- TRUE
-kappa_default <- 0
+# Sensitivity analyses (global parameters to modify) ------
+
+# Main FDF assumptions
 delay_default <- 28 - 10
 delay_fdf <- 84 - 10
 delay_hybrid <- c(rep(delay_fdf, 6), rep(delay_default, 3))
 
+# Demographics (for comparing HIC vs LIC)
+hic_pop <- pbc_spread[countries["High-income countries"],] %>% as.numeric()
+lic_pop <- pbc_spread[countries["Low-income countries"],] %>% as.numeric()
+ifr_hic <- c(0.002, 0.006, 0.03, 0.08, 0.15, 0.60, 2.2, 5.1, 9.3)/100
+ifr_lic <- ifr_hic*(3.2/2)^(5:(-3))
+pop <- hic_pop/sum(hic_pop)
+default_pdeath <- ifr_hic
+# use_delta <- TRUE
+
+# Case with losing immunity
+kappa_default <- 0
+# Case with lower supply (25% vs 100%)
+default_supply_ceiling <- 1
 
 def_labels <- list(
   "speed" = "Fraction vaccinated each day, delta"
@@ -34,6 +42,7 @@ default_delta_value <- .0025 #for LE scenario
 le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1, 2), 5)
 
 source("setup.R")
+
 source("cases/benefits.R")
 
 source("cases/prep-delta-for-fdf.R")

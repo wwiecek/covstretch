@@ -3,7 +3,7 @@ le1 <- df_efficacy_delta_raw %>%
   filter(e %in% c(.5, .75, .95)) %>%
   mutate(delta1 = 1/d1) %>%
   # filter(d1 > 50, d1 < 370) %>%
-  filter(delta1 >= .0005, delta1 <= .01) %>%
+  filter(delta1 >= .0005, delta1 <= .02) %>%
   select(delta1, d, i, harm, model, e) %>%
   gather(var, value, -model, -e, -delta1) %>%
   mutate(e = as.numeric(e)) %>%
@@ -16,11 +16,11 @@ le1 <- df_efficacy_delta_raw %>%
   geom_text(aes(x = max(1/d1_general), y = lab_y, label = lab_e), hjust = 0, size = 2) +
   ylab("Fraction infected in 1 year") + 
   xlab(def_labels$speed) +
-  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) +
   facet_wrap(~model, ncol = 3, scales = "free") +
-  scale_x_continuous(breaks = 1/d1_general, 
-                     labels = as.percent(1/d1_general), 
-                     limits = c(0,1.2*max(1/d1_general)))
+  scale_x_continuous(breaks = 1/d1_general[-5], 
+                     labels = as.percent(1/d1_general[-5]), 
+                     limits = c(0,1.2*max(1/d1_general[-5])))
   # scale_x_continuous(breaks = seq(0, 360, 120), limits = c(60,500))
 
 
