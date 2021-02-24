@@ -43,5 +43,5 @@ apap_2v <- function(pars, len, switch=Inf, delay = 10, vhes = .8, vsupply = defa
 }
 
 
-sr(apap_2d(pars_fdf_slow, 360, vsupply = .2), f = "2d_v2") %>% plot_rcs(c("cumV", "cumV1", "cumV2", "I"))
-sr(apap_2d(pars_fdf_slow, 360, vsupply = .15), f = "2d_v2") %>% rescale_rcs(merge=TRUE, pop) %>% plot_rcs(c("cumV", "cumV1", "cumV2", "I"))
+# sr(apap_2d(pars_fdf_slow, 360, vsupply = .2), f = "2d_v2") %>% plot_rcs(c("cumV", "cumV1", "cumV2", "I"))
+# sr(apap_2d(pars_fdf_slow, 360, vsupply = .15), f = "2d_v2") %>% rescale_rcs(merge=TRUE, pop) %>% plot_rcs(c("cumV", "cumV1", "cumV2", "I"))

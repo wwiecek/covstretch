@@ -114,5 +114,5 @@ gg_delay %>%
 
 
 delay_both <- ggpubr::ggarrange(delay_burden + ggtitle("Burden of infections, 0.25% vaccinated/day"), 
-                                delay_optimal + ggtitle("Optimal policy, no switching allowed, 0.25% vaccinated/day"),
+                                delay_optimal + ggtitle("Optimal policy, no switching allowed, 0.25% vaccinated/day")+theme(text = element_text(size=9)),
                                 ncol = 1, heights = c(.7,1))
