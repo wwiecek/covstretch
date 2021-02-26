@@ -77,11 +77,11 @@ df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
 
 # Fig 1: Base case example ------
 fig_fdf1 <-rescale_and_bind(list(
-  "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, fdf_deltas$d[6], delay_default) %>% 
+  "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, fdf_deltas$d[5], delay_default) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
-  "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas$d2[6], delay_fdf) %>% 
+  "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas$d2[5], delay_fdf) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
-  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d3[6], 6), rep(fdf_deltas$d[6],3)), delay_hybrid) %>% 
+  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d3[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid) %>% 
                                     list_modify(e1 = .8), f = "2d_v2")
   # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
 ), pop) %>% 

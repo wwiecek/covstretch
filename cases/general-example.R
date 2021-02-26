@@ -48,7 +48,7 @@ gglist <- lapply(as.list(1:3), function(i) {
 
 g1<-ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
 
-gg1 <- lapply(mlist, function(pars) {
+gg1.df <- lapply(mlist, function(pars) {
   ll <- list(
     "Vaccinate 0.3% per day" = apap_2v(pars, 100/.3),
     "Vaccinate 0.5% per day" = apap_2v(pars, 100/.5),
@@ -61,7 +61,9 @@ gg1 <- lapply(mlist, function(pars) {
     mutate(time = 1:nrow(.))
 }) %>%
   bind_rows(.id = "scenario") %>%
-  gather(var, value, -time, -scenario) %>%
+  gather(var, value, -time, -scenario) 
+
+gg1 <- gg1.df %>%
   ggplot(aes(x = time, y = value, color = var)) + geom_line() + facet_wrap(.~scenario, scales = "free") +
   xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120)) + ylab("fraction infected") +
   scale_color_discrete(name = "") +
@@ -76,23 +78,25 @@ ll <- list(
   lapply(sr, f = "2v_v2") %>%
   lapply(rescale_rcs, pop, merge=T) %>% 
   abind::abind()
-gg2 <- as.data.frame(ll[,"cumV",]) %>%
+gg2.df <- as.data.frame(ll[,"cumV",]) %>%
   mutate(time = 1:nrow(.)) %>%
-  gather(var, value, -time) %>%
+  gather(var, value, -time) 
+
+gg2 <- gg2.df %>%
   ggplot(aes(x = time, y = value, color = var)) + geom_line() + 
   xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120)) + 
   ylab("fraction currently vaccinated (I)") +
   scale_color_discrete(name = "") +
   theme(legend.position = "top")
 gg2
-g1_joint <- ggarrange(gg2 + ggtitle("Vaccinations"), common.legend = TRUE, 
-                 gg1 + ggtitle("Infections"), 
+g1_joint <- ggarrange(gg2 + ggtitle("Vaccinations") + theme(legend.spacing.x = unit(0.1, 'in'), text = element_text(size=7),legend.key.size = unit(0.4, "cm")), common.legend = TRUE, 
+                 gg1 + ggtitle("Infections") + theme(text = element_text(size=7)), 
                  widths = c(1,2.5))
 
 
 # Age-specific dynamics -----
 sgg_age <- sr(f="2v_v2", apap_2v(mlist[[2]], 360)) %>% plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
-  ylab("Proportion of age group")
+  ylab("Proportion of age group")+ theme(legend.spacing.y = unit(0.1, 'in'), legend.text = element_text(size = 5), legend.key.size = unit(0.5, "cm"))
 
 
 
