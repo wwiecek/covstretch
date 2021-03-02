@@ -26,14 +26,14 @@ All results can be replicated through the [run-all.R](run-all.R) script.
 The main scripts called are, in order: 
 
 * **[setup.R](setup.R)**: Loads epidemiological models (ordinary differential equations implemented with odin), auxiliary functions, and initialize parameters.
-* **[cases/prep-delta-for-fdf.R](prep-delta-for-fdf.R)**: Calibrates the vaccination speed in the first-dose-first scenario to match the total number of doses from baseline.
-* **[cases/first-doses-first-v2.R](first-doses-first-v2.R)**: Estimates the model for the first-doses-first and a hybrid strategy and compares the results with baseline (article section 7).
-* **[cases/prep-results.R](prep-results.R)**: Estimates the model using the baseline strategy for different vaccination rates and vaccine efficacies
-* **[cases/general-example.R](general-example.R)**: Uses estimates from prep-results.R to analyze the effects of different vaccination rates and vaccine efficacies (article section 5).
-* **[cases/lower-efficacy.R](lower-efficacy.R)**: Uses estimates from prep-results.R to compare the baseline strategy with an alternative that uses a lower-efficacy vaccine at a faster rate.
-* **[cases/lower-efficacy-delay.R](lower-efficacy.R)**: Estimates the model for the case where a lower-efficacy vaccine is immediately available and compares it to the baseline scenario with a delay on vaccine availability.
-* **[cases/kappa-impact.R](kappa-impact.R)**: Estimates the model allowing for loss of immunity for those vaccinated at a given rate and compares the results with the case without loss of immunity.
-* **[cases/generate-figures.R](generate-figures.R)**: Plots the results of the previous scripts.
+* **[prep-delta-for-fdf.R](cases/prep-delta-for-fdf.R)**: Calibrates the vaccination speed in the first-dose-first scenario to match the total number of doses from baseline.
+* **[first-doses-first-v2.R](cases/first-doses-first-v2.R)**: Estimates the model for the first-doses-first and a hybrid strategy and compares the results with baseline (article section 7).
+* **[prep-results.R](cases/prep-results.R)**: Estimates the model using the baseline strategy for different vaccination rates and vaccine efficacies
+* **[general-example.R](cases/general-example.R)**: Uses estimates from prep-results.R to analyze the effects of different vaccination rates and vaccine efficacies (article section 5).
+* **[lower-efficacy.R](cases/lower-efficacy.R)**: Uses estimates from prep-results.R to compare the baseline strategy with an alternative that uses a lower-efficacy vaccine at a faster rate.
+* **[lower-efficacy-delay.R](cases/lower-efficacy.R)**: Estimates the model for the case where a lower-efficacy vaccine is immediately available and compares it to the baseline scenario with a delay on vaccine availability.
+* **[kappa-impact.R](cases/kappa-impact.R)**: Estimates the model allowing for loss of immunity for those vaccinated at a given rate and compares the results with the case without loss of immunity.
+* **[generate-figures.R](cases/generate-figures.R)**: Plots the results of the previous scripts.
 
 Three variables from [run-all.R](run-all.R) deserve special attention.
 
