@@ -90,8 +90,8 @@ gg2 <- gg2.df %>%
   theme(legend.position = "top")
 gg2
 g1_joint <- ggarrange(gg2 + ggtitle("Vaccinations") + theme(legend.spacing.x = unit(0.1, 'in'), text = element_text(size=7),legend.key.size = unit(0.4, "cm")), common.legend = TRUE, 
-                      gg1 + ggtitle("Infections") + theme(text = element_text(size=7)), 
-                      widths = c(1,2.5))
+                 gg1 + ggtitle("Infections") + theme(text = element_text(size=7)), 
+                 widths = c(1,2.5))
 
 
 # Age-specific dynamics -----
