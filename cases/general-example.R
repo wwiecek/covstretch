@@ -18,17 +18,11 @@ df_efficacy_delta <-
 
 
 
-# Figure G1: general ilustration of the model and benefits of vaccination -----
-mlist <- list(
-  "Constant risk of infection" = pars_le_cr,
-  "Base case (R0 = 1.5)" = pars_le_slow,
-  "Fast growth (R0 = 3)" = pars_le_fast) %>%
-  setNames(scenario_names)
-
+# Figure G1: general illustration of the model and benefits of vaccination -----
 ln2 <- ln
 ln2[["cumV1"]] <- "Courses of vaccine used"
 gglist <- lapply(as.list(1:3), function(i) {
-  pars <- mlist[[i]]
+  pars <- scenario_list_2v[[i]]
   list(
     "Vaccinate 3/1000 per day" = apap_2v(pars, 100/.3),
     "Vaccinate 5/1000 per day" = apap_2v(pars, 100/.5),
@@ -37,18 +31,16 @@ gglist <- lapply(as.list(1:3), function(i) {
     lapply(sr, f = "2v_v2") %>%
     lapply(rescale_rcs, pop, merge=T) %>% 
     abind::abind() %>% 
-    # plot_rcs(c("S", "I", "cumV1", "D"), ncol = 5, long_names = ln2,
     plot_rcs(c("S", "I", "cumV1", "D"), ncol = 5, long_names = ln2,
              start_date = NULL
-             # end_date = as.Date("01-01-2021", format="%d-%m-%Y") + 300
     ) + ylab("") +
-    ggtitle(names(mlist)[i]) + 
+    ggtitle(names(scenario_list_2v)[i]) + 
     xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120))
 })
 
 g1<-ggarrange(plotlist=gglist, common.legend = TRUE, ncol = 1, legend = "top")
 
-gg1.df <- lapply(mlist, function(pars) {
+gg1.df <- lapply(scenario_list_2v, function(pars) {
   ll <- list(
     "Vaccinate 0.3% per day" = apap_2v(pars, 100/.3),
     "Vaccinate 0.5% per day" = apap_2v(pars, 100/.5),
@@ -69,7 +61,7 @@ gg1 <- gg1.df %>%
   scale_color_discrete(name = "") +
   theme(legend.position = "top")
 
-pars <- mlist[[1]]
+pars <- scenario_list_2v[[1]]
 ll <- list(
   "Vaccinate 0.3% per day" = apap_2v(pars, 100/.3),
   "Vaccinate 0.5% per day" = apap_2v(pars, 100/.5),
@@ -95,7 +87,7 @@ g1_joint <- ggarrange(gg2 + ggtitle("Vaccinations") + theme(legend.spacing.x = u
 
 
 # Age-specific dynamics -----
-sgg_age <- sr(f="2v_v2", apap_2v(mlist[[2]], 360)) %>% plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
+sgg_age <- sr(f="2v_v2", apap_2v(scenario_list_2v[[2]], 360)) %>% plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
   ylab("Proportion of age group")+ theme(legend.spacing.y = unit(0.1, 'in'), legend.text = element_text(size = 5), legend.key.size = unit(0.5, "cm"))
 
 

@@ -1,8 +1,8 @@
 library(xtable)
 
 table_g3.kappa <- df_kappa %>%
-  mutate(model = factor(model, levels = c("pars_le_cr", "pars_le_slow", "pars_le_fast"),
-                        labels = c("Constant risk", "Slow growth", "Fast growth"))) %>%
+  mutate(model = factor(model, levels = scenario_par_nms_2v,
+                        labels = scenario_nms_2v)) %>%
   filter(d1 %in% c(d1_general, Inf)) %>%
   mutate(ref_i = i[d1 > 1460]) %>%
   mutate(ref_d = d[d1 > 1460]) %>%

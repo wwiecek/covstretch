@@ -1,4 +1,4 @@
-df1 <- lapply(mlist, function(pars) {
+df1 <- lapply(scenario_list_2v, function(pars) {
   ll <- list(
     "Vaccinate 0.3% per day" = apap_2v(pars, 100/.3),
     "Vaccinate 0.5% per day" = apap_2v(pars, 100/.5),
@@ -13,7 +13,7 @@ df1 <- lapply(mlist, function(pars) {
 }) %>%
   bind_rows(.id = "scenario")
 
-df2 <- lapply(mlist, function(pars) {
+df2 <- lapply(scenario_list_2v, function(pars) {
   ll <- list(
     "Vaccinate 0.3% per day" = apap_2v(pars, 100/.3),
     "Vaccinate 0.5% per day" = apap_2v(pars, 100/.5),
@@ -42,10 +42,7 @@ fig_kappa <- rbind(mutate(df1, kappa = "No immunity loss"),
 # Compare two kappa levels ------
 
 model_kappa <- function(model, d1, e, kappa, rm = FALSE) {
-  if(model == "pars_le_cr")   pars <- pars_le_cr
-  if(model == "pars_le_slow") pars <- pars_le_slow
-  if(model == "pars_le_fast") pars <- pars_le_fast
-  
+  pars <- grab_2v_parms(model)
   pars <- apap_2v(pars, d1)
   # pars <- list_modify(pars, delta1 = rep(1/d1, Ngroups))
   y <- sr(list_modify(pars, e1 = e, kappa1 = rep(kappa, Ngroups)), "2v_v2")
@@ -56,16 +53,17 @@ model_kappa <- function(model, d1, e, kappa, rm = FALSE) {
 df_kappa <- expand_grid(d1 = c(d1_general, Inf),
                   e = .95,
                   kappa = c(0, 1/360),
-                  model = c("pars_le_cr", "pars_le_slow", "pars_le_fast")) %>%
+                  model = scenario_par_nms_2v) %>%
   mutate(data = pmap(list(model, d1, e, kappa), function(x,y,z,k) data.frame(value = model_kappa(x,y,z,k), 
                                                                              var = metric_nms))) %>%
   unnest(data) %>%
   spread(var, value) %>%
   group_by(model, e, kappa) 
 
+# This needs a table for appendix?
 df_kappa %>%
-  mutate(model = factor(model, levels = c("pars_le_cr", "pars_le_slow", "pars_le_fast"),
-                        labels = c("Constant risk", "Slow growth", "Fast growth"))) %>%
+  mutate(model = factor(model, levels = scenario_par_nms_2v,
+                        labels = scenario_nms_2v)) %>%
   filter(d1 %in% c(d1_general, Inf)) %>%
   mutate(ref_e = harm[d1 > 1460]) %>%
   mutate(ref_i = i[d1 > 1460]) %>%
@@ -90,4 +88,4 @@ df_kappa %>%
   mutate(value = round(value, 2)) %>%
   spread(d1, value) %>% 
   arrange(variable, model) %>% ungroup() %>%
-  select(-e) %>% View
+  select(-e) 
