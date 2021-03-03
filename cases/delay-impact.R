@@ -45,7 +45,7 @@ fig_delay <- select(df, d1, delay, i) %>%
   group_by(delay) %>%
   mutate(i = 1 - i/max(i)) %>%
   ungroup() %>%
-  filter(d1 %in% c(d1_general[-1])) %>%
+  filter(d1 %in% c(d1_general)) %>%
   mutate(d1 = factor(d1, levels = c(d1_general), labels = c(as.percent(1/d1_general)))) %>%
   ggplot() + 
   geom_ribbon(data = inf_rates, aes(x=delay, ymin=imin, ymax=imax), alpha = .10) +
