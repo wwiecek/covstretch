@@ -11,10 +11,11 @@ ggsave(paste0(fig_folder, "/g1_joint.pdf"),g1_joint, width = 5.55, height=1.85)
 ggsave(paste0(fig_folder, "/fdf2.pdf"), fig_fdf2, width = 5.55, height=3.4)
 ggsave(paste0(fig_folder, "/fdf1.pdf"),fig_fdf1 + theme(text = element_text(size=9)), width = 5.55, height=2.3)
 ggsave(paste0(fig_folder, "/sfdf.pdf"),fig_sfdf, width = 5.55, height=7.4)
-ggsave(paste0(fig_folder, "/sfdf2.pdf"),fig_sfdf2, width = 5.55, height=7.4)
+# ggsave(paste0(fig_folder, "/sfdf2.pdf"),fig_sfdf2, width = 5.55, height=7.4)
 
 ggsave(paste0(fig_folder, "/fig_kappa.pdf"),fig_kappa + theme(text = element_text(size=8)), width = 5.55, height=3)
 
 ggsave(paste0(fig_folder, "/pre-epidemic.pdf"),benefits_gg, width = 5.55, height=3.24)
 
 ggsave(paste0(fig_folder, "/vax_rate.pdf"), fig.vax_rate, width = 5.55, height=3.4)
+ggsave(paste0(fig_folder, "/delay_impact.pdf"), fig_delay, width = 5.55, height=3.4)
