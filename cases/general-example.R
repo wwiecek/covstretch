@@ -1,3 +1,4 @@
+library(kableExtra)
 
 df_efficacy_delta <- 
   df_efficacy_delta_raw %>%
@@ -180,11 +181,29 @@ for (vax_rate in c(0.001,0.0025,0.005,0.0075,0.01,0.02)){
                                              labels = c("Infections", "Deaths", "Economic harm"))) %>%
                          mutate(value = round(r, 2)) %>%
                          mutate(speedup = factor(round(delta1/vax_rate, 1))) %>%
-                         mutate(ref_rate = factor(ref_rate)) %>%
                          filter(var != "Economic harm"))
 }
 
-fig.vax_rate <- df.vax_rate %>% 
+table.vax_rate <- kbl(df.vax_rate %>% select(model, speedup, var, ref_rate, r) %>% mutate(ref_rate=as.percent(ref_rate)) %>% 
+                        pivot_wider(names_from = c("speedup"), values_from = r) %>% 
+                        arrange(model, var, ref_rate) %>% select(var,ref_rate,`1.5`,`2`,`3`,`4`),
+                      "latex", digits=3, align = "r", col.names = c('','Base rate','1.5','2','3','4')) %>%
+  kable_styling(full_width = F, font_size = 14) %>%
+  kable_paper(full_width = F) %>%
+  column_spec(1, bold = T) %>%
+  add_header_above(c(" " = 2,"Rate multiplier" = 4)) %>% 
+  collapse_rows(columns = 1, valign = "top")%>%
+  pack_rows("Constant risk",1,12,label_row_css="text-align: center; font-size: medium")%>%#,latex_align="c"
+  pack_rows("Slow growth",13,24,label_row_css="text-align: center; font-size: medium")%>%
+  pack_rows("Fast growth",25,36,label_row_css="text-align: center; font-size: medium")
+
+print(table.vax_rate)
+
+#table.vax_rate %>% save_kable("results/vax_rate_table.html")
+table.vax_rate %>% save_kable("results/vax_rate_table.tex")
+
+
+fig.vax_rate <- df.vax_rate %>% mutate(ref_rate = factor(ref_rate)) %>%
   ggplot(aes(x = speedup, y = ref_rate)) + geom_tile() +
   scale_fill_manual(values = c("grey60", "grey40", "grey20"), 
                     name = "") +
