@@ -158,3 +158,4 @@ df_efficacy_delta %>%
   arrange(variable, model) %>% ungroup() %>%
   select(-e)
 
+
