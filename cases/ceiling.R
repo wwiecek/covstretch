@@ -59,10 +59,10 @@ for (d in country_case){
   
   source("cases/prep-results.R")
   source("cases/general-example.R")
-  source("cases/lower-efficacy.R")
-  source("cases/lower-efficacy-delay.R")
+  #source("cases/lower-efficacy.R")
+  #source("cases/lower-efficacy-delay.R")
   
-  source("cases/kappa-impact.R")
+  #source("cases/kappa-impact.R")
   
   df_efficacy_delta_raw.ceiling <- df_efficacy_delta_raw
   
@@ -158,7 +158,7 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               scale_x_continuous(trans = 'log10', breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
                               scale_color_discrete(name = "Scenario") +
                               scale_linetype_manual(values=c("dotted", "solid"),name = "Supply constraint") +
-                              theme(axis.text.x = element_text(angle = 45, size = 9), legend.position = "top") +
+                              theme(axis.text.x = element_text(angle = 45), legend.position = "top",text = element_text(size=8.3)) +
                               xlab(def_labels$speed) + 
                               ylab("Fraction of harm averted") + ggtitle("HIC"),
                             g2b.out.ceiling %>% filter(delta1!=0&country=="LIC") %>% 
@@ -169,7 +169,7 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               scale_x_continuous(trans = 'log10', breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
                               scale_color_discrete(name = "Scenario") +
                               scale_linetype_manual(values=c("dotted", "solid"),name = "Supply constraint") +
-                              theme(axis.text.x = element_text(angle = 45, size = 9), legend.position = "top") +
+                              theme(axis.text.x = element_text(angle = 45), legend.position = "top",text = element_text(size=8.3)) +
                               xlab(def_labels$speed) + 
                               ylab("Fraction of harm averted") + ggtitle("LIC"),
                             common.legend = TRUE, ncol = 1)
@@ -214,7 +214,7 @@ print(fmt.table)
 gg1.out.ceiling <- gg1.out.ceiling %>% 
   mutate(ceiling = factor(ceiling))
 gg1.plot.ceiling <- gg1.out.ceiling %>% filter(country=="hic") %>% 
-  ggplot(aes(x = time, y = value, color = var, linetype = ceiling)) + geom_line(size=0.8) + facet_wrap(.~scenario, scales = "free") +
+  ggplot(aes(x = time, y = value, color = var, linetype = ceiling)) + geom_line(size=0.5) + facet_wrap(.~scenario, scales = "free") +
   xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120)) + ylab("fraction infected") +
   scale_color_discrete(name = "") +
   scale_linetype_manual(values=c("dotted", "solid"),name = "Supply constraint") +
@@ -226,14 +226,14 @@ gg2.out.ceiling <- gg2.out.ceiling %>%
                           levels = c(0.25, 1),
                           labels = c("25%", "100%")))
 gg2.plot.ceiling <- gg2.out.ceiling %>% filter(country=="hic") %>% 
-  ggplot(aes(x = time, y = value, color = var, linetype = ceiling)) + geom_line(size=0.8) + 
+  ggplot(aes(x = time, y = value, color = var, linetype = ceiling)) + geom_line(size=0.5) + 
   xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120)) + 
   ylab("fraction currently vaccinated (I)") +
   scale_color_discrete(name = "") +
   scale_linetype_manual(values=c("dotted", "solid"),name = "Supply constraint") +
   theme(legend.position = "top", legend.box="vertical",legend.margin=margin())
 
-g1_joint.ceiling <- ggarrange(gg2.plot.ceiling + ggtitle("Vaccinations")+ theme(legend.spacing.x = unit(0.1, 'in'),legend.box="vertical",legend.margin=margin(), text = element_text(size=7)), common.legend = TRUE, 
+g1_joint.ceiling <- ggarrange(gg2.plot.ceiling + ggtitle("Vaccinations")+ theme(legend.spacing.x = unit(0.15, 'in'),legend.box="vertical",legend.margin=margin(), text = element_text(size=7)), common.legend = TRUE, 
                               gg1.plot.ceiling + ggtitle("Infections")+ theme(text = element_text(size=7)), 
                               widths = c(1,2.5))
 
