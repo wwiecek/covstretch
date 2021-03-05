@@ -2,9 +2,7 @@ fdf_palette <- c("grey20", "#E69F00", "#56B4E9")
 
 # FDF model function (generating main metrics for all results) -----
 model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
-  if(model == "pars_le_cr")   pars <- pars_fdf_cr
-  if(model == "pars_le_slow")   pars <- pars_fdf_slow
-  if(model == "pars_le_fast") pars <- pars_fdf_fast
+  pars <- grab_2d_parms(model)
   
   d2 <- as.numeric(fdf_deltas$d2[fdf_deltas$d == d1])
   d3 <- as.numeric(fdf_deltas$d3[fdf_deltas$d == d1])
@@ -39,7 +37,7 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
 
 # KEEP AN EYE OUT FOR NUMERICAL ISSUES WITH THE ODEs HERE
 df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
-                      model = c("pars_le_cr", "pars_le_slow", "pars_le_fast"), 
+                      model = scenario_par_nms_2v, 
                       e = c(.4, .5, .6, .7, .8, .9, .95), 
                       policy = c("default", "fdf", "hybrid")) %>%
   mutate(data = pmap(list(model, d1, e, policy), 
@@ -47,8 +45,8 @@ df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
                                                   var = metric_nms))) %>%
   unnest(data) %>%
   spread(var, value) %>%
-  mutate(model = factor(model, levels = c("pars_le_cr", "pars_le_slow", "pars_le_fast"),
-                        labels = c("Constant risk", "Slow growth", "Fast growth"))) %>%
+  mutate(model = factor(model, levels = scenario_par_nms_2v,
+                        labels = scenario_nms_2v)) %>%
   group_by(d1, model, e, policy)
 
 

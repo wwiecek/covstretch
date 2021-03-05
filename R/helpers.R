@@ -17,9 +17,26 @@ vac_top_p <- function(p, pop) {
   rev(vrev)/pop
 }
 
+# Grabbing parameter sets (fast, slow, late, constant risk) -----
+
+grab_2v_parms <- function(model){
+  # ugly! but avoids some Env problems
+  if(model == "pars_le_cr")   pars <- pars_le_cr
+  if(model == "pars_le_slow") pars <- pars_le_slow
+  if(model == "pars_le_fast") pars <- pars_le_fast
+  if(model == "pars_le_late") pars <- pars_le_late
+  pars
+}
+grab_2d_parms <- function(model){
+  if(model == "pars_le_cr")     pars <- pars_fdf_cr
+  if(model == "pars_le_slow")   pars <- pars_fdf_slow
+  if(model == "pars_le_fast")   pars <- pars_fdf_fast
+  if(model == "pars_le_late")   pars <- pars_fdf_late
+  pars
+}
 
 
-# Single run = sr()
+# Single run = sr() ----
 sr <- function(pars, f = "2v_v2") { 
   gnames <- 1:pars$Ngroups
   times <- 1:(pars$Ndays)

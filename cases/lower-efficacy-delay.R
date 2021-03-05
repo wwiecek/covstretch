@@ -9,9 +9,7 @@ e <- c(.4, .5, .6, .7, .8)
 
 
 model_delay <- function(model, delay, e, scenario, rm = FALSE) {
-  if(model == "pars_le_cr")   pars <- pars_le_cr
-  if(model == "pars_le_slow") pars <- pars_le_slow
-  if(model == "pars_le_fast") pars <- pars_le_fast
+  pars <- grab_2v_parms(model)
   
   if(scenario == "v1only")
     y <- sr(f="2v_v2", list_modify(
@@ -33,15 +31,15 @@ model_delay <- function(model, delay, e, scenario, rm = FALSE) {
 df_delay <- expand.grid(delay = 15.25*(0:12),
             e = seq(.5, .9, .1),
             scenario = c("switch", "noswitch", "v1only"),
-            model = c("pars_le_cr", "pars_le_slow", "pars_le_fast")) %>%
+            model = scenario_par_nms_2v) %>%
   mutate(data = pmap(list(model, delay, e, scenario), function(x,y,z,s) 
     data.frame(value = model_delay(x,y,z,s), var = metric_nms))) %>%
   unnest(data) %>%
   spread(var, value) %>%
   group_by(model, e, delay)  %>%
 
-  mutate(model = factor(model, levels = c("pars_le_cr", "pars_le_slow", "pars_le_fast"),
-                        labels = c("Constant risk", "Slow growth", "Fast growth"))) %>%
+  mutate(model = factor(model, levels = scenario_par_nms_2v,
+                        labels = scenario_nms_2v)) %>%
   mutate(scenario = factor(scenario, levels = c("switch", "noswitch", "v1only"),
                            labels = c("Switch V2->V1", "No switching (V2 only)", "No early vaccine (V1 only)")))
 

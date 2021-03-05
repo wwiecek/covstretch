@@ -16,8 +16,6 @@ pre_immunity <- c(.5, .5, rep(.2, 7))
 pre_immunity_prop <- sum(pre_immunity*pop)
 
 
-scenario_names <- c("Constant risk", "Slow growth", "Fast growth")
-
 # Two doses model -----
 pars_fdf_slow <- lst(
   Nc = 13, 
@@ -39,7 +37,7 @@ pars_fdf_slow <- lst(
   pdeath = default_pdeath,
   vrf = 1,
   vstop = rep(.8, Ngroups), #around 80% vaccinated we slow down
-                            #this may be modified in apap() function(s)
+  #this may be modified in apap() function(s)
   constantrisk = 0
 )
 pars_fdf_fast <- list_modify(pars_fdf_slow,
@@ -49,8 +47,14 @@ pars_fdf_cr <- list_modify(pars_fdf_slow,
                            y0 = y0_gen(13, 9, pre_immunity, .1/30.5),
                            q = rep(0, Ngroups),
                            constantrisk = .01/30.5)
+pars_fdf_end <- list_modify(pars_fdf_fast,
+                            y0 = y0_gen(13, 9, rep(.5, Ngroups), 1e-03))
+# c(rep(12,1), 0) resets cumI (compartment 13) to 0:
+set0 <- c(rep(1,4), 0, rep(1,7), 0)
+pars_fdf_late <- list_modify(pars_fdf_fast, 
+                             y0 = (sr(pars_fdf_fast, f = "2d_v2")["120", ,])*set0)
 
-# Two vaccines model
+# Two vaccines model -----
 pars_le_slow <- list_modify(pars_fdf_slow,
                             e1 = 0.95, e2 = 0, 
                             ta1 = rep(0, Ngroups), 
@@ -64,3 +68,17 @@ pars_le_cr <- list_modify(pars_le_slow,
                           y0 = y0_gen(13, 9, pre_immunity, .1/30.5),
                           q = rep(0, Ngroups),
                           constantrisk = .01/30.5)
+
+pars_le_late <- list_modify(pars_le_fast, 
+                            y0 = (sr(pars_le_fast)["120", ,])*set0)
+
+scenario_par_nms_2v <- c("pars_le_cr", "pars_le_slow", "pars_le_fast")#, "pars_le_late")
+scenario_nms_2v <- c("Constant risk", "Slow growth", "Fast growth")#, "Declining risk")
+scenario_list_2v <- lst(
+  "Constant risk of infection" = pars_le_cr,
+  "Slow growth (R0 = 1.5)" = pars_le_slow,
+  "Fast growth (R0 = 3)" = pars_le_fast,
+  # "Declining risk (R0 = 3, after peak)" = pars_le_late
+  ) %>%
+  setNames(scenario_nms_2v)
+
