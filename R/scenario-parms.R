@@ -50,7 +50,7 @@ pars_fdf_fast <- list_modify(pars_fdf_slow,
                              q = rep(r0(2), Ngroups))
 pars_fdf_linear <- list_modify(pars_fdf_slow,
                                y0 = y0_gen(13, 9, pre_immunity, 1e-02),
-                               q = rep(r0(1), Ngroups))
+                               q = rep(r0(.99), Ngroups))
 pars_fdf_cr <- list_modify(pars_fdf_slow,
                            y0 = y0_gen(13, 9, pre_immunity, .1/30.5),
                            q = rep(0, Ngroups),
@@ -80,18 +80,18 @@ pars_le_cr <- list_modify(pars_le_slow,
                           constantrisk = .01/30.5)
 pars_le_linear <- list_modify(pars_le_slow,
                               y0 = y0_gen(13, 9, pre_immunity, 1e-02),
-                              q = rep(r0(1), Ngroups))
+                              q = rep(r0(.99), Ngroups))
 
 pars_le_late <- list_modify(pars_le_fast, 
                             y0 = (sr(pars_le_fast)["120", ,])*set0)
 
 scenario_par_nms_2v <- c("pars_linear", "pars_le_slow", "pars_le_fast")#, "pars_le_late", "pars_le_cr")
-scenario_nms_2v <- c("Linear growth", "Slow growth", "Fast growth")#, "Declining risk", "Constant risk")
+scenario_nms_2v <- c("Slow decrease", "Slow growth", "Fast growth")#, "Declining risk", "Constant risk")
 scenario_list_2v <- lst(
   # "Constant risk of infection" = pars_le_cr,
-  "Linear growth (R0 = 1)" = pars_le_linear,
-  "Slow growth (R0 = 1.1)" = pars_le_slow,
-  "Fast growth (R0 = 2)" = pars_le_fast,
+  "Slow decrease (R = 0.99)" = pars_le_linear,
+  "Slow growth (R = 1.1)" = pars_le_slow,
+  "Fast growth (R = 2)" = pars_le_fast,
   # "Declining risk (R0 = 3, after peak)" = pars_le_late
 ) %>%
   setNames(scenario_nms_2v)
