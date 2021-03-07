@@ -37,7 +37,7 @@ table.vax_rate <- kbl(df.vax_rate %>% select(model, speedup, var, ref_rate, r) %
   pack_rows("Slow growth",13,24,label_row_css="text-align: center; font-size: medium")%>%
   pack_rows("Fast growth",25,36,label_row_css="text-align: center; font-size: medium")
 
-print(table.vax_rate)
+# print(table.vax_rate)
 
 #table.vax_rate %>% save_kable("results/vax_rate_table.html")
 table.vax_rate %>% save_kable("results/vax_rate_table.tex")

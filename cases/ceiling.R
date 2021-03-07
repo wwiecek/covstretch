@@ -201,7 +201,8 @@ fmt.table <- kbl(table.ceiling,"latex", align = "r") %>%
   pack_rows("100% Supply",13,18,label_row_css="text-align: center; font-size: small")%>%
   pack_rows("25% Supply",19,24,label_row_css="text-align: center; font-size: small")
 
-print(fmt.table)
+# print(fmt.table)
+
 # fmt.table %>% save_kable('results/ceiling.png')
 
 # kbl(table.ceiling, align = "c") %>%

@@ -16,7 +16,7 @@ model_delay <- function(d1, delay) {
   main_metrics(y, pop)
 }
 
-df <- expand_grid(d1 = default_speeds, 
+df_delay_vac <- expand_grid(d1 = default_speeds, 
                   delay = 0:9) %>%
   mutate(data = pmap(list(d1, delay), 
                      function(x,y) data.frame(value = model_delay(x,y), 
@@ -25,12 +25,12 @@ df <- expand_grid(d1 = default_speeds,
   spread(var, value)
 
 # Burdens
-select(df, d1, delay, i) %>%
+select(df_delay_vac, d1, delay, i) %>%
   spread(delay, i) %>%
   filter(d1 %in% c(d1_general, Inf)) %>%
   mutate(d1 = 100/d1)
 # Reductions
-select(df, d1, delay, i) %>%
+select(df_delay_vac, d1, delay, i) %>%
   group_by(delay) %>%
   mutate(i = 1 - i/max(i)) %>%
   ungroup() %>%
@@ -41,7 +41,7 @@ select(df, d1, delay, i) %>%
 
 inf_rates <- data.frame(delay = (1:nrow(w))/30, imax = w[,"I",]/max(w[,"I",]), imin = 0)
 
-fig_delay <- select(df, d1, delay, i) %>%
+fig_delay <- select(df_delay_vac, d1, delay, i) %>%
   group_by(delay) %>%
   mutate(i = 1 - i/max(i)) %>%
   ungroup() %>%

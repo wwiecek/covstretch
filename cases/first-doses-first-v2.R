@@ -1,4 +1,6 @@
 fdf_palette <- c("grey20", "#E69F00", "#56B4E9")
+# fdf_palette <- c("grey80", "#E69F00", "#56B4E9")
+fdf_palette_text <- c("black", "white", "white")
 
 # FDF model function (generating main metrics for all results) -----
 model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
@@ -171,6 +173,8 @@ fig2 <- df_fdf %>%
   summarise(value_m = min(value[policy != "default"])/value[policy == "default"], 
             policy = policy[which.min(value)]
   ) %>%
+  mutate(better = ifelse(value_m<=1&value_m>=0.95,1,NA)) %>% 
+  mutate(better = factor(better, levels=c(1), labels = c("Less than 5% better"))) %>% 
   mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
                          labels = c("Default (4 wks delay)", 
                                     "FDF (12 wks for all)", 
@@ -184,20 +188,24 @@ fig2 <- df_fdf %>%
   mutate(e = factor(e)) %>%
   mutate(value_m = round(value_m, 2)) %>%
   filter(var != "Economic harm") %>%
-  ggplot(aes(x = delta1, y = e, fill = policy)) + 
+  ggplot(aes(x = delta1, y = e, fill = policy, alpha=better)) + 
   geom_tile() +
   # scale_fill_viridis_d(name="") +  
   # scale_fill_manual(values = c("grey20", "grey40", "grey60"),
   #                   name = "") +
+  
   scale_fill_manual(values = fdf_palette, name = "") +
+  scale_alpha_manual(values = c(0.7,1), name = "",labels=NULL,guide = 'none') +
   theme(legend.position = "bottom") +
   facet_grid(var~model) + 
   ylab("e1 (efficacy following 1st dose)") +
-  theme(axis.text.x = element_text(angle = 45)) +
+  theme(axis.text.x = element_text(angle = 45),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.background = element_blank(), panel.border = element_blank(),text=element_text(size=8)) +
   xlab(paste0(def_labels, " (1st dose, default policy)"))
 
 fig2
-fig2s <- fig2 + geom_text(aes(label = value_m), size = 2, color = "white")
+fig2s <- fig2 + geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
+  # + scale_color_manual(values = fdf_palette_text, name = "") 
 fig2s
 
 
@@ -273,5 +281,4 @@ fig_sfdf <- ggpubr::ggarrange(
   gg_all_reductions_e8 + ggtitle("Reductions, efficacy = 80%"),
   ncol = 1, heights = c(2, 2),
   common.legend = TRUE)
-
 

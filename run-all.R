@@ -57,6 +57,7 @@ source("cases/first-doses-first-v2.R")
 
 source("cases/prep-results.R")
 source("cases/general-example.R")
+source("cases/vax_rates.R")
 source("cases/lower-efficacy.R")
 source("cases/lower-efficacy-delay.R")
 
