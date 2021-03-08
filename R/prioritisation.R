@@ -6,7 +6,7 @@
 # vhes = when vaccine hesitancy kicks in (in each age group)
 # vsupply = total supply (fraction of total population)
 
-delay_by_age <- c(1,1,1,1,1,1,0.001,0.0001,0.0001) #I use .0001 instead of 0 to avoid 0*Inf
+delay_by_age <- c(1,1,1,1,1,1,0.0001,0.0001,0.0001) #I use .0001 instead of 0 to avoid 0*Inf
 avail_by_age <- c(0,0,1,1,1,1,1,1,1)
 prop_young <- sum(pop[1:2])
 prop_old <- sum(pop[7:9])
@@ -31,15 +31,27 @@ apap_2d <- function(pars, len,
 }
 
 apap_2v <- function(pars, len, 
-                    switch=Inf, delay = 10, 
+                    expand_from = Inf,
+                    expansion_factor = 2,
+                    switch=Inf, 
+                    delay = 10, 
                     vhes = .8, vsupply = default_supply_ceiling) {
   d1 <- avail_by_age/len/prop_all
   t1 <- delay + len*prop_old*vhes*delay_by_age
   allocation_vector <- vac_top_p(vsupply/vhes, pop)
   
+  # Find when the vaccinations would be completed in priority group if there was 
+  # an expansion along the way (this is to adjust t1 in non-priority groups)
+  if(expand_from < t1[1]){
+    v <- 1/360/prop_old
+    # x = e + (s - (e-d)v/Lv)
+    t1[1:6] <- expand_from + (vhes - (expand_from - delay)*v)/(expansion_factor*v)
+  }
+  
   list_modify(pars, 
               vstop = vhes*allocation_vector,
               ta1 = t1,
+              tmore1 = rep(expand_from, Ngroups),
               ta2 = sapply(t1, function(x) max(x, switch+delay)),
               ts1 = rep(switch+delay, Ngroups),
               delta1 = d1,
