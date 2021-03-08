@@ -28,7 +28,7 @@ kappa_default <- 0
 default_supply_ceiling <- 1
 
 def_labels <- list(
-  "speed" = "Fraction vaccinated each day, delta"
+  "speed" = "Fraction vaccinated each day"
 )
 
 # default_speeds <- c(seq(60, 360, 10), 450, 540, 630, 730, 1460, Inf)

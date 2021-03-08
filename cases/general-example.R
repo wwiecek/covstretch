@@ -132,11 +132,13 @@ g2b <- df_efficacy_delta  %>%
   scale_color_discrete(name = "Scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 9), legend.position = "top") +
   xlab(def_labels$speed) + 
-  ylab("Fraction of harm averted")
+  ylab("Fraction of harm averted") +
+  ylim(0, 1)
 
 fig_g2<-ggarrange(g2a+ggtitle("Burden"), 
                   g2b+ggtitle("Reductions"), 
-                  common.legend = TRUE, ncol = 1, legend = "top")
+                  common.legend = TRUE, ncol = 1, 
+                  heights = c(1,1.5), legend = "top")
 
 
 # Table G3 -----
