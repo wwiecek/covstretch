@@ -20,3 +20,4 @@ ggsave(paste0(fig_folder, "/pre-epidemic.pdf"),benefits_gg, width = 5.55, height
 
 ggsave(paste0(fig_folder, "/vax_rate.pdf"), fig.vax_rate, width = 5.55, height=3.4)
 ggsave(paste0(fig_folder, "/delay_impact.pdf"), fig_delay, width = 5.55, height=3.4)
+ggsave(paste0(fig_folder, "/supply_impact.pdf"), fig_extra_supply, width = 5.55, height=3.4)
