@@ -21,6 +21,7 @@ vac_top_p <- function(p, pop) {
 
 grab_2v_parms <- function(model){
   # ugly! but avoids some Env problems
+  if(model == "pars_linear")  pars <- pars_le_linear
   if(model == "pars_le_cr")   pars <- pars_le_cr
   if(model == "pars_le_slow") pars <- pars_le_slow
   if(model == "pars_le_fast") pars <- pars_le_fast
@@ -28,6 +29,7 @@ grab_2v_parms <- function(model){
   pars
 }
 grab_2d_parms <- function(model){
+  if(model == "pars_linear")    pars <- pars_fdf_linear
   if(model == "pars_le_cr")     pars <- pars_fdf_cr
   if(model == "pars_le_slow")   pars <- pars_fdf_slow
   if(model == "pars_le_fast")   pars <- pars_fdf_fast

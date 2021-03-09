@@ -159,6 +159,7 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               scale_color_discrete(name = "Scenario") +
                               scale_linetype_manual(values=c("dotted", "solid"),name = "Supply constraint") +
                               theme(axis.text.x = element_text(angle = 45), legend.position = "top",text = element_text(size=8.3)) +
+                              ylim(0, 1)+
                               xlab(def_labels$speed) + 
                               ylab("Fraction of harm averted") + ggtitle("HIC"),
                             g2b.out.ceiling %>% filter(delta1!=0&country=="LIC") %>% 
@@ -171,10 +172,11 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               scale_linetype_manual(values=c("dotted", "solid"),name = "Supply constraint") +
                               theme(axis.text.x = element_text(angle = 45), legend.position = "top",text = element_text(size=8.3)) +
                               xlab(def_labels$speed) + 
+                              ylim(0, 1)+
                               ylab("Fraction of harm averted") + ggtitle("LIC"),
                             common.legend = TRUE, ncol = 1)
 
-ggsave(paste0(fig_folder, "/ceiling.pdf"), g2.ceiling.fig, width = 5.55, height=5.55)
+ggsave(paste0(fig_folder, "/ceiling.pdf"), g2.ceiling.fig, width = 5.55, height=7)
 
 ####Final number of infections and death cases (table - G3 equivalent)####
 g3.out.ceiling <- g3.out.ceiling %>% 
@@ -201,7 +203,8 @@ fmt.table <- kbl(table.ceiling,"latex", align = "r") %>%
   pack_rows("100% Supply",13,18,label_row_css="text-align: center; font-size: small")%>%
   pack_rows("25% Supply",19,24,label_row_css="text-align: center; font-size: small")
 
-print(fmt.table)
+# print(fmt.table)
+
 # fmt.table %>% save_kable('results/ceiling.png')
 
 # kbl(table.ceiling, align = "c") %>%

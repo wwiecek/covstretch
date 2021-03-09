@@ -1,4 +1,6 @@
 fdf_palette <- c("grey20", "#E69F00", "#56B4E9")
+# fdf_palette <- c("grey80", "#E69F00", "#56B4E9")
+fdf_palette_text <- c("black", "white", "white")
 
 # FDF model function (generating main metrics for all results) -----
 model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
@@ -191,6 +193,7 @@ fig2 <- df_fdf %>%
   # scale_fill_viridis_d(name="") +  
   # scale_fill_manual(values = c("grey20", "grey40", "grey60"),
   #                   name = "") +
+  
   scale_fill_manual(values = fdf_palette, name = "") +
   scale_alpha_manual(values = c(0.7,1), name = "",labels=NULL,guide = 'none') +
   theme(legend.position = "bottom") +
@@ -201,7 +204,8 @@ fig2 <- df_fdf %>%
   xlab(paste0(def_labels, " (1st dose, default policy)"))
 
 fig2
-fig2s <- fig2 + geom_text(aes(label = value_m), alpha=1, size = 2, color = "white")
+fig2s <- fig2 + geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
+  # + scale_color_manual(values = fdf_palette_text, name = "") 
 fig2s
 
 
@@ -277,5 +281,4 @@ fig_sfdf <- ggpubr::ggarrange(
   gg_all_reductions_e8 + ggtitle("Reductions, efficacy = 80%"),
   ncol = 1, heights = c(2, 2),
   common.legend = TRUE)
-
 

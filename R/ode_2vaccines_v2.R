@@ -19,6 +19,9 @@ odin_ode_2vaccines_v2 <- odin::odin({
   
   va1[] <- 1/((1 + exp(ta1[i] - t))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03))*(1 + exp(t - ts1[i])))
   va2[] <- 1/((1 + exp(ta2[i] - t))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03)))
+  # Expansion factor:
+  va1[] <- (1 + 1/(1+exp(1e03*(tmore1[i] - t))))*va1[i]
+  va2[] <- (1 + 1/(1+exp(1e03*(tmore2[i] - t))))*va2[i]
   
   # ODE equations are here:
   deriv(S[])      <- -(beta[i] + constantrisk)*S[i] + phi[i]*R[i] - 
@@ -49,6 +52,8 @@ odin_ode_2vaccines_v2 <- odin::odin({
   ta1[]          <- user()
   ta2[]          <- user()
   ts1[]          <- user()
+  tmore1[]       <- user()
+  tmore2[]       <- user()
   
   # Parameters: ODE system
   gamma1[]       <- user()
@@ -78,6 +83,8 @@ odin_ode_2vaccines_v2 <- odin::odin({
   dim(ta1)          <- Ngroups
   dim(ts1)          <- Ngroups
   dim(ta2)          <- Ngroups
+  dim(tmore1)       <- Ngroups
+  dim(tmore2)       <- Ngroups
   dim(q)            <- Ngroups
   dim(beta)         <- Ngroups
   dim(beta_matrix)  <- c(Ngroups, Ngroups)
