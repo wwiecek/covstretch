@@ -51,9 +51,9 @@ source("setup.R")
 
 source("cases/benefits.R")
 
-source("cases/prep-delta-for-fdf.R")
+source("cases/fdf-prep-delta.R")
 load("results/fdf-deltas.Rdata")
-source("cases/first-doses-first-v2.R")
+source("cases/fdf-results.R")
 
 source("cases/prep-results.R")
 source("cases/general-example.R")
