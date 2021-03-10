@@ -30,6 +30,8 @@ df2 <- lapply(scenario_list_2v, function(pars) {
 
 fig_kappa <- rbind(mutate(df1, kappa = "No immunity loss"),
       mutate(df2, kappa = "1 year immunity")) %>%
+  mutate(scenario = factor(scenario, 
+                           levels = c("Slow decrease", "Slow growth", "Fast growth"))) %>% 
   gather(var, value, -time, -scenario, -kappa) %>%
   # filter(scenario != "Fast growth") %>%
   ggplot(aes(x = time, y = value, color = var, linetype = kappa)) + geom_line() + facet_wrap(.~scenario, scales = "free") +

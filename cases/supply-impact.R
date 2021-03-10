@@ -11,7 +11,7 @@ model_supply <- function(d1, supply_delay, model, rm = FALSE) {
 
 # c("2%" = 1460, "4%" = 730, "8%" = 360, "15%" = 180, "28%" = 90, "40%" = 60, "49%" = 45)
 
-df_supply <- expand_grid(d1 = d1_general,
+df_supply <- expand_grid(d1 = c(d1_general, Inf),
                                      supply_delay = seq(0, 360, 15),
                                      model = scenario_par_nms_2v) %>%
   mutate(data = pmap(list(d1, supply_delay, model), function(x,y,z) data.frame(value = model_supply(x,y,z), 

@@ -54,7 +54,9 @@ gg1.df <- lapply(scenario_list_2v, function(pars) {
     mutate(time = 1:nrow(.))
 }) %>%
   bind_rows(.id = "scenario") %>%
-  gather(var, value, -time, -scenario) 
+  gather(var, value, -time, -scenario) %>% 
+  mutate(scenario = factor(scenario, 
+                           levels = c("Slow decrease", "Slow growth", "Fast growth")))
 
 gg1 <- gg1.df %>%
   ggplot(aes(x = time, y = value, color = var)) + geom_line() + facet_wrap(.~scenario, scales = "free") +

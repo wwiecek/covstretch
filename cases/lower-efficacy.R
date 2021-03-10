@@ -64,4 +64,6 @@ le_both <- ggpubr::ggarrange(le1 + ggtitle("Burden of infections")+theme(text = 
                   le2 + ggtitle("Optimal policy (relative burden)")+theme(text = element_text(size=9)),# + theme(legend.direction = "vertical"), 
                   ncol = 1, heights = c(.7,1))
 
+le2.plot <- le2 + ggtitle("Optimal policy (relative burden)")+theme(text = element_text(size=9))
+
 
