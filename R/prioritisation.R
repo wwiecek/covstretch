@@ -15,18 +15,25 @@ prop_all <- c(rep(prop_young, 2), rep(1-prop_young-prop_old, 4), rep(prop_old, 3
 
 apap_2d <- function(pars, len, 
                     d2 = 18,
-                    vhes = .8, vsupply = default_supply_ceiling) {
+                    vhes = .8, vsupply = default_supply_ceiling,
+                    group_seq=FALSE) {
   if(length(d2) == 1)
     d2 <- rep(d2, Ngroups)
   if(length(len) == 1)
     len <- rep(len, 9)
   
   allocation_vector <- vac_top_p(vsupply/vhes, pop)
-    
+  
+  if (group_seq==FALSE){
+    ta <- 10 + len*prop_old*vhes*delay_by_age
+  } else {
+    ta <- 10 + len*c(rev(cumsum(rev(pop*vhes*allocation_vector)))[2:length(pop)],0)
+  }
+  
   list_modify(pars, 
               vstop = vhes*allocation_vector,
               delta2 = 1/d2,
-              ta = 10 + len*prop_old*vhes*delay_by_age,
+              ta = ta,
               delta1 = avail_by_age/len/prop_all)
 }
 
@@ -35,17 +42,38 @@ apap_2v <- function(pars, len,
                     expansion_factor = 2,
                     switch=Inf, 
                     delay = 10, 
-                    vhes = .8, vsupply = default_supply_ceiling) {
-  d1 <- avail_by_age/len/prop_all
-  t1 <- delay + len*prop_old*vhes*delay_by_age
+                    vhes = .8, vsupply = default_supply_ceiling,
+                    group_seq=FALSE) {
   allocation_vector <- vac_top_p(vsupply/vhes, pop)
-  
-  # Find when the vaccinations would be completed in priority group if there was 
-  # an expansion along the way (this is to adjust t1 in non-priority groups)
-  if(expand_from < t1[1]){
-    v <- 1/360/prop_old
-    # x = e + (s - (e-d)v/Lv)
-    t1[1:6] <- expand_from + (vhes - (expand_from - delay)*v)/(expansion_factor*v)
+  d1 <- avail_by_age/len/prop_all
+  if (group_seq==FALSE){
+    
+    t1 <- delay + len*prop_old*vhes*delay_by_age
+    
+    # Find when the vaccinations would be completed in priority group if there was 
+    # an expansion along the way (this is to adjust t1 in non-priority groups)
+    if(expand_from < t1[1]){
+      v <- 1/360/prop_old
+      # x = e + (s - (e-d)v/Lv)
+      t1[1:6] <- expand_from + (vhes - (expand_from - delay)*v)/(expansion_factor*v)
+    }
+  } else {
+    
+    t1 <- delay + len*c(rev(cumsum(rev(pop*vhes*allocation_vector)))[2:length(pop)],0)
+    
+    if (expand_from>delay){
+      t1.expand <- t1 - expand_from
+      t1.expand[t1.expand<0] <- 0
+      t1.expand[t1.expand>min(t1.expand[t1.expand>0])] <- 1
+      switch_index <- which(!t1.expand %in% c(0,1))
+      t1.expand[switch_index] <- t1.expand[switch_index]/(len*pop*vhes*allocation_vector)[switch_index+1]
+      pop.expand <- t1.expand*c((pop*vhes*allocation_vector)[2:length(pop)],0)
+      
+      t1.delta <- pop.expand*len*(1-1/expansion_factor)
+      t1 <- t1 - rev(cumsum(rev(t1.delta)))
+    } else {
+      t1 <- delay + (len/expansion_factor)*c(rev(cumsum(rev(pop*vhes*allocation_vector)))[2:length(pop)],0)
+    }
   }
   
   list_modify(pars, 
