@@ -27,7 +27,7 @@ apap_2d <- function(pars, len,
   if (group_seq==FALSE){
     ta <- 10 + len*prop_old*vhes*delay_by_age
   } else {
-    ta <- 10 + c(rev(cumsum(rev(len*pop*vhes*allocation_vector)))[2:length(pop)],0)
+    ta <- 10 + c(rev(cumsum(rev(len*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
   }
   
   list_modify(pars, 
@@ -66,20 +66,20 @@ apap_2v <- function(pars, len,
     }
   } else {
     
-    t1 <- delay + c(rev(cumsum(rev(len*pop*vhes*allocation_vector)))[2:length(pop)],0)
+    t1 <- delay + c(rev(cumsum(rev(len*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
     
     if (expand_from>delay[length(delay)]){
       t1.expand <- t1 - expand_from
       t1.expand[t1.expand<0] <- 0
       t1.expand[t1.expand>min(t1.expand[t1.expand>0])] <- 1
       switch_index <- which(!t1.expand %in% c(0,1))
-      t1.expand[switch_index] <- t1.expand[switch_index]/(len*pop*vhes*allocation_vector)[switch_index+1]
+      t1.expand[switch_index] <- t1.expand[switch_index]/(len*pop*vhes*(allocation_vector+0.00001))[switch_index+1]
       pop.expand <- t1.expand*c((pop*vhes*allocation_vector)[2:length(pop)],0.0001)
       
       t1.delta <- pop.expand*len*(1-1/expansion_factor)
       t1 <- t1 - rev(cumsum(rev(t1.delta)))
     } else {
-      t1 <- delay + c(rev(cumsum(rev((len/expansion_factor)*pop*vhes*allocation_vector)))[2:length(pop)],0)
+      t1 <- delay + c(rev(cumsum(rev((len/expansion_factor)*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
     }
   }
   
