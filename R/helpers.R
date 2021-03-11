@@ -44,6 +44,13 @@ sr <- function(pars, f = "2v_v2") {
   times <- 1:(pars$Ndays)
   pars$Ndays <- NULL
   
+  pars_to_expand <- c("e1", "e2")
+  for(p in pars_to_expand){
+    if(length(pars[[p]]) == 1)
+      pars[[p]] <- rep(pars[[p]], pars$Ngroups)
+  }
+    
+  
   if(pars$Ngroups == 9)
     gnames <- colnames(pbc_spread)
   
