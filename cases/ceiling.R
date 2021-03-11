@@ -54,8 +54,8 @@ for (d in country_case){
   
   source("setup.R")
   
-  source("cases/prep-delta-for-fdf.R")
-  source("cases/first-doses-first-v2.R")
+  source("cases/fdf-prep-delta.R")
+  source("cases/fdf-results.R")
   
   source("cases/prep-results.R")
   source("cases/general-example.R")
