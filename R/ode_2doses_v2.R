@@ -26,10 +26,10 @@ odin_ode_2dose_v2 <- odin::odin({
   deriv(D[])       <-  pdeath[i]*gamma2[i]*I[i]
   deriv(R[])       <-  (1-pdeath[i])*gamma2[i]*I[i] - phi[i]*R[i] - va1[i]*delta1[i]*R[i]*vrf/(S[i]+R[i])
    
-  deriv(P1[])      <-  va1[i]*delta1[i]*(e1*S[i]+R[i]*vrf)/(S[i]+R[i]*vrf) - delta2[i]*P1[i] - kappa1[i]*P1[i]
-  deriv(N1[])      <-  va1[i]*delta1[i]*(1-e1)*S[i]/(S[i]+R[i]*vrf) - delta2[i]*N1[i] - (beta[i] + constantrisk)*N1[i] + kappa1[i]*P1[i]
-  deriv(P2[])      <-  e2*delta2[i]*(P1[i]+N1[i]) - kappa2[i]*P2[i]
-  deriv(N2[])      <-  (1-e2)*delta2[i]*(P1[i]+N1[i]) + kappa2[i]*P2[i] - (beta[i] + constantrisk)*N2[i] 
+  deriv(P1[])      <-  va1[i]*delta1[i]*(e1[i]*S[i]+R[i]*vrf)/(S[i]+R[i]*vrf) - delta2[i]*P1[i] - kappa1[i]*P1[i]
+  deriv(N1[])      <-  va1[i]*delta1[i]*(1-e1[i])*S[i]/(S[i]+R[i]*vrf) - delta2[i]*N1[i] - (beta[i] + constantrisk)*N1[i] + kappa1[i]*P1[i]
+  deriv(P2[])      <-  e2[i]*delta2[i]*(P1[i]+N1[i]) - kappa2[i]*P2[i]
+  deriv(N2[])      <-  (1-e2[i])*delta2[i]*(P1[i]+N1[i]) + kappa2[i]*P2[i] - (beta[i] + constantrisk)*N2[i] 
   
   deriv(cumV1[])   <-  va1[i]*delta1[i]
   deriv(cumV2[])   <-  (delta2[i]*(P1[i]+N1[i]))
@@ -54,12 +54,14 @@ odin_ode_2dose_v2 <- odin::odin({
   delta2[]       <- user()
   kappa1[]       <- user()
   kappa2[]       <- user()
-  e1             <- user()
-  e2             <- user()
+  e1[]           <- user()
+  e2[]           <- user()
   phi[]          <- user()
   pdeath[]       <- user()
   
   # Parameters: ODE system
+  dim(e1)           <- Ngroups
+  dim(e2)           <- Ngroups
   dim(gamma1)       <- Ngroups
   dim(gamma2)       <- Ngroups
   dim(delta1)       <- Ngroups

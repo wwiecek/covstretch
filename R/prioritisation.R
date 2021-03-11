@@ -2,11 +2,13 @@
 
 # apap = adjust parameters for age prioritisation
 # Derive values of delta and ta such that 
-# len = len of vaccination campaign (in days), i.e. time to 100%
+# len = length of vaccination campaign (in days), i.e. time to 100% vaccinated
 # vhes = when vaccine hesitancy kicks in (in each age group)
 # vsupply = total supply (fraction of total population)
+# group_seq = whether to prioritise all of the groups sequentially (80+, 70-80, ..., "new" way)
+#             or just the top 3 age groups before the rest ("old" way)
 
-delay_by_age <- c(1,1,1,1,1,1,0.0001,0.0001,0.0001) #I use .0001 instead of 0 to avoid 0*Inf
+delay_by_age <- c(1,1,1,1,1,1,0.0001,0.0001,0.0001) #I use 0.0001 instead of 0 to avoid 0*Inf
 avail_by_age <- c(0,0,1,1,1,1,1,1,1)
 prop_young <- sum(pop[1:2])
 prop_old <- sum(pop[7:9])
@@ -24,7 +26,7 @@ apap_2d <- function(pars, len,
   
   allocation_vector <- vac_top_p(vsupply/vhes, pop)
   
-  if (group_seq==FALSE){
+  if (!group_seq){
     ta <- 10 + len*prop_old*vhes*delay_by_age
   } else {
     ta <- 10 + c(rev(cumsum(rev(len*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
@@ -36,6 +38,11 @@ apap_2d <- function(pars, len,
               ta = ta,
               delta1 = avail_by_age/len/prop_all)
 }
+
+
+
+
+# Same as above but for the model with 2 vaccines, not 2 doses -----
 
 apap_2v <- function(pars, len, 
                     expand_from = Inf,
@@ -53,8 +60,7 @@ apap_2v <- function(pars, len,
     ts1 <- switch+delay
   }
   
-  if (group_seq==FALSE){
-    
+  if (!group_seq){
     t1 <- delay + len*prop_old*vhes*delay_by_age
     
     # Find when the vaccinations would be completed in priority group if there was 

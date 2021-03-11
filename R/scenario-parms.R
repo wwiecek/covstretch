@@ -37,8 +37,8 @@ pars_fdf_slow <- lst(
   kappa2 = rep(kappa_default, Ngroups),
   phi = rep(0, Ngroups), 
   ta = rep(0, Ngroups),
-  e1 = .8,
-  e2 = .95,
+  e1 = rep(.8, Ngroups),
+  e2 = rep(.95, Ngroups),
   pdeath = default_pdeath,
   vrf = 1,
   vstop = rep(.8, Ngroups), #around 80% vaccinated we slow down

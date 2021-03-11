@@ -63,6 +63,7 @@ source("cases/lower-efficacy-delay.R")
 
 source("cases/kappa-impact.R") #impact of immunity loss (appendix)
 source("cases/delay-impact.R")
+source("cases/supply-impact.R")
 
 fig_folder <- "figures"
 source("cases/generate-figures.R")
