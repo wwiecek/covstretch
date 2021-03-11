@@ -27,7 +27,7 @@ apap_2d <- function(pars, len,
   if (group_seq==FALSE){
     ta <- 10 + len*prop_old*vhes*delay_by_age
   } else {
-    ta <- 10 + len*c(rev(cumsum(rev(pop*vhes*allocation_vector)))[2:length(pop)],0)
+    ta <- 10 + c(rev(cumsum(rev(len*pop*vhes*allocation_vector)))[2:length(pop)],0)
   }
   
   list_modify(pars, 
@@ -46,6 +46,13 @@ apap_2v <- function(pars, len,
                     group_seq=FALSE) {
   allocation_vector <- vac_top_p(vsupply/vhes, pop)
   d1 <- avail_by_age/len/prop_all
+  
+  if(length(delay)==1){
+    ts1 <- rep(switch+delay, Ngroups)
+  } else {
+    ts1 <- switch+delay
+  }
+  
   if (group_seq==FALSE){
     
     t1 <- delay + len*prop_old*vhes*delay_by_age
@@ -59,20 +66,20 @@ apap_2v <- function(pars, len,
     }
   } else {
     
-    t1 <- delay + len*c(rev(cumsum(rev(pop*vhes*allocation_vector)))[2:length(pop)],0)
+    t1 <- delay + c(rev(cumsum(rev(len*pop*vhes*allocation_vector)))[2:length(pop)],0)
     
-    if (expand_from>delay){
+    if (expand_from>delay[length(delay)]){
       t1.expand <- t1 - expand_from
       t1.expand[t1.expand<0] <- 0
       t1.expand[t1.expand>min(t1.expand[t1.expand>0])] <- 1
       switch_index <- which(!t1.expand %in% c(0,1))
       t1.expand[switch_index] <- t1.expand[switch_index]/(len*pop*vhes*allocation_vector)[switch_index+1]
-      pop.expand <- t1.expand*c((pop*vhes*allocation_vector)[2:length(pop)],0)
+      pop.expand <- t1.expand*c((pop*vhes*allocation_vector)[2:length(pop)],0.0001)
       
       t1.delta <- pop.expand*len*(1-1/expansion_factor)
       t1 <- t1 - rev(cumsum(rev(t1.delta)))
     } else {
-      t1 <- delay + (len/expansion_factor)*c(rev(cumsum(rev(pop*vhes*allocation_vector)))[2:length(pop)],0)
+      t1 <- delay + c(rev(cumsum(rev((len/expansion_factor)*pop*vhes*allocation_vector)))[2:length(pop)],0)
     }
   }
   
@@ -81,7 +88,7 @@ apap_2v <- function(pars, len,
               ta1 = t1,
               tmore1 = rep(expand_from, Ngroups),
               ta2 = sapply(t1, function(x) max(x, switch+delay)),
-              ts1 = rep(switch+delay, Ngroups),
+              ts1 = ts1,
               delta1 = d1,
               delta2 = d1)
 }
