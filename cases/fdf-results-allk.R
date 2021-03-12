@@ -7,8 +7,6 @@ model_fdf.all_k <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   pars <- grab_2d_parms(model)
   
   dfdf <- as.numeric(fdf_deltas$d_fdf[fdf_deltas$d == d1])
-  dh1 <- as.numeric(fdf_deltas$d_sse_h1[fdf_deltas$d == d1])
-  dh2 <- as.numeric(fdf_deltas$d_sse_h2[fdf_deltas$d == d1])
   dh3 <- as.numeric(fdf_deltas$d_sse_h3[fdf_deltas$d == d1])
   dh4 <- as.numeric(fdf_deltas$d_sse_h4[fdf_deltas$d == d1])
   dh5 <- as.numeric(fdf_deltas$d_sse_h5[fdf_deltas$d == d1])
@@ -25,14 +23,6 @@ model_fdf.all_k <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   if(policy == "fdf")
     res <- sr(f = "2d_v2",  apap_2d(list_modify(pars, e1 = e, e2 = .95),
                                     dfdf, delay_fdf))
-  if(policy == "hybrid_1"){
-    res <- sr(f = "2d_v2",  apap_2d(list_modify(pars, e1 = e, e2 = .95),
-                                    dh1, delay_hybrid_k[,1]))
-  }
-  if(policy == "hybrid_2"){
-    res <- sr(f = "2d_v2",  apap_2d(list_modify(pars, e1 = e, e2 = .95),
-                                    dh2, delay_hybrid_k[,2]))
-  }
   if(policy == "hybrid_3"){
     res <- sr(f = "2d_v2",  apap_2d(list_modify(pars, e1 = e, e2 = .95),
                                     dh3, delay_hybrid_k[,3]))
@@ -76,8 +66,10 @@ model_fdf.all_k <- function(model, d1, e, policy, comp = c("cumI", "D")) {
 df_fdf.all_k <- expand.grid(d1 = c(fdf_speeds,Inf),
                             model = scenario_par_nms_2v, 
                             e = c(.4, .5, .6, .7, .8, .9, .95), 
-                            policy = c("default", "fdf", "hybrid_1", "hybrid_2", "hybrid_3", "hybrid_4",
-                                       "hybrid_5", "hybrid_6", "hybrid_7", "hybrid_8")) %>%
+                            policy = c("default", "fdf", 
+                                       "hybrid_3", "hybrid_4",
+                                       "hybrid_5", "hybrid_6", 
+                                       "hybrid_7", "hybrid_8")) %>%
   mutate(data = pmap(list(model, d1, e, policy), 
                      function(x,y,z,a) data.frame(value = model_fdf.all_k(x,y,z,a), 
                                                   var = metric_nms))) %>%
@@ -116,11 +108,7 @@ fig2.all_k <- df_fdf.all_k %>%
   filter(var != "Economic harm") %>%
   ggplot(aes(x = delta1, y = e, fill = policy, alpha=better)) + 
   geom_tile() +
-  # scale_fill_viridis_d(name="") +  
-  # scale_fill_manual(values = c("grey20", "grey40", "grey60"),
-  #                   name = "") +
-  
-  scale_fill_manual(values = fdf_palette, name = "") +
+  # scale_fill_manual(values = fdf_palette, name = "") +
   scale_alpha_manual(values = c(0.7,1), name = "",labels=NULL,guide = 'none') +
   theme(legend.position = "bottom") +
   facet_grid(var~model) + 
@@ -130,7 +118,6 @@ fig2.all_k <- df_fdf.all_k %>%
   xlab(paste0(def_labels, " (1st dose, default policy)"))
 
 fig2s.all_k <- fig2.all_k + geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
-# + scale_color_manual(values = fdf_palette_text, name = "") 
 fig2s.all_k
 
 fig_folder <- "figures"

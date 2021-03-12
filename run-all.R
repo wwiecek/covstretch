@@ -16,7 +16,8 @@ delay_hybrid_k <- sapply(c(1,2,3,4,5,6,7,8), function(k){
   c(rep(delay_fdf, k), rep(delay_default, 9-k))
 })
 colnames(delay_hybrid_k) <- c(1,2,3,4,5,6,7,8)
-all_k=FALSE
+all_k <- TRUE
+default_group_seq <- TRUE
 
 # Demographics (for comparing HIC vs LIC)
 hic_pop <- pbc_spread[countries["High-income countries"],] %>% as.numeric()
@@ -57,6 +58,7 @@ source("setup.R")
 source("cases/benefits.R")
 
 source("cases/fdf-prep-delta.R")
+
 if (!all_k) {
   load("results/fdf-deltas.Rdata")
   source("cases/fdf-results.R")

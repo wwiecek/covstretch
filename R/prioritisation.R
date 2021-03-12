@@ -18,7 +18,7 @@ prop_all <- c(rep(prop_young, 2), rep(1-prop_young-prop_old, 4), rep(prop_old, 3
 apap_2d <- function(pars, len, 
                     d2 = 18,
                     vhes = .8, vsupply = default_supply_ceiling,
-                    group_seq=FALSE) {
+                    group_seq=default_group_seq) {
   if(length(d2) == 1)
     d2 <- rep(d2, Ngroups)
   if(length(len) == 1)
@@ -52,7 +52,7 @@ apap_2v <- function(pars, len,
                     switch=Inf, 
                     delay = 10, 
                     vhes = .8, vsupply = default_supply_ceiling,
-                    group_seq=FALSE) {
+                    group_seq=default_group_seq) {
   allocation_vector <- vac_top_p(vsupply/vhes, pop)
   d1 <- avail_by_age/len/prop_all
   
