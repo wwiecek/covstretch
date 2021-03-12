@@ -28,15 +28,17 @@ apap_2d <- function(pars, len,
   
   if (!group_seq){
     ta <- 10 + len*prop_old*vhes*delay_by_age
+    delta1 <- avail_by_age/len/prop_all
   } else {
     ta <- 10 + c(rev(cumsum(rev(len*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
+    delta1 <- avail_by_age/len/pop
   }
   
   list_modify(pars, 
               vstop = vhes*allocation_vector,
               delta2 = 1/d2,
               ta = ta,
-              delta1 = avail_by_age/len/prop_all)
+              delta1 = delta1)
 }
 
 
@@ -61,6 +63,8 @@ apap_2v <- function(pars, len,
   }
   
   if (!group_seq){
+    d1 <- avail_by_age/len/prop_all
+    
     t1 <- delay + len*prop_old*vhes*delay_by_age
     
     # Find when the vaccinations would be completed in priority group if there was 
@@ -71,10 +75,11 @@ apap_2v <- function(pars, len,
       t1[1:6] <- expand_from + (vhes - (expand_from - delay)*v)/(expansion_factor*v)
     }
   } else {
+    d1 <- avail_by_age/len/pop
     
     t1 <- delay + c(rev(cumsum(rev(len*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
     
-    if (expand_from>delay[length(delay)]){
+    if ((expand_from>delay[length(delay)])&(expand_from!=Inf)){
       t1.expand <- t1 - expand_from
       t1.expand[t1.expand<0] <- 0
       t1.expand[t1.expand>min(t1.expand[t1.expand>0])] <- 1
