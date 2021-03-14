@@ -30,7 +30,7 @@ apap_2d <- function(pars, len,
     ta <- 10 + len*prop_old*vhes*delay_by_age
     delta1 <- avail_by_age/len/prop_all
   } else {
-    ta <- 10 + c(rev(cumsum(rev(len*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
+    ta <- 10 + c(rev(cumsum(rev(len*pop*vhes*(allocation_vector+0.00001))))[-1],0)
     delta1 <- avail_by_age/len/pop
   }
   
@@ -49,6 +49,7 @@ apap_2d <- function(pars, len,
 apap_2v <- function(pars, len, 
                     expand_from = Inf,
                     expansion_factor = 2,
+                    fractional_dose = rep(1, length(pop)),
                     switch=Inf, 
                     delay = 10, 
                     vhes = .8, vsupply = default_supply_ceiling,
@@ -63,35 +64,32 @@ apap_2v <- function(pars, len,
   }
   
   if (!group_seq){
-    d1 <- avail_by_age/len/prop_all
-    
-    t1 <- delay + len*prop_old*vhes*delay_by_age
+    d1 <- avail_by_age/len/prop_all/fractional_dose
+    t1 <- delay + len*prop_old*vhes*delay_by_age*fractional_dose
     
     # Find when the vaccinations would be completed in priority group if there was 
     # an expansion along the way (this is to adjust t1 in non-priority groups)
+    
     if(expand_from < t1[1]){
       v <- 1/360/prop_old
       # x = e + (s - (e-d)v/Lv)
       t1[1:6] <- expand_from + (vhes - (expand_from - delay)*v)/(expansion_factor*v)
     }
   } else {
-    d1 <- avail_by_age/len/pop
-    
-    t1 <- delay + c(rev(cumsum(rev(len*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
+    d1 <- avail_by_age/len/pop/fractional_dose
+    time_to_vaccinate_k <- len*pop*vhes*(allocation_vector+0.00001)*fractional_dose
+    t1 <- delay + c(rev(cumsum(rev(time_to_vaccinate_k)))[-1],0)
     
     if ((expand_from>delay[length(delay)])&(expand_from!=Inf)){
       t1.expand <- t1 - expand_from
       t1.expand[t1.expand<0] <- 0
       t1.expand[t1.expand>min(t1.expand[t1.expand>0])] <- 1
       switch_index <- which(!t1.expand %in% c(0,1))
-      t1.expand[switch_index] <- t1.expand[switch_index]/(len*pop*vhes*(allocation_vector+0.00001))[switch_index+1]
-      pop.expand <- t1.expand*c((pop*vhes*allocation_vector)[2:length(pop)],0.0001)
-      
+      t1.expand[switch_index] <- t1.expand[switch_index]/(time_to_vaccinate_k)[switch_index+1]
+      pop.expand <- t1.expand*c((pop*vhes*allocation_vector)[-1],0.0001)
       t1.delta <- pop.expand*len*(1-1/expansion_factor)
       t1 <- t1 - rev(cumsum(rev(t1.delta)))
-    } else {
-      t1 <- delay + c(rev(cumsum(rev((len/expansion_factor)*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
-    }
+    } 
   }
   
   list_modify(pars, 
