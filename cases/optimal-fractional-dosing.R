@@ -2,7 +2,7 @@ default_e1 <- 0.95
 x <- seq(0.1, 1, length = 100)
 y <- default_e1*x^0.25
 plot(y~x, type = "l")
-y <- default_e1*x^0.2
+y <- default_e1*x^1
 lines(y~x, type = "l")
 y <- default_e1*x^0
 lines(y~x, type = "l")
@@ -40,7 +40,7 @@ df_fractional <- expand.grid(model = scenario_par_nms_2v,
                              d1 = c(d1_general, Inf),
                              alpha = c(0, 1, 0.25),
                              fractional_dose = c(0.1, 0.2, 0.5),
-                             K = 3:9) %>%
+                             K = 3:10) %>%
   mutate(data = pmap(list(model, d1, alpha, fractional_dose, K), 
                      function(x,y,z,a,b) data.frame(value = model_fractional_d(x,y,z,a,b), 
                                                     var = metric_nms))) %>%
@@ -49,3 +49,24 @@ df_fractional <- expand.grid(model = scenario_par_nms_2v,
   mutate(model = factor(model, levels = scenario_par_nms_2v,
                         labels = scenario_nms_2v)) 
 
+
+df_fractional %>% select(model, d1, alpha, fractional_dose, K, d) %>%
+  filter(d1 == 100) %>%
+  mutate(K = factor(K)) %>%
+  # spread(d1, i) %>% 
+  ggplot(aes(x = fractional_dose, y = d, group = K, color = K)) + geom_line() + facet_wrap(model ~ alpha, scales = "free")
+
+# Find the optimal fractional dosing policy for each speed, scenario, dose response shape
+df_fractional %>% select(model, d1, alpha, fractional_dose, K, d) %>%
+  rename(i = d) %>%
+  group_by(model, d1, alpha) %>%
+  summarise(v = paste(K[which.min(i)], fractional_dose[which.min(i)])) %>%
+  # summarise(v = min(i)/max(i)) %>%
+  spread(d1, v)
+  # filter(alpha == 1)
+
+  filter(d1 == 100) %>%
+  mutate(K = factor(K)) %>%
+  # spread(d1, i) %>% 
+  ggplot(aes(x = fractional_dose, y = i, group = K, color = K)) + geom_line() + facet_wrap(model ~ alpha, scales = "free")
+  
