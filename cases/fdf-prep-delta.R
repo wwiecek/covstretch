@@ -54,10 +54,10 @@ fdf_deltas_raw <- lapply(as.list(fdf_speeds), function(d){
 if (!all_k){
   fdf_deltas <- bind_rows(fdf_deltas_raw) %>%
     group_by(d) %>%
-    summarise(d2 = delta_vals[which.min(sse)],
-              d3 = delta_vals[which.min(sse_h)],
+    summarise(d_fdf = delta_vals[which.min(sse)],
+              d_sse_h6 = delta_vals[which.min(sse_h)],
               sse = min(sse),
-              sse_h = min(sse_h))
+              sse_h6 = min(sse_h))
   
   save(fdf_speeds, fdf_deltas, file = "results/fdf-deltas.Rdata")
 } else {
