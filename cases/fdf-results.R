@@ -335,4 +335,3 @@ if (all_k){
   fig2s.all_k <- fig2.all_k + geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
   fig2s.all_k
 }
-
