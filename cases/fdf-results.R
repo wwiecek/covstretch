@@ -309,8 +309,12 @@ if (all_k){
     ) %>%
     mutate(better = ifelse(value_m<=1&value_m>=0.95,1,NA)) %>% 
     mutate(better = factor(better, levels=c(1), labels = c("Less than 5% better"))) %>% 
-    mutate(policy = factor(policy)) %>%
-    mutate(var = factor(var, levels = c("i", "d", "harm"),
+    mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid_3","hybrid_4",
+                                              "hybrid_5","hybrid_6","hybrid_7","hybrid_8"),
+                           labels = c("SDF", "FDF", "Hybrid (SDF above 30)","Hybrid (SDF above 40)",
+                                      "Hybrid (SDF above 50)","Hybrid (SDF above 60)","Hybrid (SDF above 70)",
+                                      "Hybrid (SDF above 80)"))) %>%
+    mutate(var = factor(var, levels = c("i", "d", ""),
                         labels = c("Infections", "Deaths", "Economic harm"))) %>%
     mutate(delta1 = factor(1/d1,
                            levels = rev(1/fdf_speeds),
