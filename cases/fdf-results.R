@@ -6,10 +6,15 @@ fdf_palette_text <- c("black", "white", "white")
 model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   pars <- grab_2d_parms(model)
   
-  d2 <- as.numeric(fdf_deltas$d2[fdf_deltas$d == d1])
-  d3 <- as.numeric(fdf_deltas$d3[fdf_deltas$d == d1])
+  dfdf <- as.numeric(fdf_deltas$d_fdf[fdf_deltas$d == d1])
+  
+  if (grepl("[0-9]",policy)){
+    bottom <- substr(policy,8,8)
+    dh <- as.numeric(fdf_deltas[fdf_deltas$d == d1,paste0("d_sse_h",bottom)])
+  }
+  
   if(is.infinite(d1)){
-    d2 <- Inf; d3 <- Inf
+    dfdf <- Inf; dh <- Inf
   }
   # if(d2 == 1) browser()
   if(policy == "default")
@@ -17,11 +22,11 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
                                     d1, delay_default))
   if(policy == "fdf")
     res <- sr(f = "2d_v2",  apap_2d(list_modify(pars, e1 = e, e2 = .95),
-                                    d2, delay_fdf))
-  if(policy == "hybrid"){
+                                    dfdf, delay_fdf))
+  if (grepl("[0-9]",policy)){
     res <- sr(f = "2d_v2",  apap_2d(list_modify(pars, e1 = e, e2 = .95),
-                                    d3, delay_hybrid))
-  }
+                                    dh, delay_hybrid_k[,as.integer(bottom)]))
+  }  
   if(is.infinite(d1) || policy == "no_vaccination")
     res <- sr(f = "2d_v2", 
               list_modify(pars, 
@@ -33,7 +38,11 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   main_metrics(res, pop, vat = 91)
 }
 
-
+if (!all_k){
+  policies <- c("default", "fdf", "hybrid_6")
+} else {
+  policies <- c("default", "fdf", sapply(3:8,function(x) paste0("hybrid_",x)))
+}
 
 # Generate a data frame with all values -----
 
@@ -41,7 +50,7 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
 df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
                       model = scenario_par_nms_2v, 
                       e = c(.4, .5, .6, .7, .8, .9, .95), 
-                      policy = c("default", "fdf", "hybrid")) %>%
+                      policy = policies) %>%
   mutate(data = pmap(list(model, d1, e, policy), 
                      function(x,y,z,a) data.frame(value = model_fdf(x,y,z,a), 
                                                   var = metric_nms))) %>%
@@ -79,9 +88,9 @@ df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
 fig_fdf1 <-rescale_and_bind(list(
   "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, fdf_deltas$d[5], delay_default) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
-  "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas$d2[5], delay_fdf) %>% 
+  "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas$d_fdf[5], delay_fdf) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
-  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d3[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid) %>% 
+  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d_sse_h6[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid_k[,6]) %>% 
                                     list_modify(e1 = .8), f = "2d_v2")
   # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
 ), pop) %>% 
@@ -99,11 +108,12 @@ fig_fdf1 <-rescale_and_bind(list(
 df_gg <- df_fdf %>% 
   filter(e %in% c(.5, .95)) %>% 
   filter(d1 > 40, d1 < 540) %>% 
+  filter(policy %in% c("default", "fdf", "hybrid_6")) %>% 
   # select(d1, model, e, policy, d, harm, i) %>%
   select(d1, model, e, policy, d, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   # mutate(d1 = factor(d1)) %>%
-  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
+  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid_6"), 
                          labels = c("Default (4 wks delay)", 
                                     "FDF (12 wks for all)", 
                                     "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
@@ -130,6 +140,7 @@ fdf_burden <- df_gg %>%
 # Reductions as a function of vaccination speed -----
 fdf_reductions <- df_fdf %>% 
   filter(e %in% c(.5, .95)) %>% 
+  filter(policy %in% c("default", "fdf", "hybrid_6")) %>% 
   # select(d1, model, e, policy, d, harm, i) %>%
   select(d1, model, e, policy, d, i) %>%
   group_by(model, e, policy) %>%
@@ -138,7 +149,7 @@ fdf_reductions <- df_fdf %>%
   filter(d1 > 60, d1 <= 1000) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   # mutate(d1 = factor(d1)) %>%
-  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
+  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid_6"), 
                          labels = c("Default (4 wks delay)", 
                                     "FDF (12 wks for all)", 
                                     "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
@@ -167,6 +178,7 @@ fdf_reductions <- df_fdf %>%
 fig2 <- df_fdf %>% 
   filter(d1 > 40, d1 <= 1000) %>%
   filter(e >= .5) %>%
+  filter(policy %in% c("default", "fdf", "hybrid_6")) %>% 
   select(d1, model, e, policy, d, harm, i) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   group_by(d1, model, e, var) %>% 
@@ -175,7 +187,7 @@ fig2 <- df_fdf %>%
   ) %>%
   mutate(better = ifelse(value_m<=1&value_m>=0.95,1,NA)) %>% 
   mutate(better = factor(better, levels=c(1), labels = c("Less than 5% better"))) %>% 
-  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
+  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid_6"), 
                          labels = c("Default (4 wks delay)", 
                                     "FDF (12 wks for all)", 
                                     "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
@@ -237,13 +249,14 @@ gg_all_burden <- df_gg %>%
 
 df_all_reductions <- df_fdf %>% 
   filter(e %in% c(.5, .8)) %>% 
+  filter(policy %in% c("default", "fdf", "hybrid_6")) %>% 
   select(d1, model, e, policy, d, i) %>%
   group_by(model, e, policy) %>%
   mutate(d = 1- d/d[is.infinite(d1)], i = 1 - i/i[is.infinite(d1)]) %>%
   ungroup() %>%
   filter(d1 > 60, d1 <= 1000) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
-  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid"), 
+  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid_6"), 
                          labels = c("Default (4 wks delay)", 
                                     "FDF (12 wks for all)", 
                                     "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
@@ -281,4 +294,48 @@ fig_sfdf <- ggpubr::ggarrange(
   gg_all_reductions_e8 + ggtitle("Reductions, efficacy = 80%"),
   ncol = 1, heights = c(2, 2),
   common.legend = TRUE)
+
+
+# Comparing all possible hybrid strategies
+if (all_k){
+  fig2.all_k <- df_fdf.all_k %>% 
+    filter(d1 > 40, d1 <= 1000) %>%
+    filter(e >= .5) %>%
+    select(d1, model, e, policy, d, harm, i) %>%
+    gather(var, value, -d1, -model, -e, -policy) %>%
+    group_by(d1, model, e, var) %>% 
+    summarise(value_m = min(value[policy != "default"])/value[policy == "default"], 
+              policy = policy[which.min(value)]
+    ) %>%
+    mutate(better = ifelse(value_m<=1&value_m>=0.95,1,NA)) %>% 
+    mutate(better = factor(better, levels=c(1), labels = c("Less than 5% better"))) %>% 
+    mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid_3","hybrid_4",
+                                              "hybrid_5","hybrid_6","hybrid_7","hybrid_8"),
+                           labels = c("SDF", "FDF", "Hybrid (SDF above 30)","Hybrid (SDF above 40)",
+                                      "Hybrid (SDF above 50)","Hybrid (SDF above 60)","Hybrid (SDF above 70)",
+                                      "Hybrid (SDF above 80)"))) %>%
+    mutate(var = factor(var, levels = c("i", "d", ""),
+                        labels = c("Infections", "Deaths", "Economic harm"))) %>%
+    mutate(delta1 = factor(1/d1,
+                           levels = rev(1/fdf_speeds),
+                           labels = as.percent(rev(1/fdf_speeds)))) %>%
+    mutate(e = factor(e)) %>%
+    mutate(value_m = round(value_m, 2)) %>%
+    filter(var != "Economic harm") %>%
+    ggplot(aes(x = delta1, y = e, fill = policy, alpha=better)) + 
+    geom_tile() +
+    scale_alpha_manual(values = c(0.7,1), name = "",labels=NULL,guide = 'none') +
+    theme(legend.position = "bottom") +
+    facet_grid(var~model) + 
+    ylab("e1 (efficacy following 1st dose)") +
+    theme(axis.text.x = element_text(angle = 45),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+          panel.background = element_blank(), panel.border = element_blank(),text=element_text(size=8)) +
+    xlab(paste0(def_labels, " (1st dose, default policy)"))
+  
+  fig2s.all_k <- fig2.all_k + geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
+  fig2s.all_k
+  
+  fig_folder <- "figures"
+  ggsave("figures/fdf_best_policy_allk.pdf", fig2s.all_k, width = 6.5, height=0.6*6.5)
+}
 

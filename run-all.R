@@ -11,11 +11,10 @@ load("data/default_inputs.Rdata")
 # Main FDF assumptions
 delay_default <- 28 - 10
 delay_fdf <- 84 - 10
-delay_hybrid <- c(rep(delay_fdf, 6), rep(delay_default, 3))
-delay_hybrid_k <- sapply(c(1,2,3,4,5,6,7,8), function(k){
+delay_hybrid_k <- sapply(1:8, function(k){
   c(rep(delay_fdf, k), rep(delay_default, 9-k))
 })
-colnames(delay_hybrid_k) <- c(1,2,3,4,5,6,7,8)
+colnames(delay_hybrid_k) <- 1:8
 all_k <- TRUE
 default_group_seq <- TRUE
 
@@ -61,11 +60,10 @@ source("cases/fdf-prep-delta.R")
 
 if (!all_k) {
   load("results/fdf-deltas.Rdata")
-  source("cases/fdf-results.R")
 } else {
   load("results/fdf-deltas-allk.Rdata")
-  source("cases/fdf-results-allk.R")
 }
+source("cases/fdf-results.R")
 
 source("cases/prep-results.R")
 source("cases/general-example.R")
