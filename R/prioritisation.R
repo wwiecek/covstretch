@@ -89,7 +89,10 @@ apap_2v <- function(pars, len,
       pop.expand <- t1.expand*c((pop*vhes*allocation_vector)[-1],0.0001)
       t1.delta <- pop.expand*len*(1-1/expansion_factor)
       t1 <- t1 - rev(cumsum(rev(t1.delta)))
-    } 
+    }  
+    if ((expand_from<=delay[length(delay)])){
+      t1 <- delay + c(rev(cumsum(rev((len/expansion_factor)*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
+    }
   }
   
   list_modify(pars, 
