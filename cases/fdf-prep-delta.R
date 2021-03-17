@@ -22,7 +22,7 @@ fdf_deltas_raw <- lapply(as.list(fdf_speeds), function(d){
   
   if (!all_k){
     sse_h <- sapply(delta_vals, function(d2){
-      fdf <- sr(apap_2d(pars_fdf_fast, c(rep(d2, 6), rep(d,3)), delay_hybrid), f = "2d_v2") %>% 
+      fdf <- sr(apap_2d(pars_fdf_fast, c(rep(d2, 6), rep(d,3)), delay_hybrid_k[,6]), f = "2d_v2") %>% 
         rescale_rcs(pop, merge = T)
       fdf_v <- fdf[d_start:min(d, 360),"cumV",1]
       sum((fdf_v - bsl_vaccinated)^2)

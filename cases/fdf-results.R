@@ -298,7 +298,7 @@ fig_sfdf <- ggpubr::ggarrange(
 
 # Comparing all possible hybrid strategies
 if (all_k){
-  fig2.all_k <- df_fdf.all_k %>% 
+  fig2.all_k <- df_fdf %>% 
     filter(d1 > 40, d1 <= 1000) %>%
     filter(e >= .5) %>%
     select(d1, model, e, policy, d, harm, i) %>%
@@ -334,8 +334,5 @@ if (all_k){
   
   fig2s.all_k <- fig2.all_k + geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
   fig2s.all_k
-  
-  fig_folder <- "figures"
-  ggsave("figures/fdf_best_policy_allk.pdf", fig2s.all_k, width = 6.5, height=0.6*6.5)
 }
 
