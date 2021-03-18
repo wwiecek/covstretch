@@ -35,7 +35,7 @@ q_sol <- sapply(prop_adults*q_seq, function(Q) {
   # Equality constraints
   eval_g_eq <- function(x)
   {
-    return ( c(sum(x*pop)-Q) )
+    return ( c(sum(c(0,0,x)*pop)-Q) )
   }
   
   # Lower and upper bounds
