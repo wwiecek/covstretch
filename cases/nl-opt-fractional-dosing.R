@@ -1,4 +1,4 @@
-install.packages("nloptr")
+# install.packages("nloptr")
 library(nloptr)
 library(tidyverse)
 source("run-all.R")
@@ -13,7 +13,7 @@ phi_x <- function(x)
   3.49706*sqrt(x) - 1.74853*x  -0.798528
 
 eval_f <- function(v_prop) {
-  e_vector <- sapply(v_prop, phi_x)
+  e_vector <- c(0, 0, sapply(v_prop, phi_x))
   # Pre-vaccinate individuals:
   pars <- list_modify(
     pars_le_fast,
@@ -42,7 +42,7 @@ q_sol <- sapply(prop_adults*q_seq, function(Q) {
   
   # Initial values
   # x0 <- rep(1,7)
-  x0 <- rep(0, 7)
+  x0 <- rep(0.1, 7)
   
   # Set optimization options.
   opts <- list( "algorithm"= "NLOPT_GN_ISRES",
@@ -58,6 +58,7 @@ q_sol <- sapply(prop_adults*q_seq, function(Q) {
                   lb = lb,
                   ub = ub,
                   eval_g_eq = eval_g_eq,
+                  # eval_g_ineq = eval_g_eq,
                   opts = opts
   )
   c(res$objective, res$solution)
