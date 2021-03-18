@@ -27,7 +27,7 @@ eval_f <- function(v_prop) {
     y0 = y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e_vector*c(1,1,v_prop)))
   
   y <- rescale_rcs(sr(pars, "2v_v2"), pop, TRUE)
-  -y[360,outcome,1]
+  y[360,outcome,1]
 }
 
 q_sol <- sapply(prop_adults*q_seq, function(Q) {
