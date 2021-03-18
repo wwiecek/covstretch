@@ -12,21 +12,23 @@ source("run-all.R")
 phi_x <- function(x) 
   3.49706*sqrt(x) - 1.74853*x  -0.798528
 
-eval_f <- function(v_prop) {
-  e_vector <- c(0, 0, sapply(v_prop, phi_x))
-  # Pre-vaccinate individuals:
-  pars <- list_modify(
-    pars_le_fast,
-    y0 = y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e_vector*v_prop))
-  
-  y <- rescale_rcs(sr(pars, "2v_v2"), pop, TRUE)
-  y[360,outcome,1]
-}
+
 
 prop_adults <- sum(pop[3:9])/sum(pop) #for now I ignore children, so Q is scaled down to adult pop
 outcome <- "D"
 # q_seq <- seq(0.1, 1, 0.1)
 q_seq <- c(0.5, 1) #just try two quantities at first
+
+eval_f <- function(v_prop) {
+  e_vector <- c(0, 0, sapply(v_prop, phi_x))
+  # Pre-vaccinate individuals:
+  pars <- list_modify(
+    pars_le_fast,
+    y0 = y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e_vector*c(1,1,v_prop)))
+  
+  y <- rescale_rcs(sr(pars, "2v_v2"), pop, TRUE)
+  -y[360,outcome,1]
+}
 
 q_sol <- sapply(prop_adults*q_seq, function(Q) {
 
@@ -42,7 +44,7 @@ q_sol <- sapply(prop_adults*q_seq, function(Q) {
   
   # Initial values
   # x0 <- rep(1,7)
-  x0 <- rep(0.1, 7)
+  x0 <- rep(0.2, 7)
   
   # Set optimization options.
   opts <- list( "algorithm"= "NLOPT_GN_ISRES",
