@@ -30,26 +30,30 @@ eval_f <- function(v_prop) {
   y[360,outcome,1]
 }
 
+# Choose dimensionality of x here: -----
+n_x <- 2
+x_unroll <- function(x)
+  c(0,0,x[1],x[1],x[1],x[1],x[2],x[2],x[2])
+
+
+
+# Solve for various Q ------
 q_sol <- sapply(prop_adults*q_seq, function(Q) {
 
   # Equality constraints
-  eval_g_eq <- function(x)
-  {
-    return ( c(sum(c(0,0,x)*pop)-Q) )
-  }
+  eval_g_eq <- function(x) c(sum(x_unroll(x)*pop)-Q)
   
   # Lower and upper bounds
-  lb <- rep(0,7)
-  ub <- rep(1,7)
+  lb <- rep(0,n_x)
+  ub <- rep(1,n_x)
   
   # Initial values
-  # x0 <- rep(1,7)
-  x0 <- rep(0.25, 7)
+  x0 <- rep(0, n_x)
   
   # Set optimization options.
   opts <- list( "algorithm"= "NLOPT_GN_ISRES",
                 "xtol_rel"= 1.0e-4,
-                "maxeval"= 1e04,
+                "maxeval"= 1e03,
                 "local_opts" = list( "algorithm" = "NLOPT_LN_NELDERMEAD", 
                                      "xtol_rel" = 1.0e-4 ),
                 "print_level" = 0 )
@@ -76,7 +80,7 @@ apply(pop[3:9]*q_sol[-1,], 2, sum)
 
 
 as.data.frame(q_sol[-1,]) %>% 
-  mutate(age = 1:7) %>% 
+  mutate(age = 1:n_x) %>% 
   gather(var, val, -age) %>% 
   mutate(age = factor(age)) %>% 
   ggplot(aes(color=age,y=val,x=var, group=age)) + 
