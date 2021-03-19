@@ -21,7 +21,7 @@ All strategies are compared according to the final number of infections and deat
 
 ## Setup
 
-All results can be replicated through the [run-all.R](run-all.R) script.
+All results can be replicated through the [run-all-cases.R](run-all-cases.R) script.
 
 The main scripts called are, in order: 
 
@@ -35,7 +35,7 @@ The main scripts called are, in order:
 * **[kappa-impact.R](cases/kappa-impact.R)**: Estimates the model allowing for loss of immunity for those vaccinated at a given rate and compares the results with the case without loss of immunity.
 * **[generate-figures.R](cases/generate-figures.R)**: Plots the results of the previous scripts.
 
-Three variables from [run-all.R](run-all.R) deserve special attention.
+Three variables from preparation script [project-setup.R](project-setup.R) deserve special attention.
 
 First, the vector `pop` stores the demographic distribution according to age group used in the simulations. The default case uses values compatible with high-income countries.
 
