@@ -1,3 +1,4 @@
+source("project-setup.R")
 
 source("cases/fdf-prep-delta.R")
 
