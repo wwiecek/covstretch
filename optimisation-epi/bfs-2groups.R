@@ -139,3 +139,6 @@ res_dynamic %>%
   facet_wrap(~variable) +
   xlab("Dosing in 20-60 year olds (1 is full dose)") +
   ylab("Dosing in 60+ year olds (1 is full dose)")
+
+
+save(res_static, res_dynamic, df_fd_dynamic, file = "results/explore-2groups.Rdata")
