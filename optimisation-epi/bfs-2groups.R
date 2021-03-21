@@ -7,15 +7,15 @@ colnames(brute_force_inc_vectors) <- paste0("age", 1:9)
 
 phi_x <- function(x) 
   sapply(3.49706*sqrt(x) - 1.74853*x  -0.798528, function(y) max(y,0))
-  # 3.49706*sqrt(x) - 1.74853*x  -0.798528
+# 3.49706*sqrt(x) - 1.74853*x  -0.798528
 
 model_fd_dynamic <- function(model, d1, fd, default_e1 = 0.95, 
-                               rm = FALSE,
-                               homogen = FALSE) {
-
-    e1 <- phi_x(fd)
-    pars <- apap_2v(grab_2v_parms(model), fractional_dose = fd, len = d1)
-    pars <- list_modify(pars, e1 = e1)
+                             rm = FALSE,
+                             homogen = FALSE) {
+  
+  e1 <- phi_x(fd)
+  pars <- apap_2v(grab_2v_parms(model), fractional_dose = fd, len = d1)
+  pars <- list_modify(pars, e1 = e1)
   if(homogen){
     pars$contacts <- 1/Ngroups + 0*pars$contacts
     pars$q <- ev*pars$q
@@ -34,7 +34,7 @@ df_fd_dynamic <- expand.grid(model = scenario_par_nms_2v[3],
                              fd_v = 1:nrow(brute_force_inc_vectors)) %>%
   mutate(data = pmap(list(model, d1, fd_v,homogeneous), 
                      function(x,y,z,h) data.frame(value = model_fd_dynamic(x,y,brute_force_inc_vectors[z,], homogen=h), 
-                                                    var = metric_nms))) %>%
+                                                  var = metric_nms))) %>%
   unnest(data) %>%
   spread(var, value) %>%
   mutate(model = factor(model, levels = scenario_par_nms_2v,
@@ -49,7 +49,7 @@ res_dynamic <- cbind(df_fd_dynamic, brute_force_inc_vectors[df_fd_dynamic$fd_v,]
   group_by(model, d1,variable,homogeneous) %>%
   slice_min(value) %>%
   arrange(homogeneous)
-  # summarise(optimal_v = paste(age3[which.min(value)], age9[which.min(value)]))
+# summarise(optimal_v = paste(age3[which.min(value)], age9[which.min(value)]))
 res_dynamic %>%
   filter(d1 %in% c(1000,400,200,100,50))
 
@@ -120,14 +120,14 @@ res_static <- rbind(
 
 
 rbind(
-res_static %>% rename(d1 = Q) %>% mutate(model_type = "static") %>% mutate(d1 = paste("Q =", d1)),
-res_dynamic %>%
-  # mutate(optimal = paste(format(age3, nsmall=2), format(age9, nsmall=2))) %>%
-  ungroup() %>%
-  mutate(model_type = "dynamic") %>%
-  # filter(d1 %in% c(100,200,400)) %>%
-  mutate(d1 = paste("d1 =", d1)) %>%
-  select(-model, -value)
+  res_static %>% rename(d1 = Q) %>% mutate(model_type = "static") %>% mutate(d1 = paste("Q =", d1)),
+  res_dynamic %>%
+    # mutate(optimal = paste(format(age3, nsmall=2), format(age9, nsmall=2))) %>%
+    ungroup() %>%
+    mutate(model_type = "dynamic") %>%
+    # filter(d1 %in% c(100,200,400)) %>%
+    mutate(d1 = paste("d1 =", d1)) %>%
+    select(-model, -value)
 ) %>%
   mutate(variable = factor(variable, levels = c("i", "d", "harm"),
                            labels = c("Infections", "Deaths", "Economic harm"))) %>%
