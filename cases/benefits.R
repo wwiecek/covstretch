@@ -51,11 +51,11 @@ contribution <- sapply(1:9, function(i) {
   0.5*sum(risk_age_i*atrisk*pop)/normalising_f_i + 0.5*sum(risk_age_d*atrisk*pop)/normalising_f_d 
 })
 
-rbind("Group size" = pop,
-      "Infection risk q" = risk_age_i,
-      "Fatality risk r" = risk_age_d,
-      "Total contributon" = contribution) %>% 
-  as.data.frame() %>% setNames(colnames(pbc_spread)) %>% print(digits = 2)
+# rbind("Group size" = pop,
+#       "Infection risk q" = risk_age_i,
+#       "Fatality risk r" = risk_age_d,
+#       "Total contributon" = contribution) %>% 
+#   as.data.frame() %>% setNames(colnames(pbc_spread)) %>% print(digits = 2)
 
 
 

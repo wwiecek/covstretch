@@ -21,11 +21,11 @@ All strategies are compared according to the final number of infections and deat
 
 ## Setup
 
-All results can be replicated through the [run-all.R](run-all.R) script.
+All results can be replicated through the [run-all-cases.R](run-all-cases.R) script.
 
 The main scripts called are, in order: 
 
-* **[setup.R](setup.R)**: Loads epidemiological models (ordinary differential equations implemented with odin), auxiliary functions, and initialize parameters.
+* **[R/setup.R](R/setup.R)**: Loads epidemiological models (ordinary differential equations implemented with odin), auxiliary functions, and initialize parameters.
 * **[fdf-prep-delta.R](cases/fdf-prep-delta.R)**: Calibrates the vaccination speed in the first-dose-first scenario to match the total number of doses from baseline.
 * **[fdf-results.R](cases/fdf-results.R)**: Estimates the model for the first-doses-first and a hybrid strategy and compares the results with baseline (article section 7).
 * **[prep-results.R](cases/prep-results.R)**: Estimates the model using the baseline strategy for different vaccination rates and vaccine efficacies
@@ -35,7 +35,7 @@ The main scripts called are, in order:
 * **[kappa-impact.R](cases/kappa-impact.R)**: Estimates the model allowing for loss of immunity for those vaccinated at a given rate and compares the results with the case without loss of immunity.
 * **[generate-figures.R](cases/generate-figures.R)**: Plots the results of the previous scripts.
 
-Three variables from [run-all.R](run-all.R) deserve special attention.
+Three variables from preparation script [project-setup.R](project-setup.R) deserve special attention.
 
 First, the vector `pop` stores the demographic distribution according to age group used in the simulations. The default case uses values compatible with high-income countries.
 

@@ -119,7 +119,11 @@ tthi <- function(sr, pop, th=.5, r=FALSE) {
   im <- y[, "P1", 1] + y[, "P2", 1]
   if(r)
     im <- im + y[, "R", 1]
-  min(which(im > th))
+  x <- im > th
+  if(any(x))
+    return(min(which(x)))
+  else
+    return(Inf)
 }
 
 # Benefit
