@@ -25,7 +25,7 @@ All results can be replicated through the [run-all-cases.R](run-all-cases.R) scr
 
 The main scripts called are, in order: 
 
-* **[setup.R](setup.R)**: Loads epidemiological models (ordinary differential equations implemented with odin), auxiliary functions, and initialize parameters.
+* **[R/setup.R](R/setup.R)**: Loads epidemiological models (ordinary differential equations implemented with odin), auxiliary functions, and initialize parameters.
 * **[fdf-prep-delta.R](cases/fdf-prep-delta.R)**: Calibrates the vaccination speed in the first-dose-first scenario to match the total number of doses from baseline.
 * **[fdf-results.R](cases/fdf-results.R)**: Estimates the model for the first-doses-first and a hybrid strategy and compares the results with baseline (article section 7).
 * **[prep-results.R](cases/prep-results.R)**: Estimates the model using the baseline strategy for different vaccination rates and vaccine efficacies
