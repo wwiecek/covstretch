@@ -52,7 +52,7 @@ for (d in country_case){
     pop <- lic_pop/sum(lic_pop)
   }
   
-  source("setup.R")
+  source("R/setup.R")
   
   source("cases/fdf-prep-delta.R")
   source("cases/fdf-results.R")
