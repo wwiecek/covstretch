@@ -169,3 +169,4 @@ rbind(
 
 # save(res_static, res_dynamic, df_fd_dynamic, file = paste0("results/opt-bfs", n_x, ".Rdata"))
 save.image(file = paste0("results/opt-bfs", n_x, "-all.Rdata"))
+save(res_static, res_dynamic, file = paste0("results/opt-bfs-result", n_x, ".Rdata"))
