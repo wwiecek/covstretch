@@ -1,9 +1,9 @@
 source("project-setup.R")
 
 # Set up N groups and search grid -----
-n_x <- 3
+n_x <- 5
 search_grid_dynamic <- seq(0.1, 1, 0.1)
-unroll_x <- function(x,sub=1) c(sub,sub,x[1],x[1],x[2],x[2],x[3],x[3],x[3])
+unroll_x <- function(x,sub=1) c(sub,sub,x[1],x[2],x[3],x[4],x[5],x[5],x[5])
 d1_opt <- c(1000,400,200,100,50) #dynamic model speeds
 # d1_opt <- c(1000,750,500,400,300,200,133,100,50,25) #dynamic model speeds
 
@@ -70,6 +70,8 @@ res_dynamic <- rbind(
   arrange(homogeneous) %>%
   ungroup()
 
+save.image(file = "results/partial-bfs-result5.Rdata")
+
 res_dynamic %>%
   filter(d1 %in% c(1000,400,200,100,50)) %>%
   arrange(model, homogeneous, variable, d1) %>%
@@ -102,7 +104,7 @@ cbind(df_fd_dynamic, brute_force_inc_vectors[df_fd_dynamic$fd_v,]) %>%
 prop_young <- sum(pop[1:2])
 prop_old <- sum(pop[7:9])
 prop_work <- 1-prop_old-prop_young
-search_grid_static <- seq(0.1, 1, 0.025)
+search_grid_static <- seq(0.1, 1, 0.1)
 
 k_s <- lapply(as.list(1:n_x), function(i) search_grid_static)
 names(k_s) <- paste0("x", 1:n_x)
@@ -126,6 +128,7 @@ model_fractional_static <- function(v_prop, rm = FALSE, homogen = FALSE) {
     pars$contacts <- 1/Ngroups + 0*pars$contacts
     pars$q <- ev*pars$q
   }
+  # We do not update e1, because there is no vaccination past t=0 
   y <- sr(pars, "2v_v2")
   main_metrics(y, pop)[1:2]
 }
@@ -140,10 +143,11 @@ res_static <- rbind(
   df_fd_static %>% group_by(q, homogeneous) %>% slice_min(d) %>% mutate(variable = "d") %>% select(-i, -d)
 )
 
+save.image(file = "results/partial-bfs-result5-static.Rdata")
 
 # Visualise optimal solutions -----
 rbind(
-  res_static %>% rename(d1 = Q) %>% mutate(model_type = "static") %>% mutate(d1 = paste("Q =", d1)),
+  res_static %>% rename(d1 = q) %>% mutate(model_type = "static") %>% mutate(d1 = paste("Q =", d1)),
   res_dynamic %>%
     # mutate(optimal = paste(format(age3, nsmall=2), format(age9, nsmall=2))) %>%
     ungroup() %>%
@@ -158,9 +162,9 @@ rbind(
   filter(agegr != "[0,10)") %>%
   filter(agegr != "[10,20)") %>%
   mutate(homogeneous = factor(homogeneous)) %>%
-  ggplot(aes(x = agegr, y= value, group = interaction(homogeneous, d1), color = homogeneous)) + 
+  ggplot(aes(x = agegr, y= value, group = interaction(homogeneous, d1), lty = homogeneous, color = homogeneous)) + 
   facet_grid(model_type ~ variable) +
-  geom_line()
+  geom_line(size = 1.5)
 
 
 # save(res_static, res_dynamic, df_fd_dynamic, file = paste0("results/opt-bfs", n_x, ".Rdata"))
