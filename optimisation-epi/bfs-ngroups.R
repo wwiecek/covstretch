@@ -15,28 +15,7 @@ brute_force_inc_vectors <- t(apply(w, 1, unroll_x)) %>% unique()
 colnames(brute_force_inc_vectors) <- paste0("age", 1:9)
 
 
-# Define the dose-response function -----
-phi_x <- function(x) 
-  # 3.49706*sqrt(x) - 1.74853*x  -0.798528
-  # sapply(3.49706*sqrt(x) - 1.74853*x  -0.798528, function(y) max(y,0))
-  -25.31701*x^1.037524 + 1.037524*25.31701*x
-
-
-# Define objective functions (static and dynamic cases) ------
-model_fd_dynamic <- function(model, d1, fd, default_e1 = 0.95, 
-                             rm = FALSE,
-                             homogen = FALSE) {
-  e1 <- phi_x(fd)
-  pars <- apap_2v(grab_2v_parms(model), fractional_dose = fd, len = d1)
-  pars <- list_modify(pars, e1 = e1)
-  if(homogen){
-    pars$contacts <- 1/Ngroups + 0*pars$contacts
-    pars$q <- ev*pars$q
-  }
-  y <- sr(pars, "2v_v2")
-  if(rm) return(y)
-  main_metrics(y, pop)
-}
+source("optimisation-epi/objective-functions.R")
 
 
 # Simulations for the dynamic problem -----
@@ -119,22 +98,8 @@ qm <- t(apply(brute_force_inc_vectors_s, 1, function(x) {
 })) %>% unique()
 q <- round(apply(qm, 1, function(x) sum(x*pop)), 3)
 
-model_fractional_static <- function(v_prop, rm = FALSE, homogen = FALSE) {
-  e_vector <- phi_x(v_prop)
-  pars <- list_modify(
-    pars_le_fast,
-    y0 = y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e_vector))
-  if(homogen){
-    pars$contacts <- 1/Ngroups + 0*pars$contacts
-    pars$q <- ev*pars$q
-  }
-  # We do not update e1, because there is no vaccination past t=0 
-  y <- sr(pars, "2v_v2")
-  main_metrics(y, pop)[1:2]
-}
-
-df_fd_static_h0 <- cbind(q, qm, t(apply(qm, 1, function(x) model_fractional_static(x, homogen = FALSE))))
-df_fd_static_h1 <- cbind(q, qm, t(apply(qm, 1, function(x) model_fractional_static(x, homogen = TRUE))))
+df_fd_static_h0 <- cbind(q, qm, t(apply(qm, 1, function(x) model_fd_static(x, homogen = FALSE))))
+df_fd_static_h1 <- cbind(q, qm, t(apply(qm, 1, function(x) model_fd_static(x, homogen = TRUE))))
 df_fd_static <- rbind(as.data.frame(df_fd_static_h0) %>% mutate(homogeneous = 0),
                       as.data.frame(df_fd_static_h1) %>% mutate(homogeneous = 1))
 
