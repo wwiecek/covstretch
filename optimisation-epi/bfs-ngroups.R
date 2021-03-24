@@ -166,6 +166,32 @@ rbind(
   facet_grid(model_type ~ variable) +
   geom_line(size = 1.5)
 
+# Table (for deaths only):
+
+tab <- res_static %>% rename(d1 = q) %>% 
+  mutate(d1 = paste("Q =", d1)) %>%
+  filter(variable == "d") %>% select(-variable) %>%
+  gather(agegr, value, -d1, -homogeneous, -model_type) 
+
+
+tab %>% filter(homogeneous == 0) %>% select(-homogeneous, -model_type) %>% spread(d1, value)
+tab %>% filter(homogeneous == 1) %>% select(-homogeneous, -model_type) %>% spread(d1, value)
+
+
+tab <- res_dynamic %>%
+  # mutate(optimal = paste(format(age3, nsmall=2), format(age9, nsmall=2))) %>%
+  ungroup() %>%
+  mutate(model_type = "dynamic") %>%
+  # filter(d1 %in% c(100,200,400)) %>%
+  mutate(d1 = factor(d1, levels = c(1000,400,200,100,50),
+                     labels = paste("d1 =", c(1000,400,200,100,50)))) %>%
+  # mutate(d1 = paste("d1 =", factor(d1, levels = c(1000,400,200,100,50)))) %>%
+  select(-model, -value) %>%
+  filter(variable == "d") %>% select(-variable) %>%
+  gather(agegr, value, -d1, -homogeneous, -model_type) 
+tab %>% filter(homogeneous == 0) %>% select(-homogeneous, -model_type) %>% spread(d1, value)
+tab %>% filter(homogeneous == 1) %>% select(-homogeneous, -model_type) %>% spread(d1, value)
+
 
 # save(res_static, res_dynamic, df_fd_dynamic, file = paste0("results/opt-bfs", n_x, ".Rdata"))
 save.image(file = paste0("results/opt-bfs", n_x, "-all.Rdata"))
