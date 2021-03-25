@@ -24,6 +24,7 @@ model_fd_dynamic <- function(model, d1, fd, default_e1 = 0.95,
   if(ret == 0)
     return(main_metrics(y, pop))
   if(ret == 1)
+    y <- rescale_rcs(y, pop, TRUE)
     return(y[360,outcome,1])
 }
 
@@ -43,6 +44,7 @@ model_fd_static <- function(v_prop, rm = FALSE, homogen = FALSE,
   if(ret == 0)
     return(main_metrics(y, pop)[1:2])
   if(ret == 1)
+    y <- rescale_rcs(y, pop, TRUE)
     return(y[360,outcome,1])
   
 }
