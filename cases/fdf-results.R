@@ -9,8 +9,8 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
   dfdf <- as.numeric(fdf_deltas$d_fdf[fdf_deltas$d == d1])
   
   if (grepl("[0-9]",policy)){
-    bottom <- substr(policy,8,8)
-    dh <- as.numeric(fdf_deltas[fdf_deltas$d == d1,paste0("d_sse_h",bottom)])
+    k <- substr(policy,8,8)
+    dh <- as.numeric(fdf_deltas[fdf_deltas$d == d1,paste0("d_sse_h",k)])
   }
   
   if(is.infinite(d1)){
@@ -25,7 +25,7 @@ model_fdf <- function(model, d1, e, policy, comp = c("cumI", "D")) {
                                     dfdf, delay_fdf))
   if (grepl("[0-9]",policy)){
     res <- sr(f = "2d_v2",  apap_2d(list_modify(pars, e1 = e, e2 = .95),
-                                    dh, delay_hybrid_k[,as.integer(bottom)]))
+                                    c(rep(dh,as.integer(k)),rep(d1,9-as.integer(k))), delay_hybrid_k[,as.integer(k)]))
   }  
   if(is.infinite(d1) || policy == "no_vaccination")
     res <- sr(f = "2d_v2", 
@@ -59,8 +59,6 @@ df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
   mutate(model = factor(model, levels = scenario_par_nms_2v,
                         labels = scenario_nms_2v)) %>%
   group_by(d1, model, e, policy)
-
-
 
 
 # Total doses used: illustration -----
@@ -335,4 +333,3 @@ if (all_k){
   fig2s.all_k <- fig2.all_k + geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
   fig2s.all_k
 }
-
