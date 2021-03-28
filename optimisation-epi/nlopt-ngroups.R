@@ -6,14 +6,14 @@ source("project-setup.R")
 source("optimisation-epi/objective-functions.R")
 
 prop_adults <- sum(pop[3:9])/sum(pop) #for now I ignore children, so Q is scaled down to adult pop
-outcome_nlopt <- "cumI"
+outcome_nlopt <- "D"
 q_seq <- c(0.1, 0.25, 0.5, 0.75, 1) #just try two quantities at first
 
 
 # Choose dimensionality of x here: -----
-n_x <- 5
+n_x <- 7
 unroll_x <- function(x, sub=1) #set sub to 0 for static model where no doses go to children
-  c(sub,sub,x[1],x[2],x[3],x[4],x[5],x[5],x[5])
+  c(sub,sub,x[1],x[2],x[3],x[4],x[5],x[6],x[7])
 
 
 # Solve for various Q's (static) or deltas (dynamic) ------
@@ -38,8 +38,8 @@ opt_problem <- function(q_seq,h=FALSE, static = TRUE){
     # Equality constraints
     if(static)
       #GROUP NUMBER - Need to change this constraint according to the number of groups
-      eval_g_ineq <- function(x) c(x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[5]*pop[8]+x[5]*pop[9]-Q,
-                                   -x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[5]*pop[8]-x[5]*pop[9]+Q)
+      eval_g_ineq <- function(x) c(x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-Q,
+                                   -x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+Q)
     else
       eval_g_ineq <- NULL
     
@@ -80,11 +80,15 @@ opt_problem <- function(q_seq,h=FALSE, static = TRUE){
 
 nl_q_seq <- seq(0.1, 0.7, 0.1)#Variance analysis are unnecessary since the solution only changes with the initial values
 nl_d_seq <- c(1000,400,200,100,50)
+ptm <- proc.time()
 nlopt_s0 <- opt_problem(nl_q_seq, 0)
+proc.time() - ptm
 nlopt_s1 <- opt_problem(nl_q_seq, 1)
+ptm <- proc.time()
 nlopt_d0 <- opt_problem(nl_d_seq, 0, static = F)
+proc.time() - ptm
 nlopt_d1 <- opt_problem(nl_d_seq, 1, static = F)
 
 #save(nl_q_seq, nlopt_s0, file = "results/wip-nl-solutions5-s-h0-D.Rdata")
 save(nl_q_seq, nl_d_seq,
-     nlopt_s0, nlopt_s1, nlopt_d0, nlopt_d1, file = "results/wip-nl-solutions5-I.Rdata")
+     nlopt_s0, nlopt_s1, nlopt_d0, nlopt_d1, file = "results/wip-nl-solutions7-D.Rdata")

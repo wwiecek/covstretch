@@ -1,22 +1,33 @@
 source("project-setup.R")
 
 # Set up N groups and search grid -----
-n_x <- 5
+n_x <- 7
 search_grid_dynamic <- seq(0.1, 1, 0.1)
-unroll_x <- function(x,sub=1) c(sub,sub,x[1],x[2],x[3],x[4],x[5],x[5],x[5])
+unroll_x <- function(x,sub=1) c(sub,sub,x[1],x[2],x[3],x[4],x[5],x[6],x[7])
 d1_opt <- c(1000,400,200,100,50) #dynamic model speeds
 # d1_opt <- c(1000,750,500,400,300,200,133,100,50,25) #dynamic model speeds
 
-# Generate all vectors to search over -----
-k <- lapply(as.list(1:n_x), function(i) search_grid_dynamic)
-names(k) <- paste0("x", 1:n_x)
-w <- do.call(expand.grid, k)
-brute_force_inc_vectors <- t(apply(w, 1, unroll_x)) %>% unique()
-colnames(brute_force_inc_vectors) <- paste0("age", 1:9)
-
-
 source("optimisation-epi/objective-functions.R")
 
+# Generate all vectors to search over -----
+# k <- lapply(as.list(1:n_x), function(i) search_grid_dynamic)
+# names(k) <- paste0("x", 1:n_x)
+# w <- do.call(expand.grid, k)
+# brute_force_inc_vectors <- t(apply(w, 1, unroll_x)) %>% unique()
+# colnames(brute_force_inc_vectors) <- paste0("age", 1:9)
+
+#Test based on optimal solutions from nlopt
+load("results/wip-nl-solutions7-D.Rdata")
+test.grid <- t(nlopt_d0[2:8,])
+test.grid <- rbind(test.grid,t(nlopt_d1[2:8,]))
+load("results/wip-nl-solutions7-I.Rdata")
+test.grid <- rbind(test.grid,t(nlopt_d0[2:8,]))
+test.grid <- rbind(test.grid,t(nlopt_d1[2:8,]))
+test.grid <- rbind(ceiling(test.grid*10)/10,floor(test.grid*10)/10)
+test.grid <- rbind(test.grid,t(sapply(1:100,function(X) runif(n=7))))
+test.grid[test.grid==0] <- 0.1
+brute_force_inc_vectors <- t(apply(test.grid, 1, unroll_x)) %>% unique()
+colnames(brute_force_inc_vectors) <- paste0("age", 1:9)
 
 # Simulations for the dynamic problem -----
 df_fd_dynamic <- expand.grid(model = "pars_le_fast",
@@ -31,7 +42,6 @@ df_fd_dynamic <- expand.grid(model = "pars_le_fast",
   spread(var, value) %>%
   mutate(model = factor(model, levels = scenario_par_nms_2v,
                         labels = scenario_nms_2v)) 
-
 
 
 res_dynamic <- rbind(
@@ -49,7 +59,7 @@ res_dynamic <- rbind(
   arrange(homogeneous) %>%
   ungroup()
 
-save.image(file = "results/partial-bfs-result5.Rdata")
+#save.image(file = "results/partial-bfs-result5.Rdata")
 
 res_dynamic %>%
   filter(d1 %in% c(1000,400,200,100,50)) %>%
@@ -85,11 +95,25 @@ prop_old <- sum(pop[7:9])
 prop_work <- 1-prop_old-prop_young
 search_grid_static <- seq(0.1, 1, 0.1)
 
-k_s <- lapply(as.list(1:n_x), function(i) search_grid_static)
-names(k_s) <- paste0("x", 1:n_x)
-w_s <- do.call(expand.grid, k_s)
-brute_force_inc_vectors_s <- t(apply(w_s, 1, unroll_x, sub = 0)) %>% unique()
+# k_s <- lapply(as.list(1:n_x), function(i) search_grid_static)
+# names(k_s) <- paste0("x", 1:n_x)
+# w_s <- do.call(expand.grid, k_s)
+# brute_force_inc_vectors_s <- t(apply(w_s, 1, unroll_x, sub = 0)) %>% unique()
+# colnames(brute_force_inc_vectors_s) <- paste0("age", 1:9)
+
+#Test based on optimal solutions from nlopt
+load("results/wip-nl-solutions7-D.Rdata")
+test.grid <- t(nlopt_s0[2:8,])
+test.grid <- rbind(test.grid,t(nlopt_s1[2:8,]))
+load("results/wip-nl-solutions7-I.Rdata")
+test.grid <- rbind(test.grid,t(nlopt_s0[2:8,]))
+test.grid <- rbind(test.grid,t(nlopt_s1[2:8,]))
+test.grid <- rbind(ceiling(test.grid*10)/10,floor(test.grid*10)/10)
+test.grid <- rbind(test.grid,t(sapply(1:100,function(X) runif(n=7))))
+test.grid[test.grid==0] <- 0.1
+brute_force_inc_vectors_s <- t(apply(test.grid, 1, unroll_x, sub = 0)) %>% unique()
 colnames(brute_force_inc_vectors_s) <- paste0("age", 1:9)
+
 qm <- t(apply(brute_force_inc_vectors_s, 1, function(x) {
   # Find the closest Q on the list:
   q <- sum(x*pop)
@@ -108,7 +132,7 @@ res_static <- rbind(
   df_fd_static %>% group_by(q, homogeneous) %>% slice_min(d) %>% mutate(variable = "d") %>% select(-i, -d)
 )
 
-save.image(file = "results/partial-bfs-result5-static.Rdata")
+#save.image(file = "results/partial-bfs-result5-static.Rdata")
 
 # Visualise optimal solutions -----
 rbind(
