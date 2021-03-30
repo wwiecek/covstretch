@@ -92,4 +92,3 @@ nlopt_d1 <- opt_problem(nl_d_seq, 1, static = F)
 #save(nl_q_seq, nlopt_s0, file = "results/wip-nl-solutions5-s-h0-D.Rdata")
 save(nl_q_seq, nl_d_seq,
      nlopt_s0, nlopt_s1, nlopt_d0, nlopt_d1, file = "results/wip-nl-solutions7-D.Rdata")
-load(file = "results/wip-nl-solutions7-D.Rdata")
