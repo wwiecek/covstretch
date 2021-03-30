@@ -26,4 +26,4 @@ ggsave(paste0(fig_folder, "/delay_impact.pdf"), fig_delay, width = width, height
 ggsave(paste0(fig_folder, "/supply_impact.pdf"), fig_extra_supply, width = width, height=3.4/5.55*width)
 
 if (all_k)
-  ggsave("figures/fdf_best_policy_allk.pdf", fig2s.all_k, width = width, height=0.6*width)
+  ggsave("figures/fdf_best_policy_allk.pdf", fig2.all_k, width = width, height=0.6*width)
