@@ -49,7 +49,7 @@ opt_problem <- function(q_seq,h=FALSE, static = TRUE){
     # Initial values
     if(static){
       lb <- rep(0,n_x)
-      x0 <- rep(0.01, n_x)
+      x0 <- rep(0.5, n_x)
     } else {
       lb <- rep(0.01,n_x)
       x0 <- rep(0.01, n_x)
