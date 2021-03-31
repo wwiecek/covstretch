@@ -306,12 +306,12 @@ if (all_k){
               policy = policy[which.min(value)]
     ) %>%
     mutate(better = ifelse(value_m<=1&value_m>=0.95,1,NA)) %>% 
-    mutate(better = factor(better, levels=c(1), labels = c("Less than 5% better"))) %>% 
-    mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid_3","hybrid_4",
-                                              "hybrid_5","hybrid_6","hybrid_7","hybrid_8"),
-                           labels = c("SDF", "FDF", "Hybrid (SDF above 30)","Hybrid (SDF above 40)",
-                                      "Hybrid (SDF above 50)","Hybrid (SDF above 60)","Hybrid (SDF above 70)",
-                                      "Hybrid (SDF above 80)"))) %>%
+    # mutate(better = factor(better, levels=c(1), labels = c("Less than 5% better"))) %>% 
+    mutate(policy = factor(policy, levels = c("fdf", "hybrid_8","hybrid_7",
+                                              "hybrid_6","hybrid_5","hybrid_4","hybrid_3", "default"),
+                           labels = c("FDF for all", "FDF under 80","FDF under 70",
+                                      "FDF under 60","FDF under 50","FDF under 40",
+                                      "FDF under 30", "SDF"))) %>%
     mutate(var = factor(var, levels = c("i", "d", ""),
                         labels = c("Infections", "Deaths", "Economic harm"))) %>%
     mutate(delta1 = factor(1/d1,
@@ -320,16 +320,18 @@ if (all_k){
     mutate(e = factor(e)) %>%
     mutate(value_m = round(value_m, 2)) %>%
     filter(var != "Economic harm") %>%
-    ggplot(aes(x = delta1, y = e, fill = policy, alpha=better)) + 
+    ggplot(aes(x = delta1, y = e, fill = policy)) + #, alpha=better)) + 
     geom_tile() +
-    scale_alpha_manual(values = c(0.7,1), name = "",labels=NULL,guide = 'none') +
-    theme(legend.position = "bottom") +
+    # scale_alpha_manual(values = c(0.7,1), name = "",labels=NULL,guide = 'none') +
     facet_grid(var~model) + 
     ylab("e1 (efficacy following 1st dose)") +
-    theme(axis.text.x = element_text(angle = 45),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+    theme(legend.position = "bottom",
+          axis.text.x = element_text(angle = 45),
+          panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
           panel.background = element_blank(), panel.border = element_blank(),text=element_text(size=8)) +
-    xlab(paste0(def_labels, " (1st dose, default policy)"))
-  
-  fig2s.all_k <- fig2.all_k + geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
-  fig2s.all_k
+    # scale_fill_viridis_d(option = "magma") +
+    scale_fill_viridis_d(end = 0.7) +
+    xlab(paste0(def_labels, " (1st dose, default policy)")) + 
+    geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
+  fig2.all_k
 }
