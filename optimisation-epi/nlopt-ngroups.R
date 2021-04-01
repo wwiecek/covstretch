@@ -105,9 +105,8 @@ table_s0_lic["Infection Fatality Rate"] = ifr_lic[3:9]
 table_s0_lic <- table_s0_lic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
 print(xtable(table_s0_lic, digits=4), include.rownames=FALSE)
 
-table_s0_lic <- rbind(table_s0_lic,c('res_nlopt',1,1,round(rev(as.numeric(nlopt_s0[1,])),8)))
-
 #Comparison with non-epi results----
+# table_s0_lic <- rbind(table_s0_lic,c('res_nlopt',1,1,round(rev(as.numeric(nlopt_s0[1,])),8)))
 # test_res <- function(x) model_fd_static(unroll_x(x,sub=0), 
 #                                       homogen = 0, 
 #                                       outcome = 'D',
