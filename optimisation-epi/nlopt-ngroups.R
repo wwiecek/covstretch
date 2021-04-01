@@ -1,6 +1,7 @@
 # install.packages("nloptr")
 library(nloptr)
 library(tidyverse)
+library(xtable)
 source("project-setup.R")
 
 source("optimisation-epi/objective-functions.R")
@@ -78,17 +79,66 @@ opt_problem <- function(q_seq,h=FALSE, static = TRUE){
   sol
 }
 
-nl_q_seq <- seq(0.1, 0.7, 0.1)#Variance analysis are unnecessary since the solution only changes with the initial values
+nl_q_seq <- seq(0.1, 1, 0.1)#Variance analysis are unnecessary since the solution only changes with the initial values
 nl_d_seq <- c(1000,400,200,100,50)
-ptm <- proc.time()
-nlopt_s0 <- opt_problem(nl_q_seq, 0)
-proc.time() - ptm
-nlopt_s1 <- opt_problem(nl_q_seq, 1)
-ptm <- proc.time()
-nlopt_d0 <- opt_problem(nl_d_seq, 0, static = F)
-proc.time() - ptm
-nlopt_d1 <- opt_problem(nl_d_seq, 1, static = F)
+#Q is adjusted in the next lines to match the percentage of adults (comparison with non-epi results), to change this remove prop_adults
+nlopt_s0 <- opt_problem(nl_q_seq*prop_adults, 0)
+nlopt_s1 <- opt_problem(nl_q_seq*prop_adults, 1)
+#nlopt_d0 <- opt_problem(nl_d_seq, 0, static = F)
+#nlopt_d1 <- opt_problem(nl_d_seq, 1, static = F)
 
 #save(nl_q_seq, nlopt_s0, file = "results/wip-nl-solutions5-s-h0-D.Rdata")
-save(nl_q_seq, nl_d_seq,
-     nlopt_s0, nlopt_s1, nlopt_d0, nlopt_d1, file = "results/wip-nl-solutions7-D.Rdata")
+save(nl_q_seq, nlopt_s0, nlopt_s1, file = "results/nlopt/wip-nl-solutions7-s-D-hic.Rdata")
+#save(nl_q_seq, nl_d_seq,
+#     nlopt_s0, nlopt_s1, nlopt_d0, nlopt_d1, file = "results/nlopt/wip-nl-solutions7-D-lic.Rdata")
+
+
+#Generating tables for report
+#LIC
+prop_adults_lic <- sum(lic_pop[3:9])/sum(lic_pop)
+load("results/nlopt/wip-nl-solutions7-s-D-lic.Rdata")
+table_s0_lic<-data.frame(nlopt_s0[2:8,as.character(rev(nl_q_seq*prop_adults_lic))])
+colnames(table_s0_lic) <- as.character(rev(nl_q_seq))
+table_s0_lic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
+table_s0_lic["Population Share"] = lic_pop[3:9]/sum(lic_pop[3:9])
+table_s0_lic["Infection Fatality Rate"] = ifr_lic[3:9]
+table_s0_lic <- table_s0_lic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
+print(xtable(table_s0_lic, digits=4), include.rownames=FALSE)
+
+table_s0_lic <- rbind(table_s0_lic,c('res_nlopt',1,1,round(rev(as.numeric(nlopt_s0[1,])),8)))
+
+#Comparison with non-epi results----
+# test_res <- function(x) model_fd_static(unroll_x(x,sub=0), 
+#                                       homogen = 0, 
+#                                       outcome = 'D',
+#                                       ret = 1)
+# 
+# lic_nonepi <- read.csv('lic_non_epi.csv')
+# res_nonepi <- c()
+# for (i in 1:dim(lic_nonepi)[2]){
+#   res_nonepi <- c(res_nonepi,test_res(lic_nonepi[,i]))
+# }
+# table_s0_lic <- rbind(table_s0_lic,c('res_nonepi',1,1,round(as.numeric(res_nonepi),8)))
+##--
+
+#HIC
+prop_adults_hic <- sum(hic_pop[3:9])/sum(hic_pop)
+load("results/nlopt/wip-nl-solutions7-s-D-hic.Rdata")
+table_s0_hic<-data.frame(nlopt_s0[2:8,as.character(rev(nl_q_seq*prop_adults_hic))])
+colnames(table_s0_hic) <- as.character(rev(nl_q_seq))
+table_s0_hic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
+table_s0_hic["Population Share"] = hic_pop[3:9]/sum(hic_pop[3:9])
+table_s0_hic["Infection Fatality Rate"] = ifr_hic[3:9]
+table_s0_hic <- table_s0_hic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
+print(xtable(table_s0_hic, digits=4), include.rownames=FALSE)
+
+#Comparison with non-epi results----
+# table_s0_hic <- rbind(table_s0_hic,c('res_nlopt',1,1,round(rev(as.numeric(nlopt_s0[1,])),8)))
+# 
+# hic_nonepi <- read.csv('hic_non_epi.csv')
+# res_nonepi <- c()
+# for (i in 1:dim(hic_nonepi)[2]){
+#   res_nonepi <- c(res_nonepi,test_res(hic_nonepi[,i]))
+# }
+# table_s0_hic <- rbind(table_s0_hic,c('res_nonepi',1,1,round(as.numeric(res_nonepi),8)))
+##--
