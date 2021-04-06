@@ -1,6 +1,7 @@
 # install.packages("nloptr")
 library(nloptr)
 library(tidyverse)
+library(ggplot2)
 source("project-setup.R")
 
 source("optimisation-epi/objective-functions.R")
@@ -92,7 +93,14 @@ for (initial_value in c(0.3,0.5,0.8,0.99,0.01)){
 }
 
 ##Comparing results - auxiliary functions----
-eval_g_ineq <- function(i,x) x[i,1]*pop[3]+x[i,2]*pop[4]+x[i,3]*pop[5]+x[i,4]*pop[6]+x[i,5]*pop[7]+x[i,6]*pop[8]+x[i,7]*pop[9]-as.numeric(rownames(x)[i])
+eval_constr <- function(i,x) x[i,1]*pop[3]+x[i,2]*pop[4]+x[i,3]*pop[5]+x[i,4]*pop[6]+x[i,5]*pop[7]+x[i,6]*pop[8]+x[i,7]*pop[9]-as.numeric(rownames(x)[i])
+
+fmt_res <- function(res) {
+  x0<-data.frame(t(res[2:8,]))
+  x0['Q'] <- rownames(x0)
+  x0['constr'] <- sapply(1:dim(x0)[1], eval_constr, x=x0)
+  x0
+}
 
 fmt_df_nlopt <- function(x,dim_value,static=FALSE,dim='initial_value'){
   res0 <- x[1,]
@@ -100,7 +108,7 @@ fmt_df_nlopt <- function(x,dim_value,static=FALSE,dim='initial_value'){
   colnames(x0) <- c('age3','age4','age5','age6','age7','age8','age9')
   if (static){
     x0['Q'] <- rownames(x0)
-    x0['constr'] <- sapply(1:dim(x0)[1], eval_g_ineq, x=x0)
+    x0['constr'] <- sapply(1:dim(x0)[1], eval_constr, x=x0)
   } else {
     x0['d1'] <- rownames(x0)
   }
@@ -127,49 +135,55 @@ for (initial_value in c(0.3,0.5,0.8,0.99,0.01)){
 }
 
 #Dynamic
-nlopt_d0_all %>%
+nlopt_d0_all.fig <- nlopt_d0_all %>%
   mutate(d1 = factor(d1, levels = c("50","100","200","400","1000"), labels = c("50","100","200","400","1000"))) %>%
   mutate(initial_value = factor(initial_value)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = d1, y = res, color = initial_value)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/d0_initial_values.pdf",nlopt_d0_all.fig)
 
-nlopt_d1_all %>%
+nlopt_d1_all.fig <- nlopt_d1_all %>%
   mutate(d1 = factor(d1, levels = c("50","100","200","400","1000"), labels = c("50","100","200","400","1000"))) %>%
   mutate(initial_value = factor(initial_value)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = d1, y = res, color = initial_value)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/d1_initial_values.pdf",nlopt_d1_all.fig)
 
 #Static - objective function
-nlopt_s0_all %>%
+nlopt_s0_all.fig <- nlopt_s0_all %>%
   mutate(Q = factor(Q)) %>%
   mutate(initial_value = factor(initial_value)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = Q, y = res, color = initial_value)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/s0_initial_values_obj.pdf",nlopt_s0_all.fig)
 
-nlopt_s1_all %>%
+nlopt_s1_all.fig <- nlopt_s1_all %>%
   mutate(Q = factor(Q)) %>%
   mutate(initial_value = factor(initial_value)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = Q, y = res, color = initial_value)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/s1_initial_values_obj.pdf",nlopt_s1_all.fig)
 
 #Static - constraint
-nlopt_s0_all %>%
+nlopt_s0_all.fig <- nlopt_s0_all %>%
   mutate(Q = factor(Q)) %>%
   mutate(initial_value = factor(initial_value)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = Q, y = constr, color = initial_value)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/s0_initial_values_constr.pdf",nlopt_s0_all.fig)
 
-nlopt_s1_all %>%
+nlopt_s1_all.fig <- nlopt_s1_all %>%
   mutate(Q = factor(Q)) %>%
   mutate(initial_value = factor(initial_value)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = Q, y = constr, color = initial_value)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/s1_initial_values_constr.pdf",nlopt_s1_all.fig)
 
 ##Comparing results - stopping criteria----
 nlopt_s0_all <- data.frame()
@@ -187,46 +201,52 @@ for (tol in c('maxeval1000-tol-6','maxeval500-tol-5','maxeval100-tol-4')){
 }
 
 #Dynamic
-nlopt_d0_all %>%
+nlopt_d0_all.fig <- nlopt_d0_all %>%
   mutate(d1 = factor(d1, levels = c("50","100","200","400","1000"), labels = c("50","100","200","400","1000"))) %>%
   mutate(initial_value = factor(tol)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = d1, y = res, color = tol)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/d0_convergence.pdf",nlopt_d0_all.fig)
 
-nlopt_d1_all %>%
+nlopt_d1_all.fig <- nlopt_d1_all %>%
   mutate(d1 = factor(d1, levels = c("50","100","200","400","1000"), labels = c("50","100","200","400","1000"))) %>%
   mutate(initial_value = factor(tol)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = d1, y = res, color = tol)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/d1_convergence.pdf",nlopt_d1_all.fig)
 
 #Static - objective function
-nlopt_s0_all %>%
+nlopt_s0_all.fig <- nlopt_s0_all %>%
   mutate(Q = factor(Q)) %>%
   mutate(tol = factor(tol)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = Q, y = res, color = tol)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/s0_convergence_obj.pdf",nlopt_s0_all.fig)
 
-nlopt_s1_all %>%
+nlopt_s1_all.fig <- nlopt_s1_all %>%
   mutate(Q = factor(Q)) %>%
   mutate(tol = factor(tol)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = Q, y = res, color = tol)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/s1_convergence_obj.pdf",nlopt_s1_all.fig)
 
 #Static - constraint
-nlopt_s0_all %>%
+nlopt_s0_all.fig <- nlopt_s0_all %>%
   mutate(Q = factor(Q)) %>%
   mutate(tol = factor(tol)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = Q, y = constr, color = tol)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/s0_convergence_constr.pdf",nlopt_s0_all.fig)
 
-nlopt_s1_all %>%
+nlopt_s1_all.fig <- nlopt_s1_all %>%
   mutate(Q = factor(Q)) %>%
   mutate(tol = factor(tol)) %>%
   mutate(outcome = factor(outcome)) %>%
   ggplot(aes(x = Q, y = constr, color = tol)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
+ggsave("figures/nlopt/s1_convergence_constr.pdf",nlopt_s1_all.fig)
