@@ -16,7 +16,8 @@ model_fd_dynamic <- function(model, d1, fd, default_e1 = 0.95,
   pars <- apap_2v(grab_2v_parms(model), fractional_dose = fd, len = d1)
   pars <- list_modify(pars, e1 = e1)
   if(homogen){
-    pars$contacts <- 1/Ngroups + 0*pars$contacts
+    # pars$contacts <- 1/Ngroups + 0*pars$contacts
+    pars$contacts <- t(replicate(Ngroups, pop))
     pars$q <- ev*pars$q
   }
   y <- sr(pars, "2v_v2")
@@ -36,7 +37,8 @@ model_fd_static <- function(v_prop, rm = FALSE, homogen = FALSE,
     pars_le_fast,
     y0 = y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e_vector))
   if(homogen){
-    pars$contacts <- 1/Ngroups + 0*pars$contacts
+    # pars$contacts <- 1/Ngroups + 0*pars$contacts
+    pars$contacts <- t(replicate(Ngroups, pop))
     pars$q <- ev*pars$q
   }
   # We do not update e1, because there is no vaccination past t=0 

@@ -19,7 +19,7 @@ unroll_x <- function(x, sub=1) #set sub to 0 for static model where no doses go 
 
 # Solve for various Q's (static) or deltas (dynamic) ------
 
-opt_problem <- function(q_seq,h=FALSE, static = TRUE){
+opt_problem <- function(q_seq,h=FALSE, static = TRUE, model = "pars_le_fast"){
   
   sol <- sapply(q_seq, function(Q) {
     # Optimisation problem: define objective function for a given Q, h:
@@ -29,7 +29,7 @@ opt_problem <- function(q_seq,h=FALSE, static = TRUE){
                                             outcome = outcome_nlopt,
                                             ret = 1)
     else
-      eval_f <- function(x) model_fd_dynamic(model = "pars_le_fast", 
+      eval_f <- function(x) model_fd_dynamic(model = model, 
                                              fd = unroll_x(x), 
                                              d1 = Q, 
                                              outcome = outcome_nlopt,
@@ -37,12 +37,18 @@ opt_problem <- function(q_seq,h=FALSE, static = TRUE){
                                              homogen = h)
     
     # Equality constraints
-    if(static)
+    if(static){
+      # if (h==0)
       #GROUP NUMBER - Need to change this constraint according to the number of groups and if vaccinating young population
       eval_g_ineq <- function(x) c(0*pop[1]+0*pop[2]+x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-Q,
-                                   -0*pop[1]-0*pop[2]-x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+Q)
-    else
+                                  -0*pop[1]-0*pop[2]-x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+Q)
+      # else
+      #   eval_g_ineq <- function(x) c(0*pop[1]+0*pop[2]+x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-Q,
+      #                                -0*pop[1]-0*pop[2]-x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+Q,
+      #                                x[1:6]-x[2:7]+1e-4)
+    } else {
       eval_g_ineq <- NULL
+    }
     
     # Lower and upper bounds
     ub <- rep(1,n_x)
@@ -80,35 +86,39 @@ opt_problem <- function(q_seq,h=FALSE, static = TRUE){
 }
 
 nl_q_seq <- seq(0.1, 1, 0.1)#Variance analysis are unnecessary since the solution only changes with the initial values
+# nl_q_seq <- seq(0.1, 0.7, 0.1)
 nl_d_seq <- c(1000,400,200,100,50)
 #Q is adjusted in the next lines to match the percentage of adults (comparison with non-epi results), to change this remove prop_adults
 nlopt_s0 <- opt_problem(nl_q_seq*prop_adults, 0)
 nlopt_s1 <- opt_problem(nl_q_seq*prop_adults, 1)
-#nlopt_d0 <- opt_problem(nl_d_seq, 0, static = F)
-#nlopt_d1 <- opt_problem(nl_d_seq, 1, static = F)
+nlopt_d0 <- opt_problem(nl_d_seq, 0, static = F)
+nlopt_d0_slow <- opt_problem(nl_d_seq, 0, static = F, model = "pars_le_slow")
+nlopt_d0_decline <- opt_problem(nl_d_seq, 0, static = F, model = "pars_le_linear")
+nlopt_d1 <- opt_problem(nl_d_seq, 1, static = F)
 
 #save(nl_q_seq, nlopt_s0, file = "results/wip-nl-solutions5-s-h0-D.Rdata")
-save(nl_q_seq, nlopt_s0, nlopt_s1, file = "results/nlopt/wip-nl-solutions7-s-D-hic.Rdata")
-#save(nl_q_seq, nl_d_seq,
-#     nlopt_s0, nlopt_s1, nlopt_d0, nlopt_d1, file = "results/nlopt/wip-nl-solutions7-D-lic.Rdata")
+# save(nl_d_seq, nlopt_d0, nlopt_d1, file = "results/nlopt/wip-nl-solutions7-d-D-hic-newconstr.Rdata")
+save(nl_q_seq, nl_d_seq,
+    nlopt_s0, nlopt_s1, nlopt_d0, nlopt_d0_slow, nlopt_d0_decline,
+    nlopt_d1, file = "results/nlopt/wip-nl-solutions7-D-lic-edit_contacts.Rdata")
 
 
 #Generating tables for report
 #LIC
 prop_adults_lic <- sum(lic_pop[3:9])/sum(lic_pop)
-load("results/nlopt/wip-nl-solutions7-s-D-lic.Rdata")
+load("results/nlopt/wip-nl-solutions7-s-D-lic-newconstr.Rdata")
 table_s0_lic<-data.frame(nlopt_s0[2:8,as.character(rev(nl_q_seq*prop_adults_lic))])
 colnames(table_s0_lic) <- as.character(rev(nl_q_seq))
 table_s0_lic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
 table_s0_lic["Population Share"] = lic_pop[3:9]/sum(lic_pop[3:9])
 table_s0_lic["Infection Fatality Rate"] = ifr_lic[3:9]
 table_s0_lic <- table_s0_lic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
-print(xtable(table_s0_lic, digits=4), include.rownames=FALSE)
+print(xtable(table_s0_lic, digits=2), include.rownames=FALSE)
 
 #Comparison with non-epi results----
 # table_s0_lic <- rbind(table_s0_lic,c('res_nlopt',1,1,round(rev(as.numeric(nlopt_s0[1,])),8)))
-# test_res <- function(x) model_fd_static(unroll_x(x,sub=0), 
-#                                       homogen = 0, 
+# test_res <- function(x) model_fd_static(unroll_x(x,sub=0),
+#                                       homogen = 1,
 #                                       outcome = 'D',
 #                                       ret = 1)
 # 
@@ -122,14 +132,14 @@ print(xtable(table_s0_lic, digits=4), include.rownames=FALSE)
 
 #HIC
 prop_adults_hic <- sum(hic_pop[3:9])/sum(hic_pop)
-load("results/nlopt/wip-nl-solutions7-s-D-hic.Rdata")
+load("results/nlopt/wip-nl-solutions7-s-D-hic-newconstr.Rdata")
 table_s0_hic<-data.frame(nlopt_s0[2:8,as.character(rev(nl_q_seq*prop_adults_hic))])
 colnames(table_s0_hic) <- as.character(rev(nl_q_seq))
 table_s0_hic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
 table_s0_hic["Population Share"] = hic_pop[3:9]/sum(hic_pop[3:9])
 table_s0_hic["Infection Fatality Rate"] = ifr_hic[3:9]
 table_s0_hic <- table_s0_hic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
-print(xtable(table_s0_hic, digits=4), include.rownames=FALSE)
+print(xtable(table_s0_hic, digits=2), include.rownames=FALSE)
 
 #Comparison with non-epi results----
 # table_s0_hic <- rbind(table_s0_hic,c('res_nlopt',1,1,round(rev(as.numeric(nlopt_s0[1,])),8)))
