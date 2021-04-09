@@ -88,7 +88,7 @@ fig_fdf1 <-rescale_and_bind(list(
                                     list_modify(e1 = .8), f = "2d_v2"),
   "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas$d_fdf[5], delay_fdf) %>% 
                                     list_modify(e1 = .8), f = "2d_v2"),
-  "S-FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d_sse_h6[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid_k[,6]) %>% 
+  "S-FDF-60 (12 weeks for under 60s)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d_sse_h6[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid_k[,6]) %>% 
                                     list_modify(e1 = .8), f = "2d_v2")
   # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
 ), pop) %>% 
