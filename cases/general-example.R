@@ -68,7 +68,7 @@ pars <- scenario_list_2v[[1]]
 ll <- list(
   "Vaccinate 0.3% per day" = apap_2v(pars, 100/.3),
   "Vaccinate 0.5% per day" = apap_2v(pars, 100/.5),
-  "Vaccinate 1% per day"  = apap_2v(pars, 100/1),
+  "Vaccinate 1% per day"   = apap_2v(pars, 100/1),
   "No vaccination" = list_modify(pars, delta1 = rep(0, Ngroups))) %>%
   lapply(sr, f = "2v_v2") %>%
   lapply(rescale_rcs, pop, merge=T) %>% 
@@ -83,15 +83,23 @@ gg2 <- gg2.df %>%
   ylab("fraction currently vaccinated (I)") +
   scale_color_discrete(name = "") +
   theme(legend.position = "top")
-gg2
-g1_joint <- ggarrange(gg2 + ggtitle("Vaccinations") + theme(legend.spacing.x = unit(0.1, 'in'), text = element_text(size=7),legend.key.size = unit(0.4, "cm")), common.legend = TRUE, 
-                 gg1 + ggtitle("Infections") + theme(text = element_text(size=7)), 
-                 widths = c(1,2.5))
+
+g1_joint <- ggarrange(
+  gg2 + ggtitle("Vaccinations") + 
+    theme(legend.spacing.x = unit(0.1, 'in'), 
+          text = element_text(size=7),
+          legend.key.size = unit(0.4, "cm")), 
+  common.legend = TRUE, 
+  gg1 + ggtitle("Infections") + 
+    theme(text = element_text(size=7)), 
+  widths = c(1,2.5))
 
 
 # Age-specific dynamics -----
-sgg_age <- sr(f="2v_v2", apap_2v(scenario_list_2v[[2]], 360)) %>% plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
-  ylab("Proportion of age group")+ theme(legend.spacing.y = unit(0.1, 'in'), legend.text = element_text(size = 5), legend.key.size = unit(0.5, "cm"))
+sgg_age <- sr(f="2v_v2", apap_2v(scenario_list_2v[[2]], 360)) %>% 
+  plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
+  ylab("Proportion of age group")+ theme(legend.spacing.y = unit(0.1, 'in'), 
+                                         legend.text = element_text(size = 5), legend.key.size = unit(0.5, "cm"))
 
 
 
