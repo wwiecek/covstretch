@@ -84,14 +84,14 @@ gg2 <- gg2.df %>%
   scale_color_discrete(name = "") +
   theme(legend.position = "top")
 gg2
-g1_joint <- ggarrange(gg2 + ggtitle("Vaccinations") + theme(legend.spacing.x = unit(0.1, 'in'), text = element_text(size=7),legend.key.size = unit(0.4, "cm")), common.legend = TRUE, 
-                 gg1 + ggtitle("Infections") + theme(text = element_text(size=7)), 
+g1_joint <- ggarrange(gg2 + ggtitle("Vaccinations") + theme(legend.spacing.x = unit(0.1, 'in'), text = element_text(size=9),legend.key.size = unit(0.4, "cm")), common.legend = TRUE, 
+                 gg1 + ggtitle("Infections") + theme(text = element_text(size=9)), 
                  widths = c(1,2.5))
 
 
 # Age-specific dynamics -----
 sgg_age <- sr(f="2v_v2", apap_2v(scenario_list_2v[[2]], 360)) %>% plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
-  ylab("Proportion of age group")+ theme(legend.spacing.y = unit(0.1, 'in'), legend.text = element_text(size = 5), legend.key.size = unit(0.5, "cm"))
+  ylab("Proportion of age group")+ theme(legend.spacing.y = unit(0.1, 'in'), text = element_text(size = 12), legend.key.size = unit(0.5, "cm"))
 
 
 
