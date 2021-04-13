@@ -91,6 +91,20 @@ ggsave(fig_harm_averted, width = 6.5, height = 5, file = "figures/presentation-h
 ggsave(file = "figures/presentation-g2_reductions.png", g2b+theme(text=element_text(size=14)), width = 6.5, height=4.5)
 
 ##Slide Fractional Dosing - Optimal Allocation----
+load("results/nlopt/wip-nl-solutions7-D-hic-edit_contacts.Rdata")
+
+colnames(nlopt_s0) <- nl_q_seq
+colnames(nlopt_s1) <- nl_q_seq
+
+#Importing results from non-epi model
+
+nonepi_s1 <- read.csv("model/hic_non_epi.csv")
+colnames(nonepi_s1) <- rev(nl_q_seq)
+nonepi_s1[nonepi_s1<1e-10] <- 0
+
+nonepi_s1_lic <- read.csv("model/lic_non_epi.csv")
+colnames(nonepi_s1_lic) <- rev(nl_q_seq)
+
 fig_static <-
   rbind(
     as.data.frame(nlopt_s0)[-1,] %>% mutate(age = 3:9) %>% 
@@ -115,6 +129,72 @@ fig_static
 
 ggsave("figures/presentation-dose_sharing_static_top.png", fig_static+theme(text = element_text(size=14)), width = 5.5, height=5)
 
+#4 different allocation strategies
+df_allocation_obj <- rbind(
+  as.data.frame(nlopt_s0)[-1,] %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "Heterogeneous mixing"),
+  as.data.frame(nlopt_s1)[-1,] %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "Homogeneous mixing"),
+  as.data.frame(nonepi_s1) %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "Exogenous disease risk"),
+  data_frame(
+    "1"= rep(1,7),
+    "0.9"= rep(0.9,7),
+    "0.8"= rep(0.8,7),
+    "0.7"= rep(0.7,7),
+    "0.6"= rep(0.6,7),
+    "0.5"= rep(0.5,7),
+    "0.4"= rep(0.4,7),
+    "0.3"= rep(0.3,7),
+    "0.2"= rep(0.2,7),
+    "0.1"= rep(0.1,7)) %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "Equal distribution")
+)
+df_allocation_obj$Q <- as.numeric(df_allocation_obj$Q)
+df_allocation_obj <- df_allocation_obj %>% arrange(model,Q,age)
+
+source("optimisation-epi/objective-functions.R")
+
+unroll_x <- function(x, sub=0)
+  c(sub,sub,x[1],x[2],x[3],x[4],x[5],x[6],x[7])
+
+df_allocation_obj["obj"] <- 0
+for (q in unique(df_allocation_obj$Q)){
+  df_allocation_obj[(df_allocation_obj$model=="Heterogeneous mixing")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Heterogeneous mixing")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 0,
+                        outcome = 'D',
+                        ret = 1)
+  df_allocation_obj[(df_allocation_obj$model=="Homogeneous mixing")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Homogeneous mixing")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 1,
+                        outcome = 'D',
+                        ret = 1)
+  df_allocation_obj[(df_allocation_obj$model=="Equal distribution")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Equal distribution")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 1,
+                        outcome = 'D',
+                        ret = 1)
+  df_allocation_obj[(df_allocation_obj$model=="Exogenous disease risk")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Exogenous disease risk")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 1,
+                        outcome = 'D',
+                        ret = 1)
+}
+
+df_allocation_obj
 ##Slide Fractional dosing with uniform dose----
 le2.presentation <- df_efficacy_delta_raw %>%
   filter(d1 %in% le_speeds) %>%
