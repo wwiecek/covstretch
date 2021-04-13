@@ -177,7 +177,7 @@ fig_delay_presentation
 
 ggsave("figures/presentation-delay_impact_deaths_fast.png", fig_delay_presentation+theme(text=element_text(size=13)), width = 6.5, height=4)
 
-##Slide Efficacy vs Timing----
+##Slide Using less effective vaccine earlier----
 delay_optimal_presentation <- 
   gg_delay %>% 
   filter(delay %in% (30.5*(0:6))) %>%
@@ -185,9 +185,9 @@ delay_optimal_presentation <-
   mutate(r = `No switching (V2 only)`/`No early vaccine (V1 only)`) %>%
   select(delay, e, model, var, r) %>%
   mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
-                         labels = c("Less effective better by >=5%",
+                         labels = c("Immediately available vaccine better by >=5%",
                                     "Comparable (+-5%)", 
-                                    "95% effective better by >=5%"
+                                    "Delayed vaccine better by >=5%"
                          ))) %>%
   mutate(value = round(r, 2)) %>%
   mutate(delay = factor(delay/30.5)) %>%
@@ -198,7 +198,7 @@ delay_optimal_presentation <-
                     name = "") +
   theme(legend.position = "top") +
   ylab("Efficacy") + 
-  xlab("Months until 95% effective vaccine available") +
+  xlab("Months until delayed vaccine available") +
   geom_text(aes(label = value), color = "white", size = 5)  
 
 delay_optimal_presentation
