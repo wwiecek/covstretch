@@ -129,17 +129,33 @@ fig_static
 
 ggsave("figures/presentation-dose_sharing_static_top.png", fig_static+theme(text = element_text(size=14)), width = 5.5, height=5)
 
-#4 different allocation strategies
+##Different allocation strategies - benefits----
+vac_top_p_adult <- function(p, pop) {
+  pop <- pop/sum(pop)
+  w <- rev(pop)
+  ptemp <- p
+  vrev <- vector(length = 7)
+  for(j in 1:7){
+    if(ptemp > 0)
+      vrev[j] <- min(ptemp, w[j])
+    ptemp <- ptemp - w[j]
+  }
+  rev(vrev)/pop
+}
+
 df_allocation_obj <- rbind(
   as.data.frame(nlopt_s0)[-1,] %>% mutate(age = 3:9) %>% 
     gather(Q, value, -age) %>%
-    mutate(model = "Heterogeneous mixing"),
+    mutate(model = "Optimal allocation",mixing="Heterogeneous"),
   as.data.frame(nlopt_s1)[-1,] %>% mutate(age = 3:9) %>% 
     gather(Q, value, -age) %>%
-    mutate(model = "Homogeneous mixing"),
+    mutate(model = "Optimal allocation",mixing="Homogeneous"),
   as.data.frame(nonepi_s1) %>% mutate(age = 3:9) %>% 
     gather(Q, value, -age) %>%
-    mutate(model = "Exogenous disease risk"),
+    mutate(model = "Exogenous disease risk",mixing="Homogeneous"),
+  as.data.frame(nonepi_s1) %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "Exogenous disease risk",mixing="Heterogeneous"),
   data_frame(
     "1"= rep(1,7),
     "0.9"= rep(0.9,7),
@@ -152,7 +168,72 @@ df_allocation_obj <- rbind(
     "0.2"= rep(0.2,7),
     "0.1"= rep(0.1,7)) %>% mutate(age = 3:9) %>% 
     gather(Q, value, -age) %>%
-    mutate(model = "Equal distribution")
+    mutate(model = "Equal distribution",mixing="Homogeneous"),
+  data_frame(
+    "1"= rep(1,7),
+    "0.9"= rep(0.9,7),
+    "0.8"= rep(0.8,7),
+    "0.7"= rep(0.7,7),
+    "0.6"= rep(0.6,7),
+    "0.5"= rep(0.5,7),
+    "0.4"= rep(0.4,7),
+    "0.3"= rep(0.3,7),
+    "0.2"= rep(0.2,7),
+    "0.1"= rep(0.1,7)) %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "Equal distribution",mixing="Heterogeneous"),
+  data_frame(
+    "1"= vac_top_p_adult(1,hic_pop[3:9]),
+    "0.9"= vac_top_p_adult(0.9,hic_pop[3:9]),
+    "0.8"= vac_top_p_adult(0.8,hic_pop[3:9]),
+    "0.7"= vac_top_p_adult(0.7,hic_pop[3:9]),
+    "0.6"= vac_top_p_adult(0.6,hic_pop[3:9]),
+    "0.5"= vac_top_p_adult(0.5,hic_pop[3:9]),
+    "0.4"= vac_top_p_adult(0.4,hic_pop[3:9]),
+    "0.3"= vac_top_p_adult(0.3,hic_pop[3:9]),
+    "0.2"= vac_top_p_adult(0.2,hic_pop[3:9]),
+    "0.1"= vac_top_p_adult(0.1,hic_pop[3:9])) %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "Full dose (age prioritization)",mixing="Homogeneous"),
+  data_frame(
+    "1"= vac_top_p_adult(1,hic_pop[3:9]),
+    "0.9"= vac_top_p_adult(0.9,hic_pop[3:9]),
+    "0.8"= vac_top_p_adult(0.8,hic_pop[3:9]),
+    "0.7"= vac_top_p_adult(0.7,hic_pop[3:9]),
+    "0.6"= vac_top_p_adult(0.6,hic_pop[3:9]),
+    "0.5"= vac_top_p_adult(0.5,hic_pop[3:9]),
+    "0.4"= vac_top_p_adult(0.4,hic_pop[3:9]),
+    "0.3"= vac_top_p_adult(0.3,hic_pop[3:9]),
+    "0.2"= vac_top_p_adult(0.2,hic_pop[3:9]),
+    "0.1"= vac_top_p_adult(0.1,hic_pop[3:9])) %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "Full dose (age prioritization)",mixing="Heterogeneous"),
+  data_frame(
+    "1"= rep(0,7),
+    "0.9"= rep(0,7),
+    "0.8"= rep(0,7),
+    "0.7"= rep(0,7),
+    "0.6"= rep(0,7),
+    "0.5"= rep(0,7),
+    "0.4"= rep(0,7),
+    "0.3"= rep(0,7),
+    "0.2"= rep(0,7),
+    "0.1"= rep(0,7)) %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "No vaccine",mixing="Homogeneous"),
+  data_frame(
+    "1"= rep(0,7),
+    "0.9"= rep(0,7),
+    "0.8"= rep(0,7),
+    "0.7"= rep(0,7),
+    "0.6"= rep(0,7),
+    "0.5"= rep(0,7),
+    "0.4"= rep(0,7),
+    "0.3"= rep(0,7),
+    "0.2"= rep(0,7),
+    "0.1"= rep(0,7)) %>% mutate(age = 3:9) %>% 
+    gather(Q, value, -age) %>%
+    mutate(model = "No vaccine",mixing="Heterogeneous")
 )
 df_allocation_obj$Q <- as.numeric(df_allocation_obj$Q)
 df_allocation_obj <- df_allocation_obj %>% arrange(model,Q,age)
@@ -164,37 +245,151 @@ unroll_x <- function(x, sub=0)
 
 df_allocation_obj["obj"] <- 0
 for (q in unique(df_allocation_obj$Q)){
-  df_allocation_obj[(df_allocation_obj$model=="Heterogeneous mixing")&
+  df_allocation_obj[(df_allocation_obj$model=="Optimal allocation")&
+                      (df_allocation_obj$mixing=="Heterogeneous")&
                       (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
-                        df_allocation_obj[(df_allocation_obj$model=="Heterogeneous mixing")&
+                        df_allocation_obj[(df_allocation_obj$model=="Optimal allocation")&
+                                            (df_allocation_obj$mixing=="Heterogeneous")&
                                             (df_allocation_obj$Q==q),"value"],sub=0),
                         homogen = 0,
                         outcome = 'D',
                         ret = 1)
-  df_allocation_obj[(df_allocation_obj$model=="Homogeneous mixing")&
+  df_allocation_obj[(df_allocation_obj$model=="No vaccine")&
+                      (df_allocation_obj$mixing=="Heterogeneous")&
                       (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
-                        df_allocation_obj[(df_allocation_obj$model=="Homogeneous mixing")&
+                        df_allocation_obj[(df_allocation_obj$model=="No vaccine")&
+                                            (df_allocation_obj$mixing=="Heterogeneous")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 0,
+                        outcome = 'D',
+                        ret = 1)
+  df_allocation_obj[(df_allocation_obj$model=="Optimal allocation")&
+                      (df_allocation_obj$mixing=="Homogeneous")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Optimal allocation")&
+                                            (df_allocation_obj$mixing=="Homogeneous")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 1,
+                        outcome = 'D',
+                        ret = 1)
+  df_allocation_obj[(df_allocation_obj$model=="No vaccine")&
+                      (df_allocation_obj$mixing=="Homogeneous")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="No vaccine")&
+                                            (df_allocation_obj$mixing=="Homogeneous")&
                                             (df_allocation_obj$Q==q),"value"],sub=0),
                         homogen = 1,
                         outcome = 'D',
                         ret = 1)
   df_allocation_obj[(df_allocation_obj$model=="Equal distribution")&
+                      (df_allocation_obj$mixing=="Homogeneous")&
                       (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
                         df_allocation_obj[(df_allocation_obj$model=="Equal distribution")&
+                                            (df_allocation_obj$mixing=="Homogeneous")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 1,
+                        outcome = 'D',
+                        ret = 1)
+  df_allocation_obj[(df_allocation_obj$model=="Equal distribution")&
+                      (df_allocation_obj$mixing=="Heterogeneous")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Equal distribution")&
+                                            (df_allocation_obj$mixing=="Heterogeneous")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 0,
+                        outcome = 'D',
+                        ret = 1)
+  df_allocation_obj[(df_allocation_obj$model=="Exogenous disease risk")&
+                      (df_allocation_obj$mixing=="Homogeneous")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Exogenous disease risk")&
+                                            (df_allocation_obj$mixing=="Homogeneous")&
                                             (df_allocation_obj$Q==q),"value"],sub=0),
                         homogen = 1,
                         outcome = 'D',
                         ret = 1)
   df_allocation_obj[(df_allocation_obj$model=="Exogenous disease risk")&
+                      (df_allocation_obj$mixing=="Heterogeneous")&
                       (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
                         df_allocation_obj[(df_allocation_obj$model=="Exogenous disease risk")&
+                                            (df_allocation_obj$mixing=="Heterogeneous")&
                                             (df_allocation_obj$Q==q),"value"],sub=0),
                         homogen = 1,
                         outcome = 'D',
                         ret = 1)
+  df_allocation_obj[(df_allocation_obj$model=="Full dose (age prioritization)")&
+                      (df_allocation_obj$mixing=="Homogeneous")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Full dose (age prioritization)")&
+                                            (df_allocation_obj$mixing=="Homogeneous")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 1,
+                        outcome = 'D',
+                        ret = 1,
+                        full=1)
+  df_allocation_obj[(df_allocation_obj$model=="Full dose (age prioritization)")&
+                      (df_allocation_obj$mixing=="Heterogeneous")&
+                      (df_allocation_obj$Q==q),"obj"] <- model_fd_static(unroll_x(
+                        df_allocation_obj[(df_allocation_obj$model=="Full dose (age prioritization)")&
+                                            (df_allocation_obj$mixing=="Heterogeneous")&
+                                            (df_allocation_obj$Q==q),"value"],sub=0),
+                        homogen = 0,
+                        outcome = 'D',
+                        ret = 1,
+                        full=1)
 }
 
-df_allocation_obj
+#Homogeneous mixing
+df_allocation_obj %>% 
+  select(-age,-value) %>% 
+  filter(mixing=="Homogeneous") %>% 
+  group_by(Q) %>%
+  mutate(obj=(1-obj/max(obj))) %>%
+  ungroup() %>%
+  unique() %>% 
+  ggplot(aes(x = Q, y = obj, color = model)) +
+  geom_line(size=1) +
+  guides(color=guide_legend(title="Allocation Strategy",ncol=1))+
+  xlab("Q (supply constraint)") + ylab("Fraction of Deaths Averted")+ylim(0,1)+
+  # scale_color_viridis_d(begin = 0.1,end = 0.8)+
+  theme(legend.position = "bottom")#,legend.direction = "vertical"
+
+df_hom <- df_allocation_obj %>% 
+  select(-age,-value) %>% 
+  filter(mixing=="Homogeneous") %>% 
+  group_by(Q) %>%
+  mutate(obj=(1-obj/max(obj))) %>%
+  ungroup() %>% 
+  filter(Q %in% c(0.3,0.8)) %>% 
+  unique() %>% 
+  arrange(Q)
+write.csv(df_hom,'benefits_allocation_homogeneous.csv',row.names = F)
+#Heterogeneous mixing
+df_allocation_obj %>% 
+  select(-age,-value) %>% 
+  filter(mixing=="Heterogeneous") %>% 
+  group_by(Q) %>%
+  mutate(obj=(1-obj/max(obj))) %>%
+  ungroup() %>%
+  unique() %>% 
+  ggplot(aes(x = Q, y = obj, color = model)) +
+  geom_line(size=1) +
+  guides(color=guide_legend(title="Allocation Strategy",ncol=1))+
+  xlab("Q (supply constraint)") + ylab("Fraction of Deaths Averted")+ylim(0,1)+
+  # scale_color_viridis_d(begin = 0.1,end = 0.8)+
+  theme(legend.position = "bottom")#,legend.direction = "vertical"
+
+df_het <- df_allocation_obj %>%
+  select(-age,-value) %>% 
+  filter(mixing=="Heterogeneous") %>% 
+  group_by(Q) %>%
+  mutate(obj=(1-obj/max(obj))) %>%
+  ungroup() %>% 
+  filter(Q %in% c(0.3,0.8)) %>% 
+  unique() %>% 
+  arrange(Q)
+write.csv(df_het,'benefits_allocation_heterogeneous.csv',row.names = F)
+  
 ##Slide Fractional dosing with uniform dose----
 le2.presentation <- df_efficacy_delta_raw %>%
   filter(d1 %in% le_speeds) %>%
