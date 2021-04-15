@@ -31,8 +31,12 @@ model_fd_dynamic <- function(model, d1, fd, default_e1 = 0.95,
 
 model_fd_static <- function(v_prop, rm = FALSE, homogen = FALSE,
                                     ret = 0,
-                                    outcome = "d") {
+                                    outcome = "d",
+                                    full=0) {
   e_vector <- phi_x(v_prop)
+  if (full){
+    e_vector <- v_prop*phi_x(1)
+  }
   pars <- list_modify(
     pars_le_fast,
     y0 = y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e_vector))
