@@ -1,41 +1,10 @@
 library(kableExtra)
 library(tidyverse)
-load("data/default_inputs.Rdata")
+source("project-setup.R")
 
 fig_folder <- "figures"
 
-# Main FDF assumptions
-delay_default <- 28 - 10
-delay_fdf <- 84 - 10
-delay_hybrid <- c(rep(delay_fdf, 6), rep(delay_default, 3))
-
-# Demographics (for comparing HIC vs LIC)
-hic_pop <- pbc_spread[countries["High-income countries"],] %>% as.numeric()
-lic_pop <- pbc_spread[countries["Low-income countries"],] %>% as.numeric()
-ifr_hic <- c(0.002, 0.006, 0.03, 0.08, 0.15, 0.60, 2.2, 5.1, 9.3)/100
-ifr_lic <- ifr_hic*(3.2/2)^(5:(-3))
-
-default_pdeath <- ifr_hic
-# use_delta <- TRUE
-
-# Case with losing immunity
-kappa_default <- 0
-
-def_labels <- list(
-  "speed" = "Fraction vaccinated each day, delta"
-)
-
-# default_speeds <- c(seq(60, 360, 10), 450, 540, 630, 730, 1460, Inf)
-# main3speeds <- c(360, 180, 90)
-default_speeds <- round(100/c(2, rev(seq(.05, 1, .05)), .025, .01, 0), 5) # % per day
-fdf_speeds <- rev(round(100/c(.1, .25, .5, .75, 1, 2), 5))
-# d1_general <- c(90, 120, 180, 360, 730, 1460)
-d1_general <- 100/c(2, 1, .75, .5, .25, .1) # % per day
-default_delta_value <- .0025 #for LE scenario
-# le_speeds <- round(100/c(.25, .3, .4, .5, .75, 1), 5)
-le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1, 2), 5)
-
-country_case <- list(list('hic',1),list('hic',0.25),list('lic',1),list('lic',0.25))
+country_case <- list(list('hic',1),list('lic',1),list('hic',0.25),list('lic',0.25))
 
 gg1.out.ceiling <- data.frame()
 gg2.out.ceiling <- data.frame()
@@ -47,9 +16,11 @@ for (d in country_case){
   default_supply_ceiling <- as.numeric(d[2])
   if (country=='hic'){
     pop <- hic_pop/sum(hic_pop)
+    default_pdeath <- ifr_hic
   } 
   if (country=='lic'){
     pop <- lic_pop/sum(lic_pop)
+    default_pdeath <- ifr_lic
   }
   
   source("R/setup.R")
@@ -94,11 +65,14 @@ for (d in country_case){
   df_fdf.out.ceiling <- rbind(df_fdf.out.ceiling,df_fdf.ceiling)
 }
 
+save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
+     file = "results/results_ceiling_lic_analysis.Rdata")
+
 df_efficacy_delta.out.ceiling <- 
   df_efficacy_delta_raw.out.ceiling %>%
   ungroup() %>%
   # filter(d1 %in% c(90, 180, 360, 730, 1460, Inf)) %>%
-  filter(d1 %in% c(d1_general, Inf)|d1==133.33333) %>%
+  filter(round(d1,4) %in% c(round(d1_general,4), Inf)) %>%
   group_by(model, e,ceiling,country) %>% 
   # mutate(benefit_vr = 1 - harm_vr) %>%
   mutate(ref_e = harm[d1 > 1460]) %>%
@@ -242,5 +216,86 @@ g1_joint.ceiling <- ggarrange(gg2.plot.ceiling + ggtitle("Vaccinations")+ theme(
 
 ggsave(paste0(fig_folder, "/g1_joint_ceiling.pdf"),g1_joint.ceiling, width = 5.55, height=2)
 
-save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
-     file = "results/results_ceiling_analysis.Rdata")
+##Analysis lower efficacy x speed----
+#LIC
+le2_lic <- df_efficacy_delta_raw.out.ceiling %>%
+  filter(ceiling==1) %>% 
+  filter(round(d1,4) %in% round(le_speeds,4)) %>%
+  mutate(delta1 = 1/d1) %>% 
+  select(delta1, e, model, i,d,harm,country) %>%
+  gather(var, value, -delta1, -e, -model,-country) %>%
+  group_by(model,var,country) %>%
+  mutate(ref = value[e == .95 & delta1 == default_delta_value]) %>%
+  filter(e %in% seq(.5, .9, .1)) %>%
+  ungroup() %>%
+  mutate(ref=as.numeric(ref),value=as.numeric(value)) %>% 
+  mutate(r = (value/ref)) %>% 
+  mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
+                         labels = c("Less effective better by 5% or more",
+                                    
+                                    "Comparable (+-5%)", 
+                                    "95% effective better by at least 5%"
+                         ))) %>%
+  mutate(var = factor(var, levels = c("i", "d", "harm"),
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
+  mutate(value = round(r, 2)) %>%
+  mutate(speedup = factor(round(delta1/default_delta_value, 1))) %>%
+  # mutate(speedup = factor(as.percent(delta1, 2))) %>%
+  mutate(e = factor(e)) %>%
+  filter(var != "Economic harm") %>%
+  ggplot(aes(x = speedup, y = e, fill = le_better)) + geom_tile() +
+  scale_fill_manual(values = c("grey60", "grey40", "grey20"), 
+                    name = "") +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(country+var~model) + ylab("e2 (efficacy for the less effective vaccine)") + 
+  xlab("delta2/delta1 (speed-up factor vs 0.25% base case)") + 
+  # scale_x_continuous(breaks = 1/d1_general,
+  # labels = as.percent(1/d1_general))
+  geom_text(aes(label = value), color = "white", size = 2.5)
+
+ggsave(paste0(fig_folder, "/le_optimal_lic_hic.pdf"), le2_lic, width = 6.5, height = 7.7)
+
+##FDF analysis----
+fig2.all_k.lic <- df_fdf.out.ceiling %>% 
+  filter(ceiling==1) %>% 
+  filter(d1 > 40, d1 <= 1000) %>%
+  filter(e >= .5) %>%
+  select(d1, model, e, policy, d, harm, i, country) %>%
+  gather(var, value, -d1, -model, -e, -policy, -country) %>%
+  group_by(d1, model, e, var, country) %>% 
+  summarise(value_m = min(value[policy != "default"])/value[policy == "default"], 
+            policy = policy[which.min(value)]
+  ) %>%
+  mutate(better = ifelse(value_m<=1&value_m>=0.95,1,NA)) %>% 
+  # mutate(better = factor(better, levels=c(1), labels = c("Less than 5% better"))) %>% 
+  mutate(policy = factor(policy, levels = c("fdf", "hybrid_8","hybrid_7",
+                                            "hybrid_6","hybrid_5","hybrid_4","hybrid_3", "default"),
+                         labels = c("FDF for all", "FDF under 80","FDF under 70",
+                                    "FDF under 60","FDF under 50","FDF under 40",
+                                    "FDF under 30", "SDF"))) %>%
+  mutate(var = factor(var, levels = c("i", "d", ""),
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
+  mutate(delta1 = factor(1/d1,
+                         levels = rev(1/fdf_speeds),
+                         labels = as.percent(rev(1/fdf_speeds)))) %>%
+  mutate(e = factor(e)) %>%
+  mutate(value_m = round(value_m, 2)) %>%
+  filter(var != "Economic harm") %>%
+  ggplot(aes(x = delta1, y = e, fill = policy)) + #, alpha=better)) + 
+  geom_tile() +
+  # scale_alpha_manual(values = c(0.7,1), name = "",labels=NULL,guide = 'none') +
+  facet_grid(country+var~model) + 
+  ylab("e1 (efficacy following 1st dose)") +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 45),
+        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.background = element_blank(), panel.border = element_blank(),text=element_text(size=8)) +
+  # scale_fill_viridis_d(option = "magma") +
+  scale_fill_viridis_d(end = 0.7) +
+  xlab(paste0(def_labels, " (1st dose, default policy)")) + 
+  geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
+
+ggsave(paste0(fig_folder, "/fdf_allk_lic_hic.pdf"), fig2.all_k.lic, width = 6.5, height = 7.7)
+
+# save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
+     # file = "results/results_ceiling_analysis_pt1of4.Rdata")

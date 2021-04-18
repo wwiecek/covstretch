@@ -106,7 +106,7 @@ save(nl_q_seq, nl_d_seq,
 #Generating tables for report
 #LIC
 prop_adults_lic <- sum(lic_pop[3:9])/sum(lic_pop)
-load("results/nlopt/wip-nl-solutions7-s-D-lic-newconstr.Rdata")
+load("results/nlopt/wip-nl-solutions7-D-lic-edit_contacts.Rdata")
 table_s0_lic<-data.frame(nlopt_s0[2:8,as.character(rev(nl_q_seq*prop_adults_lic))])
 colnames(table_s0_lic) <- as.character(rev(nl_q_seq))
 table_s0_lic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
@@ -114,6 +114,14 @@ table_s0_lic["Population Share"] = lic_pop[3:9]/sum(lic_pop[3:9])
 table_s0_lic["Infection Fatality Rate"] = ifr_lic[3:9]
 table_s0_lic <- table_s0_lic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
 print(xtable(table_s0_lic, digits=2), include.rownames=FALSE)
+
+table_s1_lic<-data.frame(nlopt_s1[2:8,as.character(rev(nl_q_seq*prop_adults_lic))])
+colnames(table_s1_lic) <- as.character(rev(nl_q_seq))
+table_s1_lic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
+table_s1_lic["Population Share"] = lic_pop[3:9]/sum(lic_pop[3:9])
+table_s1_lic["Infection Fatality Rate"] = ifr_lic[3:9]
+table_s1_lic <- table_s1_lic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
+print(xtable(table_s1_lic, digits=2), include.rownames=FALSE)
 
 #Comparison with non-epi results----
 # table_s0_lic <- rbind(table_s0_lic,c('res_nlopt',1,1,round(rev(as.numeric(nlopt_s0[1,])),8)))
@@ -132,7 +140,7 @@ print(xtable(table_s0_lic, digits=2), include.rownames=FALSE)
 
 #HIC
 prop_adults_hic <- sum(hic_pop[3:9])/sum(hic_pop)
-load("results/nlopt/wip-nl-solutions7-s-D-hic-newconstr.Rdata")
+load("results/nlopt/wip-nl-solutions7-D-hic-edit_contacts.Rdata")
 table_s0_hic<-data.frame(nlopt_s0[2:8,as.character(rev(nl_q_seq*prop_adults_hic))])
 colnames(table_s0_hic) <- as.character(rev(nl_q_seq))
 table_s0_hic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
@@ -140,6 +148,14 @@ table_s0_hic["Population Share"] = hic_pop[3:9]/sum(hic_pop[3:9])
 table_s0_hic["Infection Fatality Rate"] = ifr_hic[3:9]
 table_s0_hic <- table_s0_hic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
 print(xtable(table_s0_hic, digits=2), include.rownames=FALSE)
+
+table_s1_hic<-data.frame(nlopt_s1[2:8,as.character(rev(nl_q_seq*prop_adults_hic))])
+colnames(table_s1_hic) <- as.character(rev(nl_q_seq))
+table_s1_hic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
+table_s1_hic["Population Share"] = hic_pop[3:9]/sum(hic_pop[3:9])
+table_s1_hic["Infection Fatality Rate"] = ifr_hic[3:9]
+table_s1_hic <- table_s1_hic[,c("Age Group","Population Share","Infection Fatality Rate",as.character(rev(nl_q_seq)))]
+print(xtable(table_s1_hic, digits=2), include.rownames=FALSE)
 
 #Comparison with non-epi results----
 # table_s0_hic <- rbind(table_s0_hic,c('res_nlopt',1,1,round(rev(as.numeric(nlopt_s0[1,])),8)))
