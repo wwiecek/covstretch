@@ -35,7 +35,7 @@ default_delta_value <- .0025 #for LE scenario
 # le_speeds <- round(100/c(.25, .3, .4, .5, .75, 1), 5)
 le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1, 2), 5)
 
-country_case <- list(list('hic',1),list('hic',0.25),list('lic',1),list('lic',0.25))
+country_case <- list(list('hic',0.25),list('lic',1),list('lic',0.25))#list('hic',1),
 
 gg1.out.ceiling <- data.frame()
 gg2.out.ceiling <- data.frame()
@@ -47,9 +47,11 @@ for (d in country_case){
   default_supply_ceiling <- as.numeric(d[2])
   if (country=='hic'){
     pop <- hic_pop/sum(hic_pop)
+    default_pdeath <- ifr_hic
   } 
   if (country=='lic'){
     pop <- lic_pop/sum(lic_pop)
+    default_pdeath <- ifr_lic
   }
   
   source("R/setup.R")
@@ -92,7 +94,21 @@ for (d in country_case){
   df_fdf.ceiling$ceiling <- default_supply_ceiling
   df_fdf.ceiling$country <- country
   df_fdf.out.ceiling <- rbind(df_fdf.out.ceiling,df_fdf.ceiling)
+  
+  save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
+       file = "results/results_ceiling_analysis_pt2of4.Rdata")
 }
+
+load("results/results_ceiling_analysis_pt1of4.Rdata")
+df_fdf.ceiling <- df_fdf.out.ceiling
+gg1.ceiling <- gg1.out.ceiling
+df_efficacy_delta_raw.ceiling <- df_efficacy_delta_raw.out.ceiling
+load("results/results_ceiling_analysis_pt2of4.Rdata")
+df_fdf.out.ceiling <- rbind(df_fdf.out.ceiling,df_fdf.ceiling)
+gg1.out.ceiling <- rbind(gg1.out.ceiling,gg1.ceiling)
+df_efficacy_delta_raw.out.ceiling <- rbind(df_efficacy_delta_raw.out.ceiling,df_efficacy_delta_raw.ceiling)
+save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
+     file = "results/results_ceiling_analysis_pt2of4.Rdata")
 
 df_efficacy_delta.out.ceiling <- 
   df_efficacy_delta_raw.out.ceiling %>%
@@ -242,5 +258,5 @@ g1_joint.ceiling <- ggarrange(gg2.plot.ceiling + ggtitle("Vaccinations")+ theme(
 
 ggsave(paste0(fig_folder, "/g1_joint_ceiling.pdf"),g1_joint.ceiling, width = 5.55, height=2)
 
-save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
-     file = "results/results_ceiling_analysis.Rdata")
+# save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
+     # file = "results/results_ceiling_analysis_pt1of4.Rdata")
