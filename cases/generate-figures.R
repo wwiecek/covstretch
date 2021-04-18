@@ -7,7 +7,7 @@ ggsave(paste0(fig_folder, "/delay_both.pdf"), delay_both, width = width, height 
 ggsave(paste0(fig_folder, "/delay_switch.pdf"), delay_switch + theme(text = element_text(size=9)), width = width, height = 3.7/5.55*width)
 ggsave(paste0(fig_folder, "/g2.pdf"), fig_g2, width = width, height=width)
 ggsave(paste0(fig_folder, "/g2_reductions_only.pdf"), g2b, width = width, height=0.6*width)
-ggsave(paste0(fig_folder, "/sgg_age.pdf"), sgg_age + theme(text = element_text(size=7)), width = width, height=1.85/5.55*width)
+ggsave(paste0(fig_folder, "/sgg_age.pdf"), sgg_age + theme(text = element_text(size=9)), width = width, height=1.85/5.55*width)
 ggsave(paste0(fig_folder, "/g1_joint.pdf"),g1_joint, width = width, height=1.85/5.55*width)
 
 
@@ -26,4 +26,4 @@ ggsave(paste0(fig_folder, "/delay_impact.pdf"), fig_delay, width = width, height
 ggsave(paste0(fig_folder, "/supply_impact.pdf"), fig_extra_supply, width = width, height=3.4/5.55*width)
 
 if (all_k)
-  ggsave("figures/fdf_best_policy_allk.pdf", fig2s.all_k, width = width, height=0.6*width)
+  ggsave("figures/fdf_best_policy_allk.pdf", fig2.all_k, width = width, height=0.6*width)
