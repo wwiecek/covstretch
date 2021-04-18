@@ -1,4 +1,4 @@
-width <- 6.5
+
 
 ggsave(paste0(fig_folder, "/le_both.pdf"), le_both, width = width, height = 6.475/5.55*width)
 ggsave(paste0(fig_folder, "/le_optimal.pdf"), le2.plot, width = width, height=3.4/5.55*width)
@@ -18,6 +18,9 @@ ggsave(paste0(fig_folder, "/sfdf.pdf"),fig_sfdf, width = width, height=7.4/5.55*
 # ggsave(paste0(fig_folder, "/sfdf2.pdf"),fig_sfdf2, width = 5.55, height=7.4)
 
 ggsave(paste0(fig_folder, "/fig_kappa.pdf"),fig_kappa + theme(text = element_text(size=8)), width = width, height=3/5.55*width)
+
+ggsave(paste0(fig_folder, "/fig_screening.pdf"),fig_screening + theme(text = element_text(size=9)), 
+       width = width, height=4/5.55*width)
 
 ggsave(paste0(fig_folder, "/pre-epidemic.pdf"),benefits_gg, width = width, height=3.24/5.55*width)
 
