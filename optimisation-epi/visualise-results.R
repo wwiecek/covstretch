@@ -59,23 +59,36 @@ rbind(
   geom_line(size = 1.5)
 
 #Multiple plots - all models
+# fig_dynamic <-
+#   rbind(
+#   as.data.frame(nlopt_d0)[-1,] %>% mutate(age = 3:9) %>% 
+#   gather(s, value, -age) %>% 
+#   mutate(mixing = "heterogeneous"),
+#   as.data.frame(nlopt_d1)[-1,] %>% mutate(age = 3:9) %>% 
+#   gather(s, value, -age) %>% 
+#   mutate(mixing = "homogeneous")
+#   ) %>% 
+#   # filter(s %in% c("1000","400","100")) %>% 
+#   mutate(delta1 = as.percent(round(1/as.numeric(s),4))) %>%
+#   mutate(agegr = factor(age, levels = paste0(1:9), labels = colnames(pbc_spread))) %>%
+#   mutate(mixing = factor(mixing)) %>%
+#   ggplot(aes(x = agegr, y= value, group = interaction(mixing, delta1), lty = mixing, color = delta1)) + 
+#   geom_line(size = 1) +
+#   xlab("Age group") + ylab("Dose fraction") + ylim(0,1) +
+#   guides(color=guide_legend(title="vaccination speed with\nfull dose (% per day)"))
+
 fig_dynamic <-
-  rbind(
-  as.data.frame(nlopt_d0)[-1,] %>% mutate(age = 3:9) %>% 
-  gather(s, value, -age) %>% 
-  mutate(mixing = "heterogeneous"),
-  as.data.frame(nlopt_d1)[-1,] %>% mutate(age = 3:9) %>% 
-  gather(s, value, -age) %>% 
-  mutate(mixing = "homogeneous")
-  ) %>% 
+    as.data.frame(nlopt_d0)[-1,] %>% mutate(age = 3:9) %>% 
+      gather(s, value, -age) %>% 
+      mutate(mixing = "heterogeneous") %>% 
   # filter(s %in% c("1000","400","100")) %>% 
   mutate(delta1 = as.percent(round(1/as.numeric(s),4))) %>%
   mutate(agegr = factor(age, levels = paste0(1:9), labels = colnames(pbc_spread))) %>%
-  mutate(mixing = factor(mixing)) %>%
-  ggplot(aes(x = agegr, y= value, group = interaction(mixing, delta1), lty = mixing, color = delta1)) + 
+  ggplot(aes(x = agegr, y= value, group = delta1, color = delta1)) + 
   geom_line(size = 1) +
-  xlab("Age group") + ylab("Dose fraction") + ggtitle("Dynamic Epidemiological Models") + ylim(0,1) +
-  guides(color=guide_legend(title="vaccination speed (% per day)"))
+  xlab("Age group") + ylab("Dose fraction") + ylim(0,1) +
+  guides(color=guide_legend(title="vaccination speed with\nfull dose (% per day)"))
+
 
 ggsave("figures/dose_sharing_dynamic.pdf", fig_dynamic+theme(text = element_text(size=10)), width = 6.5, height=5)
 
@@ -96,10 +109,10 @@ fig_static <-
   mutate(model = factor(model)) %>%
   ggplot(aes(x = agegr, y= value, group = interaction(model, Q), lty = model, color = Q)) + 
   geom_line(size = 1) +
-  xlab("Age group") + ylab("Dose fraction") + ggtitle("Static Models") + ylim(0,1) +
+  xlab("Age group") + ylab("Dose fraction") + ylim(0,1) +
   guides(color=guide_legend(title="Q"))
 
-ggsave("figures/dose_sharing_static.pdf", fig_static+theme(text = element_text(size=10)), width = 6.5, height=5)
+ggsave("figures/dose_sharing_static.pdf", fig_static+theme(text = element_text(size=10)), width = 6.5, height=4.7)
 
 # plot1 <- 
 #   rbind(
