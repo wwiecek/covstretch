@@ -17,22 +17,28 @@ benefits_curve <- function(e, pop){
 }
 
 bf <- rbind(
-  benefits_curve(.8, pop) %>% mutate(scenario = " 80% efficacy"),
-  benefits_curve(.6, pop) %>% mutate(scenario = " 60% efficacy"),
-  benefits_curve(.4, pop) %>% mutate(scenario = " 40% efficacy"),
-  benefits_curve(1, pop) %>% mutate(scenario = "100% efficacy")) %>%
+  benefits_curve(.8, pop) %>% mutate(scenario = "80% efficacy"),
+  benefits_curve(.5, pop) %>% mutate(scenario = "50% efficacy"),
+  # benefits_curve(.4, pop) %>% mutate(scenario = " 40% efficacy"),
+  benefits_curve(.95, pop) %>% mutate(scenario = "95% efficacy")) %>%
   mutate(bi = 1-(bi/max(bi))) %>%
   mutate(bd = 1-(bd/max(bd)))
 
 benefits_gg <- bf %>% 
   # mutate(both = .5*bi + .5*bd) %>%
   setNames(c("p", "Deaths averted", "Infections averted", "scenario")) %>%
+  mutate(scenario = factor(scenario, levels = c("95% efficacy", "80% efficacy", "50% efficacy"))) %>%
   gather(var, value, -p, -scenario) %>%
+  mutate(var = factor(var, c("Infections averted", "Deaths averted"))) %>%
   # filter(!(scenario != "100% efficacy" & var == "Total benefit")) %>%
-  ggplot(aes(x = p, y = value, group = scenario, color = scenario, lty = scenario)) + 
+  ggplot(aes(x = p, y = value, group = scenario, linetype = scenario)) + 
   geom_line() + 
+  # scale_linetype_manual(values = c("95% efficacy" = "solid", 
+  #                                  "80% efficacy" = "dashed", 
+  #                                  "50% efficacy" = "dotted")) +
   # scale_color_viridis_d() +
-  facet_wrap(~var, scales = "free") + xlab("Fraction vaccinated before epidemic") + ylab("Fraction of harm averted") +
+  facet_wrap(~var, scales = "free") + 
+    xlab("Fraction vaccinated before epidemic") + ylab("Fraction of harm averted") +
   theme(legend.position = "top", legend.title = element_blank())
 
 

@@ -220,7 +220,7 @@ ggsave(paste0(fig_folder, "/g1_joint_ceiling.pdf"),g1_joint.ceiling, width = 5.5
 ##Analysis lower efficacy x speed----
 #LIC
 le2_lic <- df_efficacy_delta_raw.out.ceiling %>%
-  filter(ceiling==0.25) %>% 
+  filter(ceiling==1) %>% 
   filter(round(d1,4) %in% round(le_speeds,4)) %>%
   mutate(delta1 = 1/d1) %>% 
   select(delta1, e, model, i,d,harm,country) %>%
@@ -254,11 +254,11 @@ le2_lic <- df_efficacy_delta_raw.out.ceiling %>%
   # labels = as.percent(1/d1_general))
   geom_text(aes(label = value), color = "white", size = 2.5)
 
-ggsave(paste0(fig_folder, "/le_optimal_lic_hic_supply25.pdf"), le2_lic, width = 6.5, height = 7.7)
+ggsave(paste0(fig_folder, "/le_optimal_lic_hic.pdf"), le2_lic, width = 6.5, height = 7.7)
 
 ##FDF analysis----
 fig2.all_k.lic <- df_fdf.out.ceiling %>% 
-  filter(ceiling==0.25) %>% 
+  filter(ceiling==1) %>% 
   filter(d1 > 40, d1 <= 1000) %>%
   filter(e >= .5) %>%
   select(d1, model, e, policy, d, harm, i, country) %>%
@@ -296,7 +296,7 @@ fig2.all_k.lic <- df_fdf.out.ceiling %>%
   xlab(paste0(def_labels, " (1st dose, default policy)")) + 
   geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
 
-ggsave(paste0(fig_folder, "/fdf_allk_lic_hic_supply25.pdf"), fig2.all_k.lic, width = 6.5, height = 7.7)
+ggsave(paste0(fig_folder, "/fdf_allk_lic_hic.pdf"), fig2.all_k.lic, width = 6.5, height = 7.7)
 
 # save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
      # file = "results/results_ceiling_analysis_pt1of4.Rdata")

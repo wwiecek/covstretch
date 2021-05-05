@@ -67,3 +67,6 @@ kbl(table_g3.kappa,"latex",align = "r", vline = "", row.names = FALSE) %>%
   kable_paper(full_width = F) %>%
   column_spec(1, bold = F) %>%
   collapse_rows(columns = 3, valign = "top")
+
+# This has to be ran after vrf.R
+print (xtable(tab_screening))

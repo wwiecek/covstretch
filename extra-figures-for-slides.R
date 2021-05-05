@@ -55,7 +55,9 @@ benefits_gg_scenarios <- bf_scenarios %>%
   ggplot(aes(x = p, y = value, group = scenario, color = scenario, lty = scenario)) + 
   geom_line() + 
   # scale_color_viridis_d() +
-  facet_wrap(~var, scales = "free") + xlab("Fraction vaccinated before epidemic") + ylab("Fraction of harm averted") +
+  facet_wrap(~var, scales = "free") + 
+  xlab("Fraction vaccinated before epidemic") + 
+  ylab("Fraction of harm averted") +
   ylim(0, 1) +
   theme(legend.position = "right", legend.title = element_blank(),text=element_text(size=9))
 
@@ -70,7 +72,7 @@ g2b <- df_efficacy_delta  %>%
   ggplot(aes(x = delta1, y = value, group = model, color = model)) + 
   geom_line(size=1.1) +
   geom_point(pch = 21, size = 2, fill = "white") +
-  facet_wrap(~key, scales = "free", ncol = 3) +
+  facet_wrap(~key, ncol = 3) +
   scale_x_continuous(breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
   scale_color_discrete(name = "Scenario") +
   theme(axis.text.x = element_text(angle = 45, size = 11), legend.position = "top",legend.direction = "vertical") +
@@ -426,9 +428,51 @@ le2.presentation <- df_efficacy_delta_raw %>%
 le2.presentation
 
 ggsave("figures/presentation-le_optimal_deaths_fast.png", le2.presentation+theme(text = element_text(size=15),
-                                                                                 legend.text = element_text(size=12),
+                                                                                 legend.text = element_text(size=15),
                                                                                  legend.direction = "vertical"), 
        width = 7, height=5.5)
+
+# Alternative figure with reciprocals of x on the x axis (MK sugestions 25 Apr 2021):
+le2.presentation <- df_efficacy_delta_raw %>%
+  filter(d1 %in% le_speeds) %>%
+  mutate(delta1 = 1/d1) %>% 
+  select(delta1, e, model, i,d,harm) %>%
+  gather(var, value, -delta1, -e, -model) %>%
+  group_by(model,var) %>%
+  mutate(ref = value[e == .95 & delta1 == default_delta_value]) %>%
+  filter(e %in% c(seq(.5, .9, .1),0.95)) %>%
+  ungroup() %>%
+  mutate(r = (value/ref)) %>% 
+  mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
+                         labels = c("Fractional dosing better by >=5%",
+                                    "Comparable (+-5%)", 
+                                    "Base case better by >=5%"
+                         ))) %>%
+  mutate(var = factor(var, levels = c("i", "d", "harm"),
+                      labels = c("Infections", "Deaths", "Economic harm"))) %>%
+  mutate(value = round(r, 2)) %>%
+  mutate(speedup = factor(round(delta1/default_delta_value, 1),
+                          levels = c(1, 1.2, 1.4, 1.6, 2, 4, 8),
+                          labels = c("1", "5/6", "5/7", "5/8", "1/2", "1/4", "1/8"))) %>%
+  # mutate(speedup = factor(as.percent(delta1, 2))) %>%
+  mutate(e = factor(e)) %>%
+  filter(var == "Deaths" & model == "Fast growth") %>%
+  ggplot(aes(x = speedup, y = e, fill = le_better)) + geom_tile() +
+  scale_fill_manual(values = c("grey60", "grey40", "grey20"), 
+                    name = "") +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Efficacy") + 
+  xlab("Dose (1 is full dose)") + 
+  # scale_x_continuous(breaks = 1/d1_general,
+  # labels = as.percent(1/d1_general))
+  geom_text(aes(label = value), color = "white", size = 5)
+le2.presentation
+ggsave("figures/presentation-le_optimal_deaths_fast.png", le2.presentation+
+         theme(text = element_text(size=15),
+         legend.text = element_text(size=15),
+         legend.direction = "vertical"), 
+       width = 7, height=5.5)
+
 
 ##Slide Importance of starting early----
 death_rates <- data.frame(delay = (1:nrow(w))/30, imax = w[,"D",]/max(w[,"D",]), imin = 0)
