@@ -34,7 +34,8 @@ fig_non_epi <-
   xlab("Age group") + ylab("Dose fraction") + ggtitle("Optimal Dosage") + ylim(0,1) +
   guides(color=guide_legend(title="Q")) + theme(legend.position="bottom") + facet_grid(cols = vars(region))
 
-ggsave("figures/dose_sharing_nonepi.pdf", fig_non_epi+theme(text = element_text(size=10)), width = 6.5, height=4.7)
+ggsave("figures/dose_sharing_nonepi.pdf", fig_non_epi + 
+         theme(text = element_text(size=10)), width = 6.5, height=4.7)
 
 # Single plot - all models
 rbind(
@@ -96,21 +97,21 @@ fig_static <-
   rbind(
     as.data.frame(nlopt_s0)[-1,] %>% mutate(age = 3:9) %>% 
       gather(Q, value, -age) %>% 
-      mutate(model = "epi static - heterogeneous"),
+      mutate(model = "Heterogeneous mixing"),
     as.data.frame(nlopt_s1)[-1,] %>% mutate(age = 3:9) %>% 
       gather(Q, value, -age) %>% 
-      mutate(model = "epi static - homogeneous"),
+      mutate(model = "Homogeneous mixing"),
     as.data.frame(nonepi_s1) %>% mutate(age = 3:9) %>% 
       gather(Q, value, -age) %>% 
-      mutate(model = "theoretical")
+      mutate(model = "Exogenous disease risk")
   ) %>% 
-  filter(Q %in% c("0.3","0.6","0.9")) %>% 
+  filter(Q %in% c("0.3","0.8")) %>% 
   mutate(agegr = factor(age, levels = paste0(1:9), labels = colnames(pbc_spread))) %>%
   mutate(model = factor(model)) %>%
   ggplot(aes(x = agegr, y= value, group = interaction(model, Q), lty = model, color = Q)) + 
   geom_line(size = 1) +
   xlab("Age group") + ylab("Dose fraction") + ylim(0,1) +
-  guides(color=guide_legend(title="Q"))
+  guides(color=guide_legend(title="Q (supply constraint)"))
 
 ggsave("figures/dose_sharing_static.pdf", fig_static+theme(text = element_text(size=10)), width = 6.5, height=4.7)
 

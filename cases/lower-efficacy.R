@@ -33,7 +33,7 @@ le2 <- df_efficacy_delta_raw %>%
   gather(var, value, -delta1, -e, -model) %>%
   group_by(model,var) %>%
   mutate(ref = value[e == .95 & delta1 == default_delta_value]) %>%
-  filter(e %in% seq(.5, .9, .1)) %>%
+  filter(e %in% c(seq(.5, .9, .1), .95)) %>%
   ungroup() %>%
   mutate(r = (value/ref)) %>% 
   mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
@@ -48,13 +48,18 @@ le2 <- df_efficacy_delta_raw %>%
   mutate(speedup = factor(round(delta1/default_delta_value, 1))) %>%
   # mutate(speedup = factor(as.percent(delta1, 2))) %>%
   mutate(e = factor(e)) %>%
+  mutate(speedup = factor(round(delta1/default_delta_value, 1),
+                          levels = c(1, 1.2, 1.4, 1.6, 2, 4, 8),
+                          labels = c("1", "5/6", "5/7", "5/8", "1/2", "1/4", "1/8"))) %>%
   filter(var != "Economic harm") %>%
   ggplot(aes(x = speedup, y = e, fill = le_better)) + geom_tile() +
   scale_fill_manual(values = c("grey60", "grey40", "grey20"), 
                     name = "") +
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  facet_grid(var~model) + ylab("e2 (efficacy for the less effective vaccine)") + 
-  xlab("delta2/delta1 (speed-up factor vs 0.25% base case)") + 
+  facet_grid(var~model) + 
+  ylab("efficacy for the alternative dose") + 
+  xlab("Dose") + 
+  # xlab("Fold increase in capacity (vs 0.25% base case)") + 
   # scale_x_continuous(breaks = 1/d1_general,
                      # labels = as.percent(1/d1_general))
   geom_text(aes(label = value), color = "white", size = 2.5)
@@ -64,6 +69,7 @@ le_both <- ggpubr::ggarrange(le1 + ggtitle("Burden of infections")+theme(text = 
                   le2 + ggtitle("Optimal policy (relative burden)")+theme(text = element_text(size=9)),# + theme(legend.direction = "vertical"), 
                   ncol = 1, heights = c(.7,1))
 
-le2.plot <- le2 + ggtitle("Optimal policy (relative burden)")+theme(text = element_text(size=9))
+le2.plot <- le2
+# le2.plot <- le2 + ggtitle("Optimal policy (relative burden)")+theme(text = element_text(size=9))
 
 

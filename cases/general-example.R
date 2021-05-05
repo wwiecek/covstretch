@@ -108,7 +108,7 @@ sgg_age <- sr(f="2v_v2", apap_2v(scenario_list_2v[[2]], 360)) %>%
 # Fig G2A: absolute harm
 g2a <- df_efficacy_delta  %>%
   filter(e == .95) %>%
-  filter(round(d1,4) %in% round(d1_general,4)) %>%
+  filter(round(d1,4) %in% c(Inf, round(d1_general,4))) %>%
   select(i, d) %>%
   gather(key, value, -d1, -model, -e) %>%
   mutate(key = factor(key, levels = c("i", "d", "harm"), 
@@ -128,7 +128,7 @@ g2a <- df_efficacy_delta  %>%
 # Fig G2B: How many infections and deaths averted with 95% efficacious vaccine -----
 g2b <- df_efficacy_delta  %>%
   filter(e == .95) %>%
-  filter(round(d1,4) %in% round(d1_general,4)) %>%
+  filter(round(d1,4) %in% c(Inf, round(d1_general,4))) %>%
   select(ri, rd) %>%
   gather(key, value, -d1, -model, -e) %>%
   mutate(key = factor(key, levels = c("ri", "rd", "re"), 
@@ -145,7 +145,7 @@ g2b <- df_efficacy_delta  %>%
   ylab("Fraction of harm averted") +
   ylim(0, 1)
 
-fig_g2<-ggarrange(g2a+ggtitle("Burden"), 
+fig_g2<-ggarrange(g2a+ggtitle("Burden (log scale)")+scale_y_log10(), 
                   g2b+ggtitle("Reductions"), 
                   common.legend = TRUE, ncol = 1, 
                   heights = c(1,1.5), legend = "top")
