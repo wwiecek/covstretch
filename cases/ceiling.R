@@ -151,12 +151,17 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               ylab("Fraction of harm averted") + ggtitle("LIC"),
                             common.legend = TRUE, ncol = 1)
 
-g2.lic_hic.fig <- g2b.out.ceiling %>% filter(delta1!=0&ceiling=="100%") %>%
+head(g2b.out.ceiling)
+
+g2.lic_hic.fig <- rbind(g2b.out.ceiling %>% filter(delta1!=0&ceiling=="100%"),
+                         data.frame(d1=rep(Inf,12),model=as.factor(rep(c("Slow decrease","Slow growth","Fast growth"),4)),
+                                    e=rep(0.95,12),ceiling=rep("100%",12),country=as.factor(rep(c("HIC","LIC"),6)),key=c(rep("Infections",6),rep("Deaths",6)),
+                                    value=rep(0,12),delta1=rep(0,12))) %>%
   ggplot(aes(x = delta1, y = value*100, color = model, linetype = country)) + 
-  geom_line(size=0.9) +
-  geom_point(size = 1.7) +
+  geom_line(size=0.5) +
+  # geom_point(size = 1) +
   facet_wrap(~key, scales = "free", ncol = 3) +
-  scale_x_log10(breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
+  scale_x_continuous(breaks = c(0.00,1/d1_general), labels = c("",as.percent(1/d1_general))) +
   lightness(scale_color_brewer(name = "Epidemic scenario",palette = "YlOrRd",direction = 1,labels = c("Slow-decrease", "Slow-growth", "Fast-growth")),scalefac(0.95))+
   # scale_color_discrete(name = "Epidemic scenario",labels = c("Slow-decrease", "Slow-growth", "Fast-growth")) +
   scale_fill_discrete(name = "Parameters") +
@@ -164,7 +169,7 @@ g2.lic_hic.fig <- g2b.out.ceiling %>% filter(delta1!=0&ceiling=="100%") %>%
   theme(axis.text.x = element_text(angle = 45), legend.position = "top", legend.title = element_text(size=8),legend.text = element_text(size=7),
         text = element_text(size=9)) +
   ylim(0, 100)+
-  xlab(def_labels$speed) + 
+  xlab("Percentage of population vaccinated daily") + 
   ylab("% burden averted")
 g2.lic_hic.fig
 
