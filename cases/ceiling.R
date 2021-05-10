@@ -170,6 +170,23 @@ g2.lic_hic.fig
 
 ggsave(paste0(fig_folder, "/harm_lic_hic.pdf"), g2.lic_hic.fig, width=width, height=0.6*width)
 
+
+# Same figure as above but with 100% supply -----
+g2b.out.ceiling %>% filter(delta1!=0, ceiling=="100%") %>%
+  ggplot(aes(x = delta1, y = value, color = model, linetype = country)) + 
+  geom_line(size=0.5) +
+  geom_point(pch = 21, size = 1.5, fill = "white") +
+  facet_wrap(~key, scales = "free", ncol = 3) +
+  scale_x_continuous(trans = 'log10', breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
+  scale_color_discrete(name = "Scenario") +
+  scale_linetype_manual(values=c("solid", "dashed"),name = "Parameters") +
+  theme(axis.text.x = element_text(angle = 45), legend.position = "top",text = element_text(size=8.3)) +
+  ylim(0, 1)+
+  xlab(def_labels$speed) + 
+  ylab("Fraction of harm averted")
+ggsave(paste0(fig_folder, "/ceiling_lic_hic_only.pdf"), width = 6.5, height=3.5)
+
+
 ####Final number of infections and death cases (table - G3 equivalent)####
 g3.out.ceiling <- g3.out.ceiling %>% 
   mutate(country = factor(country,
