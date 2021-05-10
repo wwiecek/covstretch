@@ -110,6 +110,26 @@ sgg_age <- sr(f="2v_v2", apap_2v(scenario_list_2v[[2]], 360)) %>%
 
 
 
+print("Contribtion of different age groups to infections (if no vaccine), 3 scenarios:")
+temp_l <- list(
+  sr(f="2v_v2", apap_2v(scenario_list_2v[[1]], 360)),
+  sr(f="2v_v2", apap_2v(scenario_list_2v[[2]], 360)),
+  sr(f="2v_v2", apap_2v(scenario_list_2v[[3]], 360))
+)
+names(temp_l) <- scenario_nms_2v
+
+# apply(w[, "I", ], 1, function(x) {
+#   x <- x*pop
+#   c(sum(x[1:2]), sum(x[3:5]), sum(x[6:9]))/sum(x)
+# }) %>% t()
+
+lapply(temp_l, function(w) {
+  x <- w[360, "cumI", ]*pop
+  y <- c(sum(x[1:2]), sum(x[3:5]), sum(x[6:9]))/sum(x)
+  names(y) <- c("Under 20", "20-49", "50+")
+  y
+}) %>% print()
+
 # library(scales)
 
 # Fig G2A: absolute harm

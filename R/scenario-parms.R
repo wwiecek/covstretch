@@ -2,7 +2,6 @@
 # Nc <- 9
 # Ngroups <- 9
 # Ndays <- 1000
-r0 <- 2.5
 # Use realistic age structure and infection structure
 # For now in the HICs
 
