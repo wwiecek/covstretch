@@ -4,7 +4,7 @@ source("project-setup.R")
 
 fig_folder <- "figures"
 
-country_case <- list(list('hic',1),list('lic',1),list('hic',0.25),list('lic',0.25))
+country_case <- list(list('hic',1),list('lic',1))#,list('hic',0.25),list('lic',0.25)
 
 gg1.out.ceiling <- data.frame()
 gg2.out.ceiling <- data.frame()
@@ -65,9 +65,9 @@ for (d in country_case){
   df_fdf.out.ceiling <- rbind(df_fdf.out.ceiling,df_fdf.ceiling)
 }
 
-# save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
-#      file = "results/results_ceiling_lic_analysis.Rdata")
-load("results/results_ceiling_lic_analysis.Rdata")
+save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
+     file = "results/results_lic_hic_analysis.Rdata")
+# load("results/results_ceiling_lic_analysis.Rdata")
 
 df_efficacy_delta.out.ceiling <- 
   df_efficacy_delta_raw.out.ceiling %>%
@@ -151,7 +151,24 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               ylab("Fraction of harm averted") + ggtitle("LIC"),
                             common.legend = TRUE, ncol = 1)
 
-ggsave(paste0(fig_folder, "/harm_ceiling_lic.pdf"), g2.ceiling.fig, width = 5.55, height=7)
+g2.lic_hic.fig <- g2b.out.ceiling %>% filter(delta1!=0&ceiling=="100%") %>%
+  ggplot(aes(x = delta1, y = value*100, color = model, linetype = country)) + 
+  geom_line(size=0.9) +
+  geom_point(size = 1.7) +
+  facet_wrap(~key, scales = "free", ncol = 3) +
+  scale_x_log10(breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
+  lightness(scale_color_brewer(name = "Epidemic scenario",palette = "YlOrRd",direction = 1,labels = c("Slow-decrease", "Slow-growth", "Fast-growth")),scalefac(0.95))+
+  # scale_color_discrete(name = "Epidemic scenario",labels = c("Slow-decrease", "Slow-growth", "Fast-growth")) +
+  scale_fill_discrete(name = "Parameters") +
+  scale_linetype_manual(values=c("solid", "dashed"),name = "Supply constraint") +
+  theme(axis.text.x = element_text(angle = 45), legend.position = "top", legend.title = element_text(size=8),legend.text = element_text(size=7),
+        text = element_text(size=9)) +
+  ylim(0, 100)+
+  xlab(def_labels$speed) + 
+  ylab("% burden averted")
+g2.lic_hic.fig
+
+ggsave(paste0(fig_folder, "/harm_lic_hic.pdf"), g2.lic_hic.fig, width=width, height=0.6*width)
 
 ####Final number of infections and death cases (table - G3 equivalent)####
 g3.out.ceiling <- g3.out.ceiling %>% 
