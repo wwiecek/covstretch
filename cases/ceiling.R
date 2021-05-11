@@ -4,7 +4,7 @@ source("project-setup.R")
 
 fig_folder <- "figures"
 
-country_case <- list(list('hic',1),list('lic',1),list('hic',0.25),list('lic',0.25))
+country_case <- list(list('hic',1),list('lic',1))#,list('hic',0.25),list('lic',0.25)
 
 gg1.out.ceiling <- data.frame()
 gg2.out.ceiling <- data.frame()
@@ -66,7 +66,8 @@ for (d in country_case){
 }
 
 save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
-     file = "results/results_ceiling_lic_analysis.Rdata")
+     file = "results/results_lic_hic_analysis.Rdata")
+# load("results/results_ceiling_lic_analysis.Rdata")
 
 df_efficacy_delta.out.ceiling <- 
   df_efficacy_delta_raw.out.ceiling %>%
@@ -109,7 +110,7 @@ g3.out.ceiling <- df_efficacy_delta.out.ceiling %>%
   mutate(variable = factor(variable, 
                            levels = c("i", "d", "harm", "ri", "rd", "re", "diffd", "diffi"),
                            labels = c("Infections", "Deaths per 100,000", "Economic harm",
-                                      "RI", "RD", "RE", "Difference in deaths", "Difference in infections"))) %>%
+                                      "Fraction of infections averted", "Fraction of deaths averted", "RE", "Difference in deaths", "Difference in infections"))) %>%
   mutate(value = round(value, 2)) %>%
   spread(d1, value) %>% 
   arrange(variable, model) %>% ungroup() %>%
@@ -129,7 +130,7 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               geom_line(size=0.8) +
                               geom_point(pch = 21, size = 1.5, fill = "white") +
                               facet_wrap(~key, scales = "free", ncol = 3) +
-                              scale_x_continuous(trans = 'log10', breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
+                              scale_x_continuous(breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
                               scale_color_discrete(name = "Scenario") +
                               scale_linetype_manual(values=c("dotted", "solid"),name = "Supply constraint") +
                               theme(axis.text.x = element_text(angle = 45), legend.position = "top",text = element_text(size=8.3)) +
@@ -141,7 +142,7 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               geom_line(size=0.8) +
                               geom_point(pch = 21, size = 1.5, fill = "white") +
                               facet_wrap(~key, scales = "free", ncol = 3) +
-                              scale_x_continuous(trans = 'log10', breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
+                              scale_x_continuous(breaks = 1/d1_general, labels = as.percent(1/d1_general)) +
                               scale_color_discrete(name = "Scenario") +
                               scale_linetype_manual(values=c("dotted", "solid"),name = "Supply constraint") +
                               theme(axis.text.x = element_text(angle = 45), legend.position = "top",text = element_text(size=8.3)) +
@@ -150,7 +151,29 @@ g2.ceiling.fig <- ggarrange(g2b.out.ceiling %>% filter(delta1!=0&country=="HIC")
                               ylab("Fraction of harm averted") + ggtitle("LIC"),
                             common.legend = TRUE, ncol = 1)
 
-ggsave(paste0(fig_folder, "/ceiling.pdf"), g2.ceiling.fig, width = 5.55, height=7)
+head(g2b.out.ceiling)
+
+g2.lic_hic.fig <- rbind(g2b.out.ceiling %>% filter(delta1!=0&ceiling=="100%"),
+                         data.frame(d1=rep(Inf,12),model=as.factor(rep(c("Slow decrease","Slow growth","Fast growth"),4)),
+                                    e=rep(0.95,12),ceiling=rep("100%",12),country=as.factor(rep(c("HIC","LIC"),6)),key=c(rep("Infections",6),rep("Deaths",6)),
+                                    value=rep(0,12),delta1=rep(0,12))) %>%
+  ggplot(aes(x = delta1, y = value*100, color = model, linetype = country)) + 
+  geom_line(size=0.5) +
+  # geom_point(size = 1) +
+  facet_wrap(~key, scales = "free", ncol = 3) +
+  scale_x_continuous(breaks = c(0.00,1/d1_general), labels = c("",as.percent(1/d1_general))) +
+  lightness(scale_color_brewer(name = "Epidemic scenario",palette = "YlOrRd",direction = 1,labels = c("Slow-decrease", "Slow-growth", "Fast-growth")),scalefac(0.95))+
+  # scale_color_discrete(name = "Epidemic scenario",labels = c("Slow-decrease", "Slow-growth", "Fast-growth")) +
+  scale_fill_discrete(name = "Parameters") +
+  scale_linetype_manual(values=c("solid", "dashed"),name = "Supply constraint") +
+  theme(axis.text.x = element_text(angle = 45), legend.position = "top", legend.title = element_text(size=8),legend.text = element_text(size=7),
+        text = element_text(size=9)) +
+  ylim(0, 100)+
+  xlab("Percentage of population vaccinated daily") + 
+  ylab("% burden averted")
+g2.lic_hic.fig
+
+ggsave(paste0(fig_folder, "/harm_lic_hic.pdf"), g2.lic_hic.fig, width=width, height=0.6*width)
 
 
 # Same figure as above but with 100% supply -----
@@ -176,13 +199,13 @@ g3.out.ceiling <- g3.out.ceiling %>%
                           labels = c("HIC", "LIC"))) %>% 
   rename(region=country)
 
-table.ceiling <- g3.out.ceiling %>% filter(variable %in% c("Infections","Deaths per 100,000")) %>% 
+table.ceiling <- g3.out.ceiling %>% filter(variable %in% c("Fraction of infections averted","Fraction of deaths averted")) %>% 
   arrange(region,desc(ceiling),variable,model) %>% 
-  select(variable,model,`0%`,`0.25%`,`0.5%`,`0.75%`,`1%`,`2%`)
+  select(variable,model,`0%`,`0.1%`,`0.25%`,`0.5%`,`0.75%`,`1%`,`2%`)
 # write.csv(table.ceiling,'results/ceiling.csv')
 # print (xtable(table.ceiling))
 
-fmt.table <- kbl(table.ceiling,"latex", align = "r") %>%
+fmt.table <- kbl(table.ceiling, "latex", align = "r") %>%
   kable_styling(full_width = F, font_size = 14) %>%
   kable_paper(full_width = F) %>%
   column_spec(1, bold = T) %>%
@@ -194,9 +217,9 @@ fmt.table <- kbl(table.ceiling,"latex", align = "r") %>%
   pack_rows("100% Supply",13,18,label_row_css="text-align: center; font-size: small")%>%
   pack_rows("25% Supply",19,24,label_row_css="text-align: center; font-size: small")
 
-# print(fmt.table)
+print(fmt.table)
 
-# fmt.table %>% save_kable('results/ceiling.png')
+fmt.table %>% save_kable('results/ceiling.png')
 
 # kbl(table.ceiling, align = "c") %>%
 #   kable_paper(full_width = F) %>%
@@ -236,7 +259,7 @@ ggsave(paste0(fig_folder, "/g1_joint_ceiling.pdf"),g1_joint.ceiling, width = 5.5
 ##Analysis lower efficacy x speed----
 #LIC
 le2_lic <- df_efficacy_delta_raw.out.ceiling %>%
-  filter(ceiling==1) %>% 
+  filter(ceiling==0.25) %>% 
   filter(round(d1,4) %in% round(le_speeds,4)) %>%
   mutate(delta1 = 1/d1) %>% 
   select(delta1, e, model, i,d,harm,country) %>%
@@ -270,11 +293,11 @@ le2_lic <- df_efficacy_delta_raw.out.ceiling %>%
   # labels = as.percent(1/d1_general))
   geom_text(aes(label = value), color = "white", size = 2.5)
 
-ggsave(paste0(fig_folder, "/le_optimal_lic_hic.pdf"), le2_lic, width = 6.5, height = 7.7)
+ggsave(paste0(fig_folder, "/le_optimal_lic_hic_supply25.pdf"), le2_lic, width = 6.5, height = 7.7)
 
 ##FDF analysis----
 fig2.all_k.lic <- df_fdf.out.ceiling %>% 
-  filter(ceiling==1) %>% 
+  filter(ceiling==0.25) %>% 
   filter(d1 > 40, d1 <= 1000) %>%
   filter(e >= .5) %>%
   select(d1, model, e, policy, d, harm, i, country) %>%
@@ -312,7 +335,7 @@ fig2.all_k.lic <- df_fdf.out.ceiling %>%
   xlab(paste0(def_labels, " (1st dose, default policy)")) + 
   geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
 
-ggsave(paste0(fig_folder, "/fdf_allk_lic_hic.pdf"), fig2.all_k.lic, width = 6.5, height = 7.7)
+ggsave(paste0(fig_folder, "/fdf_allk_lic_hic_supply25.pdf"), fig2.all_k.lic, width = 6.5, height = 7.7)
 
 # save(df_efficacy_delta_raw.out.ceiling,df_fdf.out.ceiling,gg1.out.ceiling,gg2.out.ceiling,
      # file = "results/results_ceiling_analysis_pt1of4.Rdata")

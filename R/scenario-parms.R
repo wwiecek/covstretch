@@ -85,7 +85,7 @@ pars_le_late <- list_modify(pars_le_fast,
                             y0 = (sr(pars_le_fast)["120", ,])*set0)
 
 scenario_par_nms_2v <- c("pars_linear", "pars_le_slow", "pars_le_fast")#, "pars_le_late", "pars_le_cr")
-scenario_nms_2v <- c("Slow decrease", "Slow growth", "Fast growth")#, "Declining risk", "Constant risk")
+scenario_nms_2v <- c("Slow-decrease epidemic", "Slow-growth epidemic", "Fast-growth epidemic")#, "Declining risk", "Constant risk")
 scenario_list_2v <- lst(
   # "Constant risk of infection" = pars_le_cr,
   "Slow decrease (R = 0.99)" = pars_le_linear,
