@@ -156,18 +156,18 @@ head(g2b.out.ceiling)
 g2.lic_hic.fig <- rbind(g2b.out.ceiling %>% filter(delta1!=0&ceiling=="100%"),
                          data.frame(d1=rep(Inf,12),model=as.factor(rep(c("Slow decrease","Slow growth","Fast growth"),4)),
                                     e=rep(0.95,12),ceiling=rep("100%",12),country=as.factor(rep(c("HIC","LIC"),6)),key=c(rep("Infections",6),rep("Deaths",6)),
-                                    value=rep(0,12),delta1=rep(0,12))) %>%
+                                    value=rep(0,12),delta1=rep(0,12))) %>% mutate(key=factor(key,levels=c("Infections","Deaths"))) %>% 
   ggplot(aes(x = delta1, y = value*100, color = model, linetype = country)) + 
   geom_line(size=0.5) +
   # geom_point(size = 1) +
-  facet_wrap(~key, scales = "free", ncol = 3) +
+  facet_wrap(~key, scales = "free", ncol = 2, strip.position="top") +
   scale_x_continuous(breaks = c(0.00,1/d1_general), labels = c("",as.percent(1/d1_general))) +
   lightness(scale_color_brewer(name = "Epidemic scenario",palette = "YlOrRd",direction = 1,labels = c("Slow-decrease", "Slow-growth", "Fast-growth")),scalefac(0.95))+
   # scale_color_discrete(name = "Epidemic scenario",labels = c("Slow-decrease", "Slow-growth", "Fast-growth")) +
   scale_fill_discrete(name = "Parameters") +
   scale_linetype_manual(values=c("solid", "dashed"),name = "Supply constraint") +
   theme(axis.text.x = element_text(angle = 45), legend.position = "top", legend.title = element_text(size=8),legend.text = element_text(size=7),
-        text = element_text(size=9)) +
+        text = element_text(size=10),strip.text = element_text(size = 10,hjust = 0)) +
   ylim(0, 100)+
   xlab("Percentage of population vaccinated daily") + 
   ylab("% burden averted")

@@ -84,24 +84,22 @@ df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
 
 # Fig 1: Base case example ------
 fig_fdf1 <-rescale_and_bind(list(
-  "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, fdf_deltas$d[5], delay_default) %>% 
-                                    list_modify(e1 = .8), f = "2d_v2"),
   "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas$d_fdf[5], delay_fdf) %>% 
-                                    list_modify(e1 = .8), f = "2d_v2"),
-  "S-FDF-60 (12 weeks for under 60s)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d_sse_h6[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid_k[,6]) %>% 
-                                    list_modify(e1 = .8), f = "2d_v2")
+                                    list_modify(e1 = .8), f = "2d_v2")*100,
+  "HDF-60 (12 weeks for under 60s)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d_sse_h6[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid_k[,6]) %>% 
+                                           list_modify(e1 = .8), f = "2d_v2")*100,
+  "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, fdf_deltas$d[5], delay_default) %>% 
+                                    list_modify(e1 = .8), f = "2d_v2")*100
   # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
 ), pop) %>% 
   plot_rcs(c("P1", "P2", "cumV"), long_names = ln, ncol = 3, start_date = NULL) + 
-  ylab("Proportion of population") + theme(legend.position = "top") + 
-  scale_color_manual(values = fdf_palette, name = "2nd dose delay policy:") +
-  scale_x_continuous(name = "time [days]", breaks = seq(0, 360, 120))
+  ylab("Population %") + theme(legend.position = "top") + 
+  lightness(scale_color_brewer(palette = "YlGnBu",direction = 1,),scalefac(0.85)) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 360, 120)) +
+  labs(color="Second-dose delay policy:",linetype="Second-dose delay policy:")
 
 # sr(apap_2d(pars_fdf_fast, 180, delay_default) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
 # sr(apap_2d(pars_fdf_fast, 145, delay_fdf) %>% list_modify(e1 = .8), f = "2d_v2") %>% main_metrics(pop)
-
-
-
 
 df_gg <- df_fdf %>% 
   filter(e %in% c(.5, .95)) %>% 
@@ -165,7 +163,7 @@ fdf_reductions <- df_fdf %>%
         axis.text.x = element_text(angle = 45)) +
   scale_color_manual(values = fdf_palette) +
   scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
-  scale_linetype_manual(name = "efficacy after 1st dose", values = c("solid", "dashed")) +
+  scale_linetype_manual(name = "Efficacy following first dose (e1)", values = c("solid", "dashed")) +
   xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Fraction of harm averted")+
   guides(linetype=FALSE)
 
@@ -254,10 +252,10 @@ df_all_reductions <- df_fdf %>%
   ungroup() %>%
   filter(d1 > 60, d1 <= 1000) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
-  mutate(policy = factor(policy, levels = c("default", "fdf", "hybrid_6"), 
-                         labels = c("Default (4 wks delay)", 
-                                    "FDF (12 wks for all)", 
-                                    "S-FDF (4 wks for 60+, 12 for rest)"))) %>%
+  mutate(policy = factor(policy, levels = c("default", "hybrid_6", "fdf"), 
+                         labels = c("Default (4 weeks)",
+                                    "HDF-60 (12 weeks for under 60s)",
+                                    "FDF (12 weeks)"))) %>%
   mutate(var = factor(var, levels = c("i", "d", "harm"),
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   mutate(e = factor(e)) %>%
@@ -265,27 +263,29 @@ df_all_reductions <- df_fdf %>%
 
 gg_all_reductions_e5 <- df_all_reductions %>%
   filter(e == .5) %>%
-  ggplot(aes(x = delta1, y = value, color = policy)) + 
+  ggplot(aes(x = delta1, y = value*100, color = policy)) + 
   geom_line(size=.75) +
   facet_grid(var ~ model, scales = "free") +
   theme(legend.position = "top", 
         legend.box = "vertical",
         axis.text.x = element_text(angle = 45)) +
-  scale_color_manual(values = fdf_palette) +
+  lightness(scale_color_brewer(palette = "YlGnBu",direction = 1,),scalefac(0.85)) +
   scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
-  xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Fraction of harm averted")
+  xlab(def_labels) + ylab("% harm averted") +
+  labs(color="Second-dose delay policy:")
 
 gg_all_reductions_e8 <- df_all_reductions %>%
   filter(e == .8) %>%
-  ggplot(aes(x = delta1, y = value, color = policy)) + 
+  ggplot(aes(x = delta1, y = value*100, color = policy)) + 
   geom_line(size=.75) +
   facet_grid(var ~ model, scales = "free") +
   theme(legend.position = "top", 
         legend.box = "vertical",
         axis.text.x = element_text(angle = 45)) +
-  scale_color_manual(values = fdf_palette) +
+  lightness(scale_color_brewer(palette = "YlGnBu",direction = 1,),scalefac(0.85)) +
   scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
-  xlab(paste0(def_labels, " (1st dose, default policy)")) + ylab("Fraction of harm averted")
+  xlab(def_labels) + ylab("% harm averted") +
+  labs(color="Second-dose delay policy:")
 
 fig_sfdf <- ggpubr::ggarrange(
   gg_all_reductions_e5 + ggtitle("Reductions, efficacy = 50%"),
@@ -324,14 +324,14 @@ if (all_k){
     geom_tile() +
     # scale_alpha_manual(values = c(0.7,1), name = "",labels=NULL,guide = 'none') +
     facet_grid(var~model) + 
-    ylab("e1 (efficacy following 1st dose)") +
+    ylab(TeX(r'(Efficacy following first dose ($\\mathit{e}_1$))')) + 
     theme(legend.position = "bottom",
           axis.text.x = element_text(angle = 45),
           panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
           panel.background = element_blank(), panel.border = element_blank(),text=element_text(size=8)) +
     # scale_fill_viridis_d(option = "magma") +
-    scale_fill_viridis_d(end = 0.7) +
-    xlab(paste0(def_labels, " (1st dose, default policy)")) + 
-    geom_text(aes(label = value_m), color = "white", alpha=1, size = 2)
+    lightness(scale_fill_brewer(palette = "PuBuGn",direction = -1,),scalefac(0.8)) +
+    xlab(def_labels) + 
+    geom_text(aes(label = format(value_m,3)), color = "white", alpha=1, size = 2)
   fig2.all_k
 }

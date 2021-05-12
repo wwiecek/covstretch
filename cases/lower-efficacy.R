@@ -25,9 +25,8 @@ le1 <- df_efficacy_delta_raw %>%
 
 
 # Fig LE2 -----
-
 le2 <- df_efficacy_delta_raw %>%
-  filter(d1 %in% le_speeds) %>%
+  filter(round(d1,5) %in% le_speeds) %>%
   mutate(delta1 = 1/d1) %>% 
   select(delta1, e, model, i,d,harm) %>%
   gather(var, value, -delta1, -e, -model) %>%
@@ -37,10 +36,10 @@ le2 <- df_efficacy_delta_raw %>%
   ungroup() %>%
   mutate(r = (value/ref)) %>% 
   mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
-                         labels = c("Less effective better by 5% or more",
+                         labels = c("Fractional dose better by >5%",
                                     
-                                    "Comparable (+-5%)", 
-                                    "95% effective better by at least 5%"
+                                    "Comparable (within 5%)", 
+                                    "Full dose better by >5%"
                                     ))) %>%
   mutate(var = factor(var, levels = c("i", "d", "harm"),
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
@@ -48,28 +47,26 @@ le2 <- df_efficacy_delta_raw %>%
   mutate(speedup = factor(round(delta1/default_delta_value, 1))) %>%
   # mutate(speedup = factor(as.percent(delta1, 2))) %>%
   mutate(e = factor(e)) %>%
-  mutate(speedup = factor(round(delta1/default_delta_value, 1),
-                          levels = c(1, 1.2, 1.4, 1.6, 2, 4, 8),
-                          labels = c("1", "5/6", "5/7", "5/8", "1/2", "1/4", "1/8"))) %>%
+  mutate(speedup = factor(round(delta1/default_delta_value, 4),
+                          levels = round(1/c(1,3/4,1/2,1/4,1/8),4),
+                          labels = c("1","3/4","1/2","1/4","1/8"))) %>%
   filter(var != "Economic harm") %>%
   ggplot(aes(x = speedup, y = e, fill = le_better)) + geom_tile() +
   scale_fill_manual(values = c("grey60", "grey40", "grey20"), 
                     name = "") +
-  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "bottom", axis.text.x = element_text(hjust = 1,angle = 45)) +
   facet_grid(var~model) + 
-  ylab("efficacy for the alternative dose") + 
-  xlab("Dose") + 
-  # xlab("Fold increase in capacity (vs 0.25% base case)") + 
+  ylab("Efficacy of fractional dose") +
+  xlab("Dose fraction") +
   # scale_x_continuous(breaks = 1/d1_general,
                      # labels = as.percent(1/d1_general))
-  geom_text(aes(label = value), color = "white", size = 2.5)
-
+  geom_text(aes(label = format(value,3)), color = "white", size = 2.5)
+le2
 
 le_both <- ggpubr::ggarrange(le1 + ggtitle("Burden of infections")+theme(text = element_text(size=9)), 
-                  le2 + ggtitle("Optimal policy (relative burden)")+theme(text = element_text(size=9)),# + theme(legend.direction = "vertical"), 
+                  le2 + ggtitle("Optimal policy (relative burden)")+theme(text = element_text(size=9)),
                   ncol = 1, heights = c(.7,1))
 
 le2.plot <- le2
-# le2.plot <- le2 + ggtitle("Optimal policy (relative burden)")+theme(text = element_text(size=9))
 
 
