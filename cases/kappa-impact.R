@@ -34,9 +34,9 @@ fig_kappa <- rbind(mutate(df1, kappa = "No immunity loss"),
                            levels = c("Slow decrease", "Slow growth", "Fast growth"))) %>% 
   gather(var, value, -time, -scenario, -kappa) %>%
   # filter(scenario != "Fast growth") %>%
-  ggplot(aes(x = time, y = value, color = var, linetype = kappa)) + geom_line() + facet_wrap(.~scenario, scales = "free") +
-  xlab("time [days]") + scale_x_continuous(breaks = seq(0, 360, 120)) + ylab("fraction currently infected") +
-  scale_color_discrete(name = "") +
+  ggplot(aes(x = time, y = value*100, color = var, linetype = kappa)) + geom_line() + facet_wrap(.~scenario, scales = "free") +
+  xlab("Time (days)") + scale_x_continuous(breaks = seq(0, 360, 120)) + ylab("% currently infected") +
+  lightness(scale_color_brewer(palette = "YlOrRd",direction = 1,name = ""),scalefac(0.9)) +
   scale_linetype_discrete(name = "") +
   theme(legend.position = "top", 
         legend.direction = "vertical")

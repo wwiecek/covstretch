@@ -96,8 +96,17 @@ g1_joint <- ggarrange(
           legend.position = "right"), 
   #common.legend = TRUE, 
   gg1 + ggtitle("Infections") + 
-    theme(text = element_text(size=10)), 
-  heights =  c(2,2),nrow = 2)
+  theme(text = element_text(size=9)), 
+  widths = c(1,2.5))
+  #   theme(legend.spacing.x = unit(0.2, 'in'), 
+  #         text = element_text(size=10),
+  #         legend.text = element_text(size=9),
+  #         legend.key.size = unit(0.6, "cm"),
+  #         legend.position = "right"), 
+  # #common.legend = TRUE, 
+  # gg1 + ggtitle("Infections") + 
+  #   theme(text = element_text(size=10)), 
+  # heights =  c(2,2),nrow = 2)
 
 
 # Age-specific dynamics -----

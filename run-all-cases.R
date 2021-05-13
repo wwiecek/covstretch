@@ -14,6 +14,7 @@ source("cases/general-example.R")
 source("cases/vax_rates.R")
 source("cases/lower-efficacy.R")
 source("cases/lower-efficacy-delay.R")
+source("cases/lower-efficacy-speedup-lim.R")
 
 source("cases/kappa-impact.R") #impact of immunity loss (appendix)
 source("cases/delay-impact.R")

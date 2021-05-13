@@ -33,7 +33,7 @@ kappa_default <- 0
 default_supply_ceiling <- 1
 
 def_labels <- list(
-  "speed" = "Fraction vaccinated each day"
+  "speed" = "Percentage of pop. vaccinated daily"
 )
 
 # default_speeds <- c(seq(60, 360, 10), 450, 540, 630, 730, 1460, Inf)
@@ -41,16 +41,18 @@ def_labels <- list(
 default_speeds <- round(100/c(2, rev(seq(.05, 1, .05)), .025, .01, 0), 5) # % per day
 default_speeds <- unique(c(default_speeds,
                            round(1/c(c(0.001,0.0025,0.005,0.0075,0.01,0.02),
-                                     c(0.001,0.0025,0.005,0.0075,0.01,0.02)*1.5,
+                                     c(0.001,0.0025,0.005,0.0075,0.01,0.02)*1.2,
+                                     c(0.001,0.0025,0.005,0.0075,0.01,0.02)*1.4,
+                                     c(0.001,0.0025,0.005,0.0075,0.01,0.02)*1.6,
                                      c(0.001,0.0025,0.005,0.0075,0.01,0.02)*2,
-                                     c(0.001,0.0025,0.005,0.0075,0.01,0.02)*3,
                                      c(0.001,0.0025,0.005,0.0075,0.01,0.02)*4),5)))
 fdf_speeds <- rev(round(100/c(.1, .25, .5, .75, 1, 2), 5))
 # d1_general <- c(90, 120, 180, 360, 730, 1460)
 d1_general <- 100/c(2, 1, .75, .5, .25, .1) # % per day
 default_delta_value <- .0025 #for LE scenario
-# le_speeds <- round(100/c(.25, .3, .4, .5, .75, 1), 5)
-le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1, 2), 5)
+# le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1, 2), 5)
+le_speeds <- round(1/0.0025*c(1,3/4,1/2,1/4,1/8), 5)
+default_speeds <- unique(c(default_speeds,le_speeds))
 
 source("R/setup.R")
 

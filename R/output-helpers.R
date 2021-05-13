@@ -45,7 +45,8 @@ plot_rcs <- function(y, compartment = "R",
     # geom_rect(aes(xmin = as.Date(7*shade_weeks[1], origin = start_date), 
     # xmax = as.Date(7*shade_weeks[2], origin = start_date),
     # ymin=0, ymax=Inf), fill = "skyblue", alpha = .2) +
-    geom_line(data = gg_data, aes(x=time, y=value, group=group_name, color=group_name)) +
+    geom_line(data = gg_data %>% mutate(group_name=factor(group_name,levels=rev(unique(gg_data$group_name)))),
+              aes(x=time, y=value, group=group_name, color=group_name)) +
     {if(!is.null(start_date)) scale_x_date(limits = c(as.Date(start_date), as.Date(end_date)))} +
     # {if(length(compartment) == 1) labs(y = paste0(compartment_names_trt[compartment], lab_type))} +
     {if(dim(y)[3] == 1) theme(legend.position = "none")} +

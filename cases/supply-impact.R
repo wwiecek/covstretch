@@ -42,13 +42,13 @@ fig_extra_supply <- select(df_supply, d1, supply_delay, i) %>%
   mutate(i = 1 - i/max(i)) %>%
   ungroup() %>%
   filter(d1 %in% c(d1_general)) %>%
-  mutate(d1 = factor(d1, levels = c(d1_general), labels = c(as.percent(1/d1_general)))) %>%
-  ggplot(aes(x = supply_delay, y = i, color = d1, group = d1)) + 
+  mutate(d1 = factor(d1, levels = rev(c(d1_general)), labels = rev(c(as.percent(1/d1_general))))) %>%
+  ggplot(aes(x = supply_delay, y = i*100, color = d1, group = d1)) + 
   facet_wrap(~model) + 
   geom_line() +
   xlab("Time until extra capacity available (2x increase in vaccination rate)") +
-  ylab("Fraction of infections averted") +
+  ylab("% infections averted") +
   scale_x_continuous(breaks = seq(0, 360, 120)) + 
-  scale_color_discrete(name = "Vaccinated per day") +
+  lightness(scale_color_brewer(palette = "YlOrRd",direction = 1,name = "Vaccinated per day"),scalefac(0.85)) +
   theme(legend.position = "top")
 

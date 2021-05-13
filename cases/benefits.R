@@ -31,14 +31,14 @@ benefits_gg <- bf %>%
   gather(var, value, -p, -scenario) %>%
   mutate(var = factor(var, c("Infections averted", "Deaths averted"))) %>%
   # filter(!(scenario != "100% efficacy" & var == "Total benefit")) %>%
-  ggplot(aes(x = p, y = value, group = scenario, linetype = scenario)) + 
+  ggplot(aes(x = p*100, y = value*100, group = scenario, linetype = scenario)) + 
   geom_line() + 
   # scale_linetype_manual(values = c("95% efficacy" = "solid", 
   #                                  "80% efficacy" = "dashed", 
   #                                  "50% efficacy" = "dotted")) +
   # scale_color_viridis_d() +
   facet_wrap(~var, scales = "free") + 
-    xlab("Fraction vaccinated before epidemic") + ylab("Fraction of harm averted") +
+    xlab("% vaccinated before epidemic") + ylab("% harm averted") +
   theme(legend.position = "top", legend.title = element_blank())
 
 

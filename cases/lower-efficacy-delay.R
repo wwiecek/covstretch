@@ -55,15 +55,15 @@ delay_burden <-
   filter(e %in% c(.5, .8)) %>%
   mutate(e=factor(e)) %>%
   filter(var == "Infections") %>%
-  ggplot(aes(x = delay, y = value, linetype = e, color = scenario)) +
+  ggplot(aes(x = delay, y = value*100, linetype = e, color = scenario)) +
   geom_line() +
   facet_wrap(var ~ model, scales = "free") +
   scale_x_continuous(breaks = c(0, 60, 120, 180)) +
-  scale_color_manual(values = delay_palette, name = "") +
+  lightness(scale_color_brewer(palette = "YlOrRd",direction = 1, name = ""),scalefac(0.85))+
   guides(linetype=F) +
   theme(legend.position = "top") +
-  ylab("Fraction infected in 1 year") +
-  xlab("time until vaccine 1 available [days]")
+  ylab("% population infected in 1 year") +
+  xlab("Time until vaccine 1 available (days)")
 
 delay_optimal <- 
 gg_delay %>% 
@@ -72,9 +72,9 @@ gg_delay %>%
   mutate(r = `No switching (V2 only)`/`No early vaccine (V1 only)`) %>%
   select(delay, e, model, var, r) %>%
   mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
-                         labels = c("Less effective better by 5% or more",
-                                    "Comparable (+-5%)", 
-                                    "95% effective better by at least 5%"
+                         labels = c("Less effective better by >5%",
+                                    "Comparable (within 5%)", 
+                                    "95% effective better by >5%"
                          ))) %>%
   mutate(value = round(r, 2)) %>%
   mutate(delay = factor(delay/30.5)) %>%
@@ -82,9 +82,9 @@ gg_delay %>%
   scale_fill_manual(values = c("grey60", "grey40", "grey20"), 
                     name = "") +
   theme(legend.position = "bottom") +
-  facet_grid(var~model) + ylab("e2 (efficacy for the less effective vaccine)") + 
+  facet_grid(var~model) + ylab(TeX(r'(Efficacy for the less effective vaccine ($\\mathit{e}_2$))')) + 
   xlab("Months until 95% effective vaccine available") +
-  geom_text(aes(label = value), color = "white", size = 2.5)  
+  geom_text(aes(label = format(value,3)), color = "white", size = 2.5)  
 
 delay_switch <- 
 gg_delay %>% 
@@ -106,7 +106,7 @@ gg_delay %>%
   theme(legend.position = "bottom") +
   facet_grid(var~model) + ylab("e2 (efficacy for the less effective vaccine)") + 
   xlab("Months until 95% effective vaccine available") +
-  geom_text(aes(label = value), color = "white", size = 2.5)  +
+  geom_text(aes(label = format(value,digits=3)), color = "white", size = 2.5)  +
   ggtitle("Optimal policy if switching allowed, 0.25% vaccinated/day")
 
 
@@ -114,3 +114,4 @@ gg_delay %>%
 delay_both <- ggpubr::ggarrange(delay_burden + ggtitle("Burden of infections, 0.25% vaccinated/day"), 
                                 delay_optimal + ggtitle("Optimal policy, no switching allowed, 0.25% vaccinated/day")+theme(text = element_text(size=9)),
                                 ncol = 1, heights = c(.7,1))
+delay_optimal.fig<- delay_optimal+theme(text = element_text(size=9))

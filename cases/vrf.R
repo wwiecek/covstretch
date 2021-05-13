@@ -78,9 +78,32 @@ fig_screening <- df %>%
   mutate(d1 = (1/d1)) %>%
   group_by(model) %>% mutate(d = 1 - i/max(i)) %>%
   mutate(vrf = factor(vrf, labels = c("yes", "no"), levels = c(0,1))) %>%
-  ggplot(aes(x = d1, y = d, linetype = factor(vrf), color = model)) + geom_line() +
-  xlab("Vaccinated per day (%)") + ylab("Fraction of infections averted") + 
-  scale_linetype_discrete(name = "screening") +
-  scale_color_discrete(name = "epidemic scenario") +
+  ggplot(aes(x = d1, y = d*100, linetype = factor(vrf), color = model)) + geom_line() +
+  ylab("% infections averted") + 
+  scale_linetype_discrete(name = "Screening") +
+  lightness(scale_color_brewer(palette = "YlOrRd",direction = 1,name = "Epidemic scenario",labels = c("Slow-decrease", "Slow-growth", "Fast-growth")),scalefac(0.9)) +
   theme(legend.position = "top") +
+  ylim(0,100)+
   scale_x_continuous(breaks = 1/d1_general, labels = as.percent(1/d1_general))
+
+fig_screening.deaths <- df %>% 
+  filter(d1 %in% c(d1_general, Inf)) %>% 
+  mutate(d1 = (1/d1)) %>%
+  group_by(model) %>% mutate(d = 1 - d/max(d)) %>%
+  mutate(vrf = factor(vrf, labels = c("yes", "no"), levels = c(0,1))) %>%
+  ggplot(aes(x = d1, y = d*100, linetype = factor(vrf), color = model)) + geom_line() +
+  ylab("% deaths averted") + 
+  scale_linetype_discrete(name = "Screening") +
+  lightness(scale_color_brewer(palette = "YlOrRd",direction = 1,name = "Epidemic scenario",labels = c("Slow-decrease", "Slow-growth", "Fast-growth")),scalefac(0.9)) +
+  theme(legend.position = "top") +
+  ylim(0,100)+
+  scale_x_continuous(breaks = 1/d1_general, labels = as.percent(1/d1_general))
+
+fig_screening.both <- ggpubr::ggarrange(
+  fig_screening+ rremove("xlab") + theme(axis.text.x = element_text(angle = 45),text = element_text(size=10),plot.title = element_text(size = 10)) + ggtitle("Infections"),
+  fig_screening.deaths + rremove("xlab") + theme(axis.text.x = element_text(angle = 45),text = element_text(size=10),plot.title = element_text(size = 10)) + ggtitle("Deaths"),
+  labels = NULL,
+  ncol = 2,
+  common.legend = TRUE)
+fig_screening.both <- annotate_figure(fig_screening.both, bottom = textGrob("Vaccinated per day (% pop.)", gp = gpar(cex = 0.8)))
+fig_screening.both
