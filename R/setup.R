@@ -21,20 +21,27 @@ as.percent <- function(x, d=2, perc=FALSE){
   else format(round(100*x, d), nsmall = 2)
 }
 
-# Names of compartments ------
+# Long names of compartments ------
 ln <- c(
   "S" = "Susceptible",
   "R" = "Natural immunity (no vaccine)",
+  "RV" = "Recovered following vaccination",
   "E" = "Exposed (latent phase)",
-  "I" = "Currently infected",
-  "P" = "Vaccinated, protected",
-  "N" = "Vaccinated, not protected",
+  "E0" = "Exposed (not vaccinated)",
+  "E1" = "Exposed (had 1 dose)",
+  "E2" = "Exposed (had 2 doses)",
+  "I"  = "Infectious",
+  "I0" = "Infectious (not vaccinated)",
+  "I1" = "Infectious (had 1 dose)",
+  "I2" = "Infectious (had 2 doses)",
+  "P"  = "Vaccinated, protected",
+  "N"  = "Vaccinated, susceptible",
   "V1" = "Had vaccine 1, protected",
   "V2" = "Had vaccine 2, protected",
   "P1" = "Had one dose, protected",
-  "N1" = "Had one dose, not protected",
+  "N1" = "Had one dose, susceptible",
   "P2" = "Had two doses, protected",
-  "N2" = "Had two doses, not protected",
+  "N2" = "Had two doses, susceptible",
   "cumV1" = "Courses of vaccine 1 used to date",
   "cumV2" = "Courses of vaccine 2 used to date",
   "cumV" = "Cumulative doses",

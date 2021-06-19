@@ -65,7 +65,7 @@ sr <- function(pars, f = "2v_v2") {
   if(f == "2d_v3") {
     mod <- odin_ode_2dose_v3(user = pars)
     cnames <- c("S", "E0", "E1", "E2", "I0", "I1", "I2", 
-                "R", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumV", "cumI")
+                "R", "RV", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumV", "cumI")
   }
   if(f == "2v") {
     mod <- odin_ode_2vaccines(user = pars)
@@ -160,3 +160,8 @@ main_metrics <- function(y, pop, vat = 31) {
     "harm_vr" = harm(y))
 }
 metric_nms <- c("i", "d", "v1", "tt50", "harm")
+
+
+check0sums <- function(ode, maxC=14) {
+  apply(x, c(1,2), \(x) sum(x)/9) %>% apply(1, \(x) sum(x[1:maxC]))
+}
