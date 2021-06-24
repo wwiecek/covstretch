@@ -34,7 +34,7 @@ ln <- c(
   "N1" = "Had one dose, not protected",
   "P2" = "Had two doses, protected",
   "N2" = "Had two doses, not protected",
-  "cumV1" = "Courses of vaccine 1 used to date",
+  "cumV1" = "Vaccinated",
   "cumV2" = "Courses of vaccine 2 used to date",
   "cumV" = "Cumulative doses",
   "cumI" = "Total new infections to date",
