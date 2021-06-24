@@ -11,6 +11,9 @@ Ndays <- 360
 Ngroups <- 9
 pre_immunity <- c(.5, .5, rep(.2, 7))
 pre_immunity_prop <- sum(pre_immunity*pop)
+infected0 <- c("fast" = 1e-03,
+                           "slow" = 5e-03,
+                           "decreasing" = 1e-02)
 
 # R0 adjustment:
 ev <- eigen(default_cm)$values[1]
@@ -25,7 +28,7 @@ pars_fdf_slow <- lst(
   Nc = 13, 
   Ngroups, 
   Ndays,
-  y0 = y0_gen(13, 9, pre_immunity, 5e-03),
+  y0 = y0_gen(13, 9, pre_immunity, infected0[["slow"]]),
   q = rep(r0(1.1), Ngroups),
   contacts = default_cm,
   gamma1 = rep(.2, Ngroups),
@@ -44,18 +47,20 @@ pars_fdf_slow <- lst(
   #this may be modified in apap() function(s)
   constantrisk = 0
 )
+
+infected0[["fast"]]
 pars_fdf_fast <- list_modify(pars_fdf_slow,
-                             y0 = y0_gen(13, 9, pre_immunity, 1e-03),
+                             y0 = y0_gen(13, 9, pre_immunity, infected0[["fast"]]),
                              q = rep(r0(2), Ngroups))
 pars_fdf_linear <- list_modify(pars_fdf_slow,
-                               y0 = y0_gen(13, 9, pre_immunity, 1e-02),
+                               y0 = y0_gen(13, 9, pre_immunity, infected0[["decreasing"]]),
                                q = rep(r0(.99), Ngroups))
 pars_fdf_cr <- list_modify(pars_fdf_slow,
                            y0 = y0_gen(13, 9, pre_immunity, .1/30.5),
                            q = rep(0, Ngroups),
                            constantrisk = .01/30.5)
 pars_fdf_end <- list_modify(pars_fdf_fast,
-                            y0 = y0_gen(13, 9, rep(.5, Ngroups), 1e-03))
+                            y0 = y0_gen(13, 9, rep(.5, Ngroups), infected0[["fast"]]))
 # c(rep(12,1), 0) resets cumI (compartment 13) to 0:
 set0 <- c(rep(1,4), 0, rep(1,7), 0)
 pars_fdf_late <- list_modify(pars_fdf_fast, 
@@ -71,14 +76,14 @@ pars_le_slow <- list_modify(pars_fdf_slow,
                             ts1 = rep(Ndays, Ngroups))
 pars_le_slow$ta  <- NULL
 pars_le_fast <- list_modify(pars_le_slow,
-                            y0 = y0_gen(13, 9, pre_immunity, 1e-03),
+                            y0 = y0_gen(13, 9, pre_immunity, infected0[["fast"]]),
                             q = rep(r0(2), Ngroups))
 pars_le_cr <- list_modify(pars_le_slow,
                           y0 = y0_gen(13, 9, pre_immunity, .1/30.5),
                           q = rep(0, Ngroups),
                           constantrisk = .01/30.5)
 pars_le_linear <- list_modify(pars_le_slow,
-                              y0 = y0_gen(13, 9, pre_immunity, 1e-02),
+                              y0 = y0_gen(13, 9, pre_immunity, infected0[["decreasing"]]),
                               q = rep(r0(.99), Ngroups))
 
 pars_le_late <- list_modify(pars_le_fast, 

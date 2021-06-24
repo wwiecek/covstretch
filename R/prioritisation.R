@@ -1,13 +1,5 @@
-# Function for deriving age prioritised vaccination parameters -----
 
-# apap = adjust parameters for age prioritisation
-# Derive values of delta and ta such that 
-# len = length of vaccination campaign (in days), i.e. time to 100% vaccinated
-# vhes = when vaccine hesitancy kicks in (in each age group)
-# vsupply = total supply (fraction of total population)
-# group_seq = whether to prioritise all of the groups sequentially (80+, 70-80, ..., "new" way)
-#             or just the top 3 age groups before the rest ("old" way)
-
+# Some helper objects for apap functions (depends on pop object in global env!)
 delay_by_age <- c(1,1,1,1,1,1,0.0001,0.0001,0.0001) #I use 0.0001 instead of 0 to avoid 0*Inf
 avail_by_age <- c(0,0,1,1,1,1,1,1,1)
 prop_young <- sum(pop[1:2])
@@ -15,6 +7,18 @@ prop_old <- sum(pop[7:9])
 prop_adults <- 1-prop_old-prop_young
 prop_all <- c(rep(prop_young, 2), rep(1-prop_young-prop_old, 4), rep(prop_old, 3))
 
+#' Adjust parameters for age prioritised vaccination (apap)
+#' 
+#' Derives new values of `delta` and `ta` matching a desired vaccination length
+#' 
+#' @param pars parameters object that is then used by `sr()`
+#' @param len  length of vaccination campaign (in days), i.e. time to 100% vaccinated
+#' @param d2   delay between the two doses of the vaccine
+#' @param vhes fraction of pop at which vaccine hesitancy kicks in (in each age group)
+#' @param vsupply total supply (fraction of total population)
+#' @param group_seq whether to prioritise all of the groups sequentially (80+, 70-80, ..., "new" way)
+#'                  or just the top 3 age groups before the rest ("old" way)
+#' @return parameters object that is then used by `sr()`
 apap_2d <- function(pars, len, 
                     d2 = 18,
                     vhes = .8, vsupply = default_supply_ceiling,

@@ -62,6 +62,11 @@ sr <- function(pars, f = "2v_v2") {
     mod <- odin_ode_2dose_v2(user = pars)
     cnames <- c("S", "E", "I", "R", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumV", "cumI")
   }
+  if(f == "2d_v3") {
+    mod <- odin_ode_2dose_v3(user = pars)
+    cnames <- c("S", "E0", "E1", "E2", "I0", "I1", "I2", 
+                "R", "RV", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumV", "cumI")
+  }
   if(f == "2v") {
     mod <- odin_ode_2vaccines(user = pars)
     cnames <- c("S", "E", "I", "R", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumI")
@@ -82,16 +87,17 @@ sr <- function(pars, f = "2v_v2") {
 # with varying levels of initial
 # infection, pre-existing immunity, appropriate dimensions
 y0_gen <- function(Nc, Ngroups, 
-                   pre_immunity = rep(0, Ngroups), 
+                   pre_immunity = rep(0, Ngroups),
                    # v = rep(0, Ngroups), 
-                   ii = 5e-03){
+                   ii = 5e-03, 
+                   S = 1, E = 2, I = 3, R = 4){
   y0_default <- matrix(0, Nc, Ngroups)
-  y0_default[1,] <- 1-pre_immunity
-  y0_default[2,] <- (y0_default[1,]*ii)/2
-  y0_default[3,] <- (y0_default[1,]*ii)/2
+  y0_default[S,] <- 1-pre_immunity
+  y0_default[E,] <- (y0_default[1,]*ii)/2
+  y0_default[I,] <- (y0_default[1,]*ii)/2
   # subtract initial infections
-  y0_default[1,] <- y0_default[1,] - y0_default[2,]
-  y0_default[4,] <- pre_immunity
+  y0_default[S,] <- y0_default[1,] - y0_default[2,]
+  y0_default[R,] <- pre_immunity
   y0_default
 }
 
@@ -154,3 +160,8 @@ main_metrics <- function(y, pop, vat = 31) {
     "harm_vr" = harm(y))
 }
 metric_nms <- c("i", "d", "v1", "tt50", "harm")
+
+
+check0sums <- function(x, maxC=14) {
+  apply(x, c(1,2), \(x) sum(x)/9) %>% apply(1, \(x) sum(x[1:maxC]))
+}

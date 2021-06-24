@@ -93,17 +93,17 @@ odin_ode_2vaccines_v2 <- odin::odin({
   dim(y0) <- c(Nc, Ngroups)
   dim(contacts) <- c(Ngroups, Ngroups)
   
-  dim(S) <- Ngroups
-  dim(E) <- Ngroups
-  dim(I) <- Ngroups
-  dim(R) <- Ngroups
-  dim(V1) <- Ngroups
-  dim(N1) <- Ngroups
-  dim(V2) <- Ngroups
-  dim(N2) <- Ngroups
-  dim(D) <- Ngroups
+  dim(S)     <- Ngroups
+  dim(E)     <- Ngroups
+  dim(I)     <- Ngroups
+  dim(R)     <- Ngroups
+  dim(V1)    <- Ngroups
+  dim(N1)    <- Ngroups
+  dim(V2)    <- Ngroups
+  dim(N2)    <- Ngroups
+  dim(D)     <- Ngroups
   dim(cumV1) <- Ngroups
   dim(cumV2) <- Ngroups
-  dim(cumV) <- Ngroups
+  dim(cumV)  <- Ngroups
   dim(cumI)  <- Ngroups
 })
