@@ -163,5 +163,5 @@ metric_nms <- c("i", "d", "v1", "tt50", "harm")
 
 
 check0sums <- function(x, maxC=14) {
-  apply(x, c(1,2), \(x) sum(x)/9) %>% apply(1, \(x) sum(x[1:maxC]))
+  apply(x, c(1,2), function(x) sum(x)/9) %>% apply(1, function(x) sum(x[1:maxC]))
 }
