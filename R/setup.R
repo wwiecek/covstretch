@@ -17,7 +17,7 @@ source("R/harm_function.R")
 source("R/prioritisation.R")
 
 as.percent <- function(x, d=2, perc=FALSE){
-  if (perc) paste0(format(round(100*x, d), nsmall = 2),'%')
+  if (perc) paste0(format(round(100*x, d), nsmall = d),'%')
   else format(round(100*x, d), nsmall = 2)
 }
 
