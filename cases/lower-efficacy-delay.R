@@ -29,7 +29,7 @@ model_delay <- function(model, delay, e, scenario, rm = FALSE) {
 
 
 df_delay <- expand.grid(delay = 15.25*(0:12),
-            e = seq(.5, .9, .1),
+            e = c(seq(.5, .9, .1),0.95),
             scenario = c("switch", "noswitch", "v1only"),
             model = scenario_par_nms_2v) %>%
   mutate(data = pmap(list(model, delay, e, scenario), function(x,y,z,s) 
@@ -69,7 +69,8 @@ delay_optimal <-
 gg_delay %>% 
   filter(delay %in% (30.5*(0:6))) %>%
   spread(scenario, value) %>%
-  mutate(r = `No switching (V2 only)`/`No early vaccine (V1 only)`) %>%
+  mutate(r = `No switching (V2 only)`/`No early vaccine (V1 only)`,
+         e=factor(e)) %>%
   select(delay, e, model, var, r) %>%
   mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
                          labels = c("Less effective better by >5%",
@@ -90,12 +91,13 @@ delay_switch <-
 gg_delay %>% 
   filter(delay %in% (30.5*(0:6))) %>%
   spread(scenario, value) %>%
-  mutate(r = `Switch V2->V1`/`No early vaccine (V1 only)`) %>%
+  mutate(r = `Switch V2->V1`/`No early vaccine (V1 only)`,
+         e=factor(e)) %>%
   select(delay, e, model, var, r) %>%
   mutate(le_better = cut(r, c(-Inf, .95, 1.05, Inf), 
-                         labels = c("Less effective better by 5% or more",
-                                    "Comparable (+-5%)", 
-                                    "95% effective better by at least 5%"
+                         labels = c("Less effective better by >5% ",
+                                    "Comparable (within 5%)", 
+                                    "95% effective better by >5%"
                          ))) %>%
   mutate(value = round(r, 2)) %>%
   filter(delay > 0) %>%
@@ -104,10 +106,9 @@ gg_delay %>%
   scale_fill_manual(values = c("grey60", "grey40", "grey20"), 
                     name = "") +
   theme(legend.position = "bottom") +
-  facet_grid(var~model) + ylab("e2 (efficacy for the less effective vaccine)") + 
+  facet_grid(var~model) + ylab(TeX(r'(Efficacy for the less effective vaccine ($\\mathit{e}_2$))')) + 
   xlab("Months until 95% effective vaccine available") +
-  geom_text(aes(label = format(value,digits=3)), color = "white", size = 2.5)  +
-  ggtitle("Optimal policy if switching allowed, 0.25% vaccinated/day")
+  geom_text(aes(label = format(value,digits=3)), color = "white", size = 2.5)
 
 
 

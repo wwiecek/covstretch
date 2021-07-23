@@ -8,6 +8,9 @@ load("data/default_inputs.Rdata")
 
 # Sensitivity analyses (global parameters to modify) ------
 
+#Baseline efficacy
+default_e <- 0.95
+
 # Main FDF assumptions
 delay_default <- 28 - 10
 delay_fdf <- 84 - 10
@@ -51,7 +54,7 @@ fdf_speeds <- rev(round(100/c(.1, .25, .5, .75, 1, 2), 5))
 d1_general <- 100/c(2, 1, .75, .5, .25, .1) # % per day
 default_delta_value <- .0025 #for LE scenario
 # le_speeds <- round(100/c(.25, .3, .35, .4, .5, 1, 2), 5)
-le_speeds <- round(1/0.0025*c(1,3/4,1/2,1/4,1/8), 5)
+le_speeds <- round(1/0.0025*c(1,3/4,1/2,1/4,1/3,1/8), 5)
 default_speeds <- unique(c(default_speeds,le_speeds))
 
 source("R/setup.R")
