@@ -1,21 +1,11 @@
 library(stats)
 library(MASS)
 
-source("project-setup.R")
-
-model_i <- function(model, d1, e, rm = FALSE) {
-  pars <- grab_2v_parms(model)
-  pars <- apap_2v(pars, d1)
-  y <- sr(list_modify(pars, e1 = e), "2v_v2")
-  if(rm) return(y)
-  main_metrics(y, pop)
-}
-
 select <- dplyr::select
 
 nab_factor <- c(0.2,0.4,0.8,1)
-speedups <- c(1,1/2,1/3,1/10)
-baseline_effs <- c(0.5,0.6,0.7,0.8,0.95)
+speedups <- c(1,2/3,1/2,1/3,1/4)
+baseline_effs <- c(0.7,0.95)
 
 curve <- read.csv('data/curve.csv',header = FALSE)
 colnames(curve) <- c("x","y")
@@ -42,7 +32,7 @@ for (i in 1:length(baseline_effs)){
   }
   effs <- effs/100
   
-  df_efficacy_delta_raw.base_eff_grid <- expand_grid(d1 = c(speedups/default_delta_value,Inf),
+  df_efficacy_delta_raw.base_eff_grid <- expand_grid(d1 = c(speedups/default_delta_value),
                                        e = unique(effs),
                                        model = scenario_par_nms_2v) %>%
     mutate(data = pmap(list(model, d1, e), function(x,y, z) data.frame(value = model_i(x,y, z), 
@@ -70,8 +60,8 @@ for (i in 1:length(baseline_effs)){
                            labels = c("Fractional dose better",
                                       "Full dose better"
                            ))) %>%
-    mutate(var = factor(var, levels = c("i", "d","d_rel"),
-                        labels = c("Infections", "Deaths","Relative Deaths"))) %>%
+    mutate(var = factor(var, levels = c("i", "d"),#,"d_rel"
+                        labels = c("Infections", "Deaths"))) %>%#,"Relative Deaths"
     mutate(value = round(r, 2)) %>%
     mutate(speedup = factor(round(delta1/default_delta_value, 1))) %>%
     mutate(nab_e = factor(paste0(nab_factor_label,'(',round(100*e),'%)'))) %>%
@@ -92,19 +82,12 @@ for (i in 1:length(baseline_effs)){
       ylab("NAb ratio (associated efficacy)") +
       xlab("Dose fraction") +
       geom_text(aes(label = format(value,3)), color = "white", size = 2.5)
-  #list_plots[[i]] <- local(print(df_efficacy_delta.base_eff_grid.plot))
+  list_plots[[i]] <- local(print(df_efficacy_delta.base_eff_grid.plot))
 }
-
-##Plots----
-fig_folder <- "figures"
-width <- 6.5
 
 #Matrix of results
 le_baselines<-ggarrange(list_plots[[2]]+ggtitle("Baseline 95%"),list_plots[[1]]+ggtitle("Baseline 70%"), 
               common.legend = TRUE, ncol = 1, legend = "bottom")
-
-ggsave(paste0(fig_folder, "/le_baselines.pdf"),le_baselines, width = width, height=2*3.4/5.55*width)
-
 
 #2d plots
 le_2d_baselines <- le.base_eff_grid %>% filter((nab_factor_label==1&speedup=="1")|(nab_factor_label==0.8&speedup=="1/2")|

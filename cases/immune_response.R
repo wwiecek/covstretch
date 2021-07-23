@@ -2,7 +2,6 @@ library(tidyverse)
 library(ggplot2)
 library(shades)
 library(stats)
-theme_set(theme_minimal(base_size = 10))
 
 curve <- read.csv('data/curve.csv',header = FALSE)
 colnames(curve) <- c("x","y")
@@ -36,7 +35,6 @@ frac_nab.fig <- ggplot() +
   scale_y_continuous(breaks = seq(35, 100, by = 5)) +
   scale_x_log10()
 frac_nab.fig
-ggsave(paste0("figures", "/fraction_imm_response_stddose.png"), frac_nab.fig, width = 6.5, height=6.5)
 
 ##Variant factor----
 frac_nab.fig <- ggplot() +
