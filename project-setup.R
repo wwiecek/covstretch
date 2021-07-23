@@ -58,5 +58,3 @@ le_speeds <- round(1/0.0025*c(1,3/4,1/2,1/4,1/3,1/8), 5)
 default_speeds <- unique(c(default_speeds,le_speeds))
 
 source("R/setup.R")
-
-source("cases/benefits.R")
