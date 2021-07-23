@@ -31,12 +31,12 @@ All results can be replicated through the [run-all-cases.R](run-all-cases.R) scr
 The main scripts called are: 
 
 * **[project_setup.R](project_setup.R)**: Loads epidemiological models (ordinary differential equations implemented with odin), auxiliary functions, and initialize parameters.
-* * **[immune_response.R](cases/immune_response.R)**: Creates the plot that extends the model in Khoury et al. (2021). The final figure (Figure 1) presented in the paper was generated outside of R, the script here uses the same data for an exploration exercise.
+* **[immune_response.R](cases/immune_response.R)**: Creates the plot that extends the model in Khoury et al. (2021). The final figure (Figure 1) presented in the paper was generated outside of R, the script here uses the same data for an exploration exercise.
 * **[prep-results.R](cases/prep-results.R)**: Estimates the model using the baseline strategy for different vaccination rates and vaccine efficacies
 * **[general-example.R](cases/general-example.R)**: Uses estimates from prep-results.R to analyze outcomes under different vaccination rates (Figure S2 and S5).
 * **[lower_efficacy_baseline_grid.R](cases/lower_efficacy_baseline_grid.R)**: Uses estimates from prep-results.R to compare the baseline strategies (70% and 95% efficacy) with an alternative that uses a lower dose-regimen at a faster rate but at a potentially lower efficacy (Figure S3).
-* * * * **[extra_doses.R](cases/extra_doses.R)**: Auxiliary script used to estimate the additional vaccine supply generated through the adoption of lower doses. This contains only auxiliary calculations and does not generate the final estimates shown in Table S3, which are compiled in a separate spreadsheet.
-* * **[dev-pdeath.R](cases/dev-pdeath.R)**: Compares scenarios where vaccination leads to varying efficacy against infection/transmission but fixed efficacy against death, allowing for the comparison of indirect and direct benefits (Figure S4).
+* **[extra_doses.R](cases/extra_doses.R)**: Auxiliary script used to estimate the additional vaccine supply generated through the adoption of lower doses. This contains only auxiliary calculations and does not generate the final estimates shown in Table S3, which are compiled in a separate spreadsheet.
+* **[dev-pdeath.R](cases/dev-pdeath.R)**: Compares scenarios where vaccination leads to varying efficacy against infection/transmission but fixed efficacy against death, allowing for the comparison of indirect and direct benefits (Figure S4).
 * **[delay-impact.R](cases/delay-impact.R)**: Compares scenarios with different starting points for vaccination relative to the peak of transmissions (Figure S6)
 * **[generate-figures.R](cases/generate-figures.R)**: Plots the results of the previous scripts.
 
