@@ -89,12 +89,11 @@ gg2 <- gg2.df %>%
 
 g1_joint <- ggarrange(
   gg2 + ggtitle("Vaccinations") + 
-    theme(legend.spacing.x = unit(0.2, 'in'), 
-          text = element_text(size=10),
+    theme(legend.spacing.x = unit(0.1, 'in'), 
+          text = element_text(size=9),
           legend.text = element_text(size=9),
-          legend.key.size = unit(0.6, "cm"),
-          legend.position = "right"), 
-  #common.legend = TRUE, 
+          legend.key.size = unit(0.4, "cm")), 
+  common.legend = TRUE, 
   gg1 + ggtitle("Infections") + 
   theme(text = element_text(size=9)), 
   widths = c(1,2.5))
@@ -111,11 +110,13 @@ g1_joint <- ggarrange(
 
 # Age-specific dynamics -----
 sgg_age <- sr(f="2v_v2", apap_2v(scenario_list_2v[[2]], 360)) %>% 
-  plot_rcs(c("I", "S", "cumV1"), ncol = 3) + 
-  labs(color=NULL) +
+  plot_rcs(c("S", "I", "cumV1"), ncol = 3) + 
+  scale_color_discrete(name="Age cohort") +
   scale_y_continuous(labels = function(x) x*100) +
-  ylab("% of age group")+ theme(legend.spacing.y = unit(0.1, 'in'), 
-                                         text = element_text(size = 12), legend.key.size = unit(0.5, "cm"))
+  ylab("% of age cohort")+ theme(legend.spacing.y = unit(0.1, 'in'), 
+                                 text = element_text(size = 12), legend.key.size = unit(0.5, "cm"),
+                                 legend.title=element_text(size=8.5),
+                                 strip.text = element_text(size = 10,hjust = 0))
 
 
 
