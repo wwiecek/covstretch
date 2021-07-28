@@ -1,12 +1,8 @@
-# COVID-19 Vaccination - Epidemiological Simulations
+# Code Repository for COVID-19 Vaccine Dose Stretching project
 
 ## Introduction
 
-This repository includes the scripts used to generate the results in "Testing fractional doses of COVID-19 vaccines".
-
-We take the model in "Neutralizing antibody levels are highly predictive of immune protection from symptomatic SARS-CoV-2 infection" (Khoury et al., 2021) and extend the analysis to immunogenicity levels observed for doses lower than the ones currently approved for distribution.
-
-We implement a SEIR (Susceptible, Exposed, Infectious, Recover) model and estimate the health outcomes under different vaccination scenarios.
+This repository includes the scripts used to generate the results in our recent working paper on dose stretching. Please find the working paper [HERE](https://bfi.uchicago.edu/working-paper/2021-68/) (currently, i.e. July 2021, currently a shorter version of this work is in submission).
 
 In the baseline scenarios, individuals receive the standard dose size of vaccines that are 70% and 95% against death and infection.
 
@@ -16,6 +12,7 @@ We also compare various starting points for the vaccination campaign in relation
 
 All strategies are compared according to the total number of infections and deaths.
 
+
 ## Packages
 
 * **R**: 4.0.5
@@ -24,11 +21,13 @@ All strategies are compared according to the total number of infections and deat
 * **socialmixr**: 0.1.8
 * **MASS**: 7.3-53.1
 
+
+
 ## Setup
 
-All results can be replicated through the [run-all-cases.R](run-all-cases.R) script.
+All results can be replicated through the [run-all-cases.R](run-all-cases.R) script. This should generate all of the figures and underlying data structures that are presented in the simulation sections of our paper.
 
-The main scripts called are: 
+The main scripts called by [run-all-cases.R](run-all-cases.R) are: 
 
 * **[project_setup.R](project_setup.R)**: Loads epidemiological models (ordinary differential equations implemented with odin), auxiliary functions, and initialize parameters.
 * **[immune_response.R](cases/immune_response.R)**: Creates the plot that extends the results in Khoury et al. (2021). The final figure (Figure 1) presented in the paper was generated outside of R, the script here uses the same data for an exploration exercise.
@@ -40,8 +39,12 @@ The main scripts called are:
 * **[delay-impact.R](cases/delay-impact.R)**: Compares scenarios with different starting points for vaccination relative to the peak of transmissions (Figure S6)
 * **[generate-figures.R](cases/generate-figures.R)**: Plots the results of the previous scripts.
 
-Three variables from preparation script [project-setup.R](project-setup.R) deserve special attention.
+## Sensitivity/scenario analyses
+
+Three variables from preparation script [project-setup.R](project-setup.R) deserve special attention as they are used for generating different scenarios.
 
 First, the vector `pop` stores the demographic distribution according to age group used in the simulations. The default case uses values compatible with high-income countries. The same applies to the vector `default_pdeath` which contains the probability of death given infection for each age group.
+
+Second, `kappa_default` defines the rate of loss of immunity, the default being 0.
 
 Lastly, `default_supply_ceiling` defines the maximum percentage of the population that can get vaccines due to supply constraints, the default value is 1.
