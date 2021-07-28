@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This repository includes the scripts used to generate the results in our recent working paper on dose stretching. Please find the working paper [HERE](https://bfi.uchicago.edu/working-paper/2021-68/) (currently, i.e. July 2021, currently a shorter version of this work is in submission).
+This repository includes the scripts used to generate the results in our recent working paper on dose stretching. Please find the working paper [HERE](https://bfi.uchicago.edu/working-paper/2021-68/) (currently, i.e. July 2021, a shorter version of this paper is in submission).
 
 In the baseline scenarios, individuals receive the standard dose size of vaccines that are 70% and 95% against death and infection.
 
