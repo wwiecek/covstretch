@@ -17,7 +17,7 @@ source("R/harm_function.R")
 source("R/prioritisation.R")
 
 as.percent <- function(x, d=2, perc=FALSE){
-  if (perc) paste0(format(round(100*x, d), nsmall = 2),'%')
+  if (perc) paste0(format(round(100*x, d), nsmall = d),'%')
   else format(round(100*x, d), nsmall = 2)
 }
 
@@ -42,7 +42,7 @@ ln <- c(
   "N1" = "Had one dose, susceptible",
   "P2" = "Had two doses, protected",
   "N2" = "Had two doses, susceptible",
-  "cumV1" = "Courses of vaccine 1 used to date",
+  "cumV1" = "Vaccinated",
   "cumV2" = "Courses of vaccine 2 used to date",
   "cumV" = "Cumulative doses",
   "cumI" = "Total new infections to date",

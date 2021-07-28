@@ -48,8 +48,8 @@ le2 <- df_efficacy_delta_raw %>%
   # mutate(speedup = factor(as.percent(delta1, 2))) %>%
   mutate(e = factor(e)) %>%
   mutate(speedup = factor(round(delta1/default_delta_value, 4),
-                          levels = round(1/c(1,3/4,1/2,1/4,1/8),4),
-                          labels = c("1","3/4","1/2","1/4","1/8"))) %>%
+                          levels = round(1/c(1,3/4,1/2,1/3,1/4,1/8),4),
+                          labels = c("1","3/4","1/2","1/3","1/4","1/8"))) %>%
   filter(var != "Economic harm") %>%
   ggplot(aes(x = speedup, y = e, fill = le_better)) + geom_tile() +
   scale_fill_manual(values = c("grey60", "grey40", "grey20"), 

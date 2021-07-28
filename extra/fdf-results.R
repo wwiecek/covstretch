@@ -84,15 +84,15 @@ df_fdf <- expand.grid(d1 = c(fdf_speeds, Inf),
 
 # Fig 1: Base case example ------
 fig_fdf1 <-rescale_and_bind(list(
-  "FDF (12 weeks)"           = sr(apap_2d(pars_fdf_slow, fdf_deltas$d_fdf[5], delay_fdf) %>% 
+  "FDF"           = sr(apap_2d(pars_fdf_slow, fdf_deltas$d_fdf[5], delay_fdf) %>% 
                                     list_modify(e1 = .8), f = "2d_v2")*100,
-  "HDF-60 (12 weeks for under 60s)" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d_sse_h6[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid_k[,6]) %>% 
+  "HDF-60" = sr(apap_2d(pars_fdf_slow, c(rep(fdf_deltas$d_sse_h6[5], 6), rep(fdf_deltas$d[5],3)), delay_hybrid_k[,6]) %>% 
                                            list_modify(e1 = .8), f = "2d_v2")*100,
-  "Default (4 weeks)"        = sr(apap_2d(pars_fdf_slow, fdf_deltas$d[5], delay_default) %>% 
+  "SDF"        = sr(apap_2d(pars_fdf_slow, fdf_deltas$d[5], delay_default) %>% 
                                     list_modify(e1 = .8), f = "2d_v2")*100
   # "FDF (12 weeks, hybrid)" = sr(apap_2d(pars_fdf_cr, 156, delay_hybrid) %>% list_modify(e1 = .8), f = "2d_v2")
 ), pop) %>% 
-  plot_rcs(c("P1", "P2", "cumV"), long_names = ln, ncol = 3, start_date = NULL) + 
+  plot_rcs(c("cumV", "P2", "P1"), long_names = ln, ncol = 3, start_date = NULL) + 
   ylab("Population %") + theme(legend.position = "top") + 
   lightness(scale_color_brewer(palette = "YlGnBu",direction = 1,),scalefac(0.85)) +
   scale_x_continuous(name = "Time (days)", breaks = seq(0, 360, 120)) +
@@ -250,12 +250,12 @@ df_all_reductions <- df_fdf %>%
   group_by(model, e, policy) %>%
   mutate(d = 1- d/d[is.infinite(d1)], i = 1 - i/i[is.infinite(d1)]) %>%
   ungroup() %>%
-  filter(d1 > 60, d1 <= 1000) %>%
+  filter((d1 > 40 & d1 <= 1000)|(d1 == Inf)) %>%
   gather(var, value, -d1, -model, -e, -policy) %>%
   mutate(policy = factor(policy, levels = c("default", "hybrid_6", "fdf"), 
-                         labels = c("Default (4 weeks)",
-                                    "HDF-60 (12 weeks for under 60s)",
-                                    "FDF (12 weeks)"))) %>%
+                         labels = c("SDF",
+                                    "HDF-60",
+                                    "FDF"))) %>%
   mutate(var = factor(var, levels = c("i", "d", "harm"),
                       labels = c("Infections", "Deaths", "Economic harm"))) %>%
   mutate(e = factor(e)) %>%
@@ -271,7 +271,7 @@ gg_all_reductions_e5 <- df_all_reductions %>%
         axis.text.x = element_text(angle = 45)) +
   lightness(scale_color_brewer(palette = "YlGnBu",direction = 1,),scalefac(0.85)) +
   scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
-  xlab(def_labels) + ylab("% harm averted") +
+  xlab(def_labels) + ylab("% harm averted") + ylim(0,100) +
   labs(color="Second-dose delay policy:")
 
 gg_all_reductions_e8 <- df_all_reductions %>%
@@ -284,12 +284,12 @@ gg_all_reductions_e8 <- df_all_reductions %>%
         axis.text.x = element_text(angle = 45)) +
   lightness(scale_color_brewer(palette = "YlGnBu",direction = 1,),scalefac(0.85)) +
   scale_x_continuous(breaks = 1/fdf_speeds, labels = as.percent(1/fdf_speeds, 1)) +
-  xlab(def_labels) + ylab("% harm averted") +
+  xlab(def_labels) + ylab("% harm averted") + ylim(0,100) +
   labs(color="Second-dose delay policy:")
 
 fig_sfdf <- ggpubr::ggarrange(
-  gg_all_reductions_e5 + ggtitle("Reductions, efficacy = 50%"),
-  gg_all_reductions_e8 + ggtitle("Reductions, efficacy = 80%"),
+  gg_all_reductions_e8 + ggtitle(TeX(r"(Efficacy following first dose $\\mathit{e}_1=80%$)")),
+  gg_all_reductions_e5 + ggtitle(TeX(r"(Efficacy following first dose $\\mathit{e}_1=50%$)")),
   ncol = 1, heights = c(2, 2),
   common.legend = TRUE)
 
