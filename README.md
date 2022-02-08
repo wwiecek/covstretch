@@ -2,7 +2,10 @@
 
 ## Introduction
 
-This repository includes the scripts used to generate the results in our recent working paper on dose stretching. Please find the working paper [HERE](https://bfi.uchicago.edu/working-paper/2021-68/) (currently, i.e. July 2021, a shorter version of this paper is in submission).
+This repository includes the scripts used to generate the results in [Testing fractional doses of COVID-19 vaccines](https://www.pnas.org/content/119/8/e2116932119), Więcek _et al_., 2021.
+
+
+## Notes
 
 In the baseline scenarios, individuals receive the standard dose size of vaccines that are 70% and 95% against death and infection.
 
