@@ -108,6 +108,22 @@ g3 <- df %>%
   xlab("Vaccination speed [%/day]") +
   ylab("Mortality reduction vs EAT 0% case") +
   scale_color_viridis_d(option = "mako", name = "Efficacy\nagainst\ntransmission (EAT)")
+                     
+burden_vetrans <- df %>%
+  gather(var, value, -d1, -model, -e_d, -e_t) %>%
+  mutate(var = factor(var, levels = c("i", "d"), 
+                      labels = c("Infections", "Deaths"))) %>%
+  mutate(delta1 = 1/d1) %>%
+  mutate(e_t=factor(e_t,levels=unique(e_t),labels=as.percent(unique(e_t),d=0,perc=T))) %>% 
+  ggplot(aes(x = delta1, y = value*100, color = e_t)) + 
+  geom_line(size=1) +
+  facet_wrap(~var, scales = "free", ncol = 2) +
+  scale_x_continuous(breaks = unique(x_ticks), labels = as.percent(unique(1/df$d1)[unique(1/df$d1)!=0])) +
+  lightness(scale_color_brewer(palette = "YlOrRd",direction = 1),scalefac(0.95))+
+  theme(axis.text.x = element_text(angle = 45, size = 10), legend.position = "bottom") +
+  xlab(def_labels$speed) + 
+  ylab("Burden (% pop.)")  +
+  labs(color="Efficacy against transmission")
 
 # install.packages("patchwork")
 library(patchwork)
