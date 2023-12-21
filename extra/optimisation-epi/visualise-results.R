@@ -3,7 +3,7 @@ library(tidyverse)
 source("project-setup.R")
 ##Deaths----
 #The file below is used only for the dynamic case
-load("results/nlopt/wip-nl-solutions7-D-hic-edit_contacts.Rdata")
+load("results/extra/nlopt/wip-nl-solutions7-D-hic-edit_contacts.Rdata")
 
 colnames(nlopt_s0) <- nl_q_seq
 colnames(nlopt_s1) <- nl_q_seq
