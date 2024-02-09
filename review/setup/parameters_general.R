@@ -1,3 +1,7 @@
+#-------------------------------------------------------------------------------
+# This file defines general parameters regardless of scenarios/models
+#-------------------------------------------------------------------------------
+
 # Load pbc_spread and default contact matrix from the default data inputs file.
 # This loads four items in the environment: 
 # - pbc_spread 
@@ -55,13 +59,6 @@ default_delta_value <- .0025 #for LE scenario
 le_speeds <- round(1/0.0025*c(1,3/4,1/2,1/4,1/3,1/8), 5)
 default_speeds <- unique(c(default_speeds,le_speeds))
 
-source("R/setup.R")
-source("R/ode_2vaccines_v2.R")
-source("R/helpers.R")
-source("R/output-helpers.R")
-source("R/scenario-parms.R")
-source("R/harm_function.R")
-source("R/prioritisation.R")
 
 as.percent <- function(x, d=2, perc=FALSE){
   if (perc) paste0(format(round(100*x, d), nsmall = d),'%')
@@ -97,7 +94,23 @@ ln <- c(
 )
 
 # For generic and lower efficacy cases -----
-df_efficacy_delta_raw <- readRDS(file = "results/df_efficacy_delta_raw.rds")
+df_efficacy_delta_raw <- readRDS(file = "setup/df_efficacy_delta_raw.rds")
 
 # Settings for FDF -----
 comp_to_display <- c("I", "D", "cumV", "cumI", "P1", "P2")
+
+y0_gen <- function(Nc, Ngroups, 
+                   pre_immunity = rep(0, Ngroups),
+                   # v = rep(0, Ngroups), 
+                   ii = 5e-03, 
+                   S = 1, E = 2, I = 3, R = 4){
+  y0_default <- matrix(0, Nc, Ngroups)
+  y0_default[S,] <- 1-pre_immunity
+  y0_default[E,] <- (y0_default[1,]*ii)/2
+  y0_default[I,] <- (y0_default[1,]*ii)/2
+  # subtract initial infections
+  y0_default[S,] <- y0_default[1,] - y0_default[2,]
+  y0_default[R,] <- pre_immunity
+  y0_default
+}
+
