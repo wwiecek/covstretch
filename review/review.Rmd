@@ -15,22 +15,24 @@ This note will summarize main functions for simulation and optimization from the
 We begin with the fundamental epidemiological model. The associated system of differential equations is defined in **R/ode_2vaccines_v2.R** and can be formally written as below. The model assumes two vaccine types with different efficacies, which can be interpreted as full and fractional doses. 
 
 \begin{align}
-\dot{S}_i(t) &= - (\lambda_i(t) + constantrisk) S_i(t) + \phi_i R_i(t) - (v_i^1(t) \delta_t^1 - v_i^2(t) \delta_t^2) \frac{S_i(t)}{S_i(t) + vrf R_i(t)} \\
-\dot{E}_i(t) &= (\lambda_i(t) + constantrisk) (S_i(t) + N_i^1(t) + N_i^2(t)) - \gamma_i^{EI} E_i(t) \\
+\dot{S}_i(t) &= - \lambda_i(t) S_i(t) + \phi_i R_i(t) - (v_i^1(t) \delta_t^1 - v_i^2(t) \delta_t^2) \frac{S_i(t)}{S_i(t) + R_i(t)} \\
+\dot{E}_i(t) &= \lambda_i(t) (S_i(t) + N_i^1(t) + N_i^2(t)) - \gamma_i^{EI} E_i(t) \\
 \dot{I}_i(t) &= \gamma_i^{EI} E_i(t) - \gamma_i^{IRD} I_i(t) \\
-\dot{R}_i(t) &= (1 - p_i) \gamma_i^{IRD} I_i(t) - \phi_i R_i(t) - (v_i^1 \delta_i^1 + v_i^2 \delta_i^2) \frac{vrf R_i(t)}{S_i(t) + R_i(t)} \\
+\dot{R}_i(t) &= (1 - p_i) \gamma_i^{IRD} I_i(t) - \phi_i R_i(t) - (v_i^1 \delta_i^1 + v_i^2 \delta_i^2) \frac{R_i(t)}{S_i(t) + R_i(t)} \\
 \dot{D}_i(t) &= p_i \gamma_i^{IRD} I_i(t) \\
-\dot{V}_i^1(t) &= v_i^1(t) \delta_i^1 \frac{e_i^1 S_i(t) + vrf R_i(t)}{S_i(t) + vrf R_i(t)} - \kappa_i^1 V_i^1(t) \\
-\dot{N}_i^1(t) &= v_i^1(t) \delta_i^1 \frac{(1 - e_i^1) S_i(t)}{S_i(t) + vrf R_i(t)} + \kappa_i^1 V_i^1(t) - (\lambda_i(t) + constantrisk) N_i^1(t) \\
-\dot{V}_i^2(t) &= v_i^2(t) \delta_i^2 \frac{e_i^2 S_i(t) + vrf R_i(t)}{S_i(t) + vrf R_i(t)} - \kappa_i^2 V_i^2(t) \\
-\dot{N}_i^2(t) &= v_i^2(t) \delta_i^2 \frac{(1 - e_i^2) S_i(t)}{S_i(t) + vrf R_i(t)} + \kappa_i^2 V_i^2(t) - (\lambda_i(t) + constantrisk) N_i^2(t) 
+\dot{V}_i^1(t) &= v_i^1(t) \delta_i^1 \frac{e_i^1 S_i(t) + R_i(t)}{S_i(t) + R_i(t)} - \kappa_i^1 V_i^1(t) \\
+\dot{N}_i^1(t) &= v_i^1(t) \delta_i^1 \frac{(1 - e_i^1) S_i(t)}{S_i(t) + vrf R_i(t)} + \kappa_i^1 V_i^1(t) - \lambda_i(t) N_i^1(t) \\
+\dot{V}_i^2(t) &= v_i^2(t) \delta_i^2 \frac{e_i^2 S_i(t) + R_i(t)}{S_i(t) + R_i(t)} - \kappa_i^2 V_i^2(t) \\
+\dot{N}_i^2(t) &= v_i^2(t) \delta_i^2 \frac{(1 - e_i^2) S_i(t)}{S_i(t) + R_i(t)} + \kappa_i^2 V_i^2(t) - \lambda_i(t) N_i^2(t) 
 \end{align}
+
+
 
 Questions:
 
-* What is *constantrisk*?
+* What is *constantrisk*? To delete
 * What is $\phi_i$?
-* What is *vrf*?
+* What is *vrf*? To delete
 * What are the exact definitions/interpretations of $\tilde{S_i(t)}$ and $\tilde{R_i(t)}$? They appear as $\frac{S_i(t)}{S_i(t) + vrf R_i(t)}$ in (1) and $\frac{vrf R_i(t)}{S_i(t) + R_i(t)}$ in (4), slightly different than in (8) and (9) of the PNAS paper's appendix. Why is the *vrf* not appearing in the denominator of the second expression?
 
 
