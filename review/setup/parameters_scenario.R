@@ -3,6 +3,9 @@
 # for extracting and applying these parameters to the ODE system. 
 #-------------------------------------------------------------------------------
 
+library(tidyverse)
+source("setup/epi_models.R")
+
 # Parameters for each scenario -----
 Ndays <- 360
 Ngroups <- 9
