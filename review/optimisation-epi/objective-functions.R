@@ -1,14 +1,19 @@
-# define the objective functions in both the static and dynamic cases.
+# Note that in the raw output of a single run, the compartment values are normalized
+# percentages for each age group. This function scales the compartment values by
+# population of age groups so that we have the actual number of infected/death. 
+rescale_rcs <- function(y, pop_sizes=rep(1, dim(y)[3]), merge = FALSE) {
+  y_new <- y*rep(pop_sizes, each = dim(y)[1]*dim(y)[2])
+  if(merge)
+    y_new <- replicate(1, apply(y_new, c(1,2), sum))
+  y_new
+}
 
-source("simulation/single_run.R")
-source("setup/parameters_scenario.R")
 
 # Define the dose-response function -----
 phi_x <- function(x) 
   # 3.49706*sqrt(x) - 1.74853*x  -0.798528
   # sapply(3.49706*sqrt(x) - 1.74853*x  -0.798528, function(y) max(y,0))
   -25.31701*x^1.037524 + 1.037524*25.31701*x
-
 
 
 # Define objective functions (static and dynamic cases) ------

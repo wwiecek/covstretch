@@ -5,12 +5,10 @@
 # 
 # 1. Initial compartment values
 # 2. Universal parameters
-# 3. Two-dose model parameters
-# 4. Two-vaccine model parameters
-# 5. Selection function of parameters: grab_2v_parms
-# 6. Adjustment function of parameters: apap_2v
-# 7. Unknown
-# 
+# 3. Two-vaccine model parameters
+# 4. Selection function of parameters: grab_2v_parms
+# 5. Adjustment function of parameters: apap_2v
+# 6. Unknown
 # 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -67,6 +65,7 @@ y0_gen <- function(Nc, Ngroups,
 
 
 
+
 # ------------------------------------------------------------------------------
 # 2. Universal parameters
 #-------------------------------------------------------------------------------
@@ -93,11 +92,13 @@ r0 <- function(r) r / (5 * ev_pi)
 
 
 
+
 # ------------------------------------------------------------------------------
-# 3. Two-dose model parameters
+# 3. Two-vaccine model parameters
 # ------------------------------------------------------------------------------
 # This first one is the foundation upon which later ones simply modify
-pars_fdf_slow <- lst(
+# Basically only the initial infected and the q (viral reproduction) are modified. 
+pars_le_slow <- lst(
   Nc = 13, 
   Ngroups, 
   Ndays,
@@ -111,49 +112,19 @@ pars_fdf_slow <- lst(
   kappa1 = rep(kappa_default, Ngroups),
   kappa2 = rep(kappa_default, Ngroups),
   phi = rep(0, Ngroups), 
-  ta = rep(0, Ngroups),
-  e1 = rep(.8, Ngroups),
-  e2 = rep(.95, Ngroups),
+  e1 = 0.95,
+  e2 = 0,
+  ta1 = rep(0, Ngroups), 
+  ta2 = rep(0, Ngroups), 
+  tmore1 = rep(Inf, Ngroups),
+  tmore2 = rep(Inf, Ngroups),
+  ts1 = rep(Ndays, Ngroups),
   pdeath = default_pdeath,
   vrf = 1,
   vstop = rep(.8, Ngroups), # slow down when 80% vaccinated, may be modified in apap_*()
   constantrisk = 0
 )
 
-pars_fdf_fast <- list_modify(pars_fdf_slow,
-                             y0 = y0_gen(13, 9, pre_immunity, infected0[["fast"]]),
-                             q = rep(r0(2), Ngroups))
-pars_fdf_linear <- list_modify(pars_fdf_slow,
-                               y0 = y0_gen(13, 9, pre_immunity, infected0[["decreasing"]]),
-                               q = rep(r0(.99), Ngroups))
-pars_fdf_cr <- list_modify(pars_fdf_slow,
-                           y0 = y0_gen(13, 9, pre_immunity, .1/30.5),
-                           q = rep(0, Ngroups),
-                           constantrisk = .01/30.5)
-pars_fdf_end <- list_modify(pars_fdf_fast,
-                            y0 = y0_gen(13, 9, rep(.5, Ngroups), infected0[["fast"]]))
-# c(rep(12,1), 0) resets cumI (compartment 13) to 0:
-set0 <- c(rep(1,4), 0, rep(1,7), 0)
-pars_fdf_late <- list_modify(pars_fdf_fast, 
-                             y0 = (sr(pars_fdf_fast, f = "2d_v2")["120", ,])*set0)
-# ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-
-
-
-
-
-# ------------------------------------------------------------------------------
-# 4. Two-vaccine model parameters
-# ------------------------------------------------------------------------------
-pars_le_slow <- list_modify(pars_fdf_slow,
-                            e1 = 0.95, e2 = 0, 
-                            ta1 = rep(0, Ngroups), 
-                            ta2 = rep(0, Ngroups), 
-                            tmore1 = rep(Inf, Ngroups),
-                            tmore2 = rep(Inf, Ngroups),
-                            ts1 = rep(Ndays, Ngroups))
-pars_le_slow$ta  <- NULL
 pars_le_fast <- list_modify(pars_le_slow,
                             y0 = y0_gen(13, 9, pre_immunity, infected0[["fast"]]),
                             q = rep(r0(2), Ngroups))
@@ -165,17 +136,18 @@ pars_le_linear <- list_modify(pars_le_slow,
                               y0 = y0_gen(13, 9, pre_immunity, infected0[["decreasing"]]),
                               q = rep(r0(.99), Ngroups))
 
+set0 <- c(rep(1,4), 0, rep(1,7), 0)
 pars_le_late <- list_modify(pars_le_fast, 
                             y0 = (sr(pars_le_fast)["120", ,])*set0)
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 
 
 # ------------------------------------------------------------------------------
-# 5. Selection of parameters
+# 4. Selection function of parameters: grab_2v_parms
 # ------------------------------------------------------------------------------
-
-
 scenario_par_nms_2v <- c("pars_linear", "pars_le_slow", "pars_le_fast")#, "pars_le_late", "pars_le_cr")
 scenario_nms_2v <- c("Slow-decrease epidemic", "Slow-growth epidemic", "Fast-growth epidemic")#, "Declining risk", "Constant risk")
 scenario_list_2v <- lst(
@@ -197,14 +169,123 @@ grab_2v_parms <- function(model){
   if(model == "pars_le_late") pars <- pars_le_late
   pars
 }
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+
 
 
 
 # ------------------------------------------------------------------------------
-# Unknown (seems important but don't know the use)
+# 5. Adjustment function of parameters: apap_2v
+#-------------------------------------------------------------------------------
+# This function is of special importance. It derives new value of delta, the 
+# vaccination rate parameter, based on dose fraction and vaccine production
+# capacity. It is exactly where the optimization procedure adjusts the parameters. 
+
+
+# Some helper objects for apap functions
+delay_by_age <- c(1,1,1,1,1,1,0.0001,0.0001,0.0001) # 0.0001 instead of 0 to avoid 0*Inf
+avail_by_age <- c(0,0,1,1,1,1,1,1,1)
+prop_young <- sum(pop[1:2])
+prop_old <- sum(pop[7:9])
+prop_adults <- 1-prop_old-prop_young
+prop_all <- c(rep(prop_young, 2), rep(1-prop_young-prop_old, 4), rep(prop_old, 3))
+
+
+#' @param pars parameters object that is then used by `sr()`
+#' @param len  length of vaccination campaign (in days), i.e. time to 100% vaccinated
+#' @param vhes fraction of pop at which vaccine hesitancy kicks in (in each age group)
+#' @param vsupply total supply (fraction of total population)
+#' @param group_seq whether to prioritise all of the groups sequentially (80+, 70-80, ..., "new" way)
+#'                  or just the top 3 age groups before the rest ("old" way)
+#' @return parameters object that is then used by `sr()`
+
+# Vaccinate top p of the population, starting from the oldest
+# Returns a vector of what proportion of each age group was vaccinated
+vac_top_p <- function(p, pop) {
+  pop <- pop/sum(pop)
+  w <- rev(pop)
+  ptemp <- p
+  vrev <- vector(length = 9)
+  for(j in 1:9){
+    if(ptemp > 0)
+      vrev[j] <- min(ptemp, w[j])
+    ptemp <- ptemp - w[j]
+  }
+  rev(vrev)/pop
+}
+
+apap_2v <- function(pars, len, 
+                    expand_from = Inf,
+                    expansion_factor = 2,
+                    fractional_dose = rep(1, length(pop)),
+                    switch=Inf, 
+                    delay = 10, 
+                    vhes = .8, vsupply = default_supply_ceiling,
+                    group_seq=default_group_seq) {
+  allocation_vector <- vac_top_p(vsupply/vhes, pop)
+  d1 <- avail_by_age/len/prop_all
+  
+  if(length(delay)==1){
+    ts1 <- rep(switch+delay, Ngroups)
+  } else {
+    ts1 <- switch+delay
+  }
+  
+  if (!group_seq){
+    d1 <- avail_by_age/len/prop_all/fractional_dose
+    t1 <- delay + len*prop_old*vhes*delay_by_age*fractional_dose
+    
+    # Find when the vaccinations would be completed in priority group if there was 
+    # an expansion along the way (this is to adjust t1 in non-priority groups)
+    
+    if(expand_from < t1[1]){
+      v <- 1/360/prop_old
+      # x = e + (s - (e-d)v/Lv)
+      t1[1:6] <- expand_from + (vhes - (expand_from - delay)*v)/(expansion_factor*v)
+    }
+  } else {
+    d1 <- avail_by_age/len/pop/fractional_dose
+    time_to_vaccinate_k <- len*pop*vhes*(allocation_vector+0.00001)*fractional_dose
+    t1 <- delay + c(rev(cumsum(rev(time_to_vaccinate_k)))[-1],0)
+    
+    if ((expand_from>delay[length(delay)])&(expand_from!=Inf)){
+      t1.expand <- t1 - expand_from
+      t1.expand[t1.expand<0] <- 0
+      t1.expand[t1.expand>min(t1.expand[t1.expand>0])] <- 1
+      switch_index <- which(!t1.expand %in% c(0,1))
+      t1.expand[switch_index] <- t1.expand[switch_index]/(time_to_vaccinate_k)[switch_index+1]
+      pop.expand <- t1.expand*c((pop*vhes*allocation_vector)[-1],0.0001)
+      t1.delta <- pop.expand*len*(1-1/expansion_factor)
+      t1 <- t1 - rev(cumsum(rev(t1.delta)))
+    }  
+    if ((expand_from<=delay[length(delay)])){
+      t1 <- delay + c(rev(cumsum(rev((len/expansion_factor)*pop*vhes*(allocation_vector+0.00001))))[2:length(pop)],0)
+    }
+  }
+  
+  list_modify(pars, 
+              vstop = vhes*allocation_vector,
+              ta1 = t1,
+              tmore1 = rep(expand_from, Ngroups),
+              ta2 = sapply(t1, function(x) max(x, switch+delay)),
+              ts1 = ts1,
+              delta1 = d1,
+              delta2 = d1)
+}
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+
+
+
+
+# ------------------------------------------------------------------------------
+# 6. Seems important but don't really know the use
 #-------------------------------------------------------------------------------
 
-# Main FDF assumptions (Don't really know the use)
+# Main FDF assumptions
 delay_default <- 28 - 10
 delay_fdf <- 84 - 10
 delay_hybrid_k <- sapply(1:8, function(k){
@@ -270,10 +351,9 @@ df_efficacy_delta_raw <- readRDS(file = "setup/df_efficacy_delta_raw.rds")
 # Settings for FDF -----
 comp_to_display <- c("I", "D", "cumV", "cumI", "P1", "P2")
 
-
-
 as.percent <- function(x, d=2, perc=FALSE){
   if (perc) paste0(format(round(100*x, d), nsmall = d),'%')
   else format(round(100*x, d), nsmall = 2)
 }
-
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
