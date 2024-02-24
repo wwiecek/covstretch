@@ -63,8 +63,8 @@ pars_fdf_end <- list_modify(pars_fdf_fast,
                             y0 = y0_gen(13, 9, rep(.5, Ngroups), infected0[["fast"]]))
 # c(rep(12,1), 0) resets cumI (compartment 13) to 0:
 set0 <- c(rep(1,4), 0, rep(1,7), 0)
-pars_fdf_late <- list_modify(pars_fdf_fast, 
-                             y0 = (sr(pars_fdf_fast, f = "2d_v2")["120", ,])*set0)
+# pars_fdf_late <- list_modify(pars_fdf_fast, 
+#                              y0 = (sr(pars_fdf_fast, f = "2d_v2")["120", ,])*set0)
 
 # Two vaccines model -----
 pars_le_slow <- list_modify(pars_fdf_slow,
