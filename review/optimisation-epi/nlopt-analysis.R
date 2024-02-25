@@ -4,9 +4,9 @@
 library(nloptr)
 library(tidyverse)
 
-source("project-setup.R")
+source("project_setup.R")
 source("optimisation-epi/objective-functions.R")
-source("setup/parameters_adj_age_prioritization.R")
+# source("setup/parameters_adj_age_prioritization.R")
 
 prop_adults <- sum(pop[3:9])/sum(pop) #for now I ignore children, so Q is scaled down to adult pop
 q_seq <- c(0.1, 0.25, 0.5, 0.75, 1) #just try two quantities at first
