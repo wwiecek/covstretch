@@ -1,41 +1,42 @@
 library(nloptr)
 library(tidyverse)
-source("project-setup.R")
+source("project_setup.R")
 ##Deaths----
 #The file below is used only for the dynamic case
-load("results/extra/nlopt/wip-nl-solutions7-D-hic-edit_contacts.Rdata")
+load("results/wip-nl-solutions7-D-hic-edit_contacts.Rdata")
+load("results/wip-nl-solutions7-I-1.Rdata")
 
 colnames(nlopt_s0) <- nl_q_seq
 colnames(nlopt_s1) <- nl_q_seq
 
-#Importing results from non-epi model
+# #Importing results from non-epi model
+# 
+# nonepi_s1 <- read.csv("model/hic_non_epi.csv")
+# colnames(nonepi_s1) <- rev(nl_q_seq)
+# 
+# nonepi_s1_lic <- read.csv("model/lic_non_epi.csv")
+# colnames(nonepi_s1_lic) <- rev(nl_q_seq)
 
-nonepi_s1 <- read.csv("model/hic_non_epi.csv")
-colnames(nonepi_s1) <- rev(nl_q_seq)
-
-nonepi_s1_lic <- read.csv("model/lic_non_epi.csv")
-colnames(nonepi_s1_lic) <- rev(nl_q_seq)
-
-#Only non-epi model
-
-fig_non_epi <-
-  rbind(
-    as.data.frame(nonepi_s1_lic) %>% mutate(age = 3:9) %>% 
-      gather(Q, value, -age) %>% 
-      mutate(region = "LIC"),
-    as.data.frame(nonepi_s1) %>% mutate(age = 3:9) %>% 
-      gather(Q, value, -age) %>% 
-      mutate(region = "HIC")
-  ) %>% 
-  mutate(agegr = factor(age, levels = paste0(1:9), labels = colnames(pbc_spread))) %>%
-  mutate(region = factor(region)) %>%
-  ggplot(aes(x = agegr, y= value, group = interaction(region, Q), color = Q)) + 
-  geom_line(size = 1) +
-  xlab("Age group") + ylab("Dose fraction") + ggtitle("Optimal Dosage") + ylim(0,1) +
-  guides(color=guide_legend(title="Q")) + theme(legend.position="bottom") + facet_grid(cols = vars(region))
-
-ggsave("figures/dose_sharing_nonepi.pdf", fig_non_epi + 
-         theme(text = element_text(size=10)), width = 6.5, height=4.7)
+# #Only non-epi model
+# 
+# fig_non_epi <-
+#   rbind(
+#     as.data.frame(nonepi_s1_lic) %>% mutate(age = 3:9) %>% 
+#       gather(Q, value, -age) %>% 
+#       mutate(region = "LIC"),
+#     as.data.frame(nonepi_s1) %>% mutate(age = 3:9) %>% 
+#       gather(Q, value, -age) %>% 
+#       mutate(region = "HIC")
+#   ) %>% 
+#   mutate(agegr = factor(age, levels = paste0(1:9), labels = colnames(pbc_spread))) %>%
+#   mutate(region = factor(region)) %>%
+#   ggplot(aes(x = agegr, y= value, group = interaction(region, Q), color = Q)) + 
+#   geom_line(size = 1) +
+#   xlab("Age group") + ylab("Dose fraction") + ggtitle("Optimal Dosage") + ylim(0,1) +
+#   guides(color=guide_legend(title="Q")) + theme(legend.position="bottom") + facet_grid(cols = vars(region))
+# 
+# ggsave("figures/dose_sharing_nonepi.pdf", fig_non_epi + 
+#          theme(text = element_text(size=10)), width = 6.5, height=4.7)
 
 # Single plot - all models
 rbind(
@@ -93,27 +94,27 @@ fig_dynamic <-
 
 ggsave("figures/dose_sharing_dynamic.pdf", fig_dynamic+theme(text = element_text(size=10)), width = 6.5, height=5)
 
-fig_static <-
-  rbind(
-    as.data.frame(nlopt_s0)[-1,] %>% mutate(age = 3:9) %>% 
-      gather(Q, value, -age) %>% 
-      mutate(model = "Heterogeneous mixing"),
-    as.data.frame(nlopt_s1)[-1,] %>% mutate(age = 3:9) %>% 
-      gather(Q, value, -age) %>% 
-      mutate(model = "Homogeneous mixing"),
-    as.data.frame(nonepi_s1) %>% mutate(age = 3:9) %>% 
-      gather(Q, value, -age) %>% 
-      mutate(model = "Exogenous disease risk")
-  ) %>% 
-  filter(Q %in% c("0.3","0.8")) %>% 
-  mutate(agegr = factor(age, levels = paste0(1:9), labels = colnames(pbc_spread))) %>%
-  mutate(model = factor(model)) %>%
-  ggplot(aes(x = agegr, y= value, group = interaction(model, Q), lty = model, color = Q)) + 
-  geom_line(size = 1) +
-  xlab("Age group") + ylab("Dose fraction") + ylim(0,1) +
-  guides(color=guide_legend(title="Q (supply constraint)"))
-
-ggsave("figures/dose_sharing_static.pdf", fig_static+theme(text = element_text(size=10)), width = 6.5, height=4.7)
+# fig_static <-
+#   rbind(
+#     as.data.frame(nlopt_s0)[-1,] %>% mutate(age = 3:9) %>% 
+#       gather(Q, value, -age) %>% 
+#       mutate(model = "Heterogeneous mixing"),
+#     as.data.frame(nlopt_s1)[-1,] %>% mutate(age = 3:9) %>% 
+#       gather(Q, value, -age) %>% 
+#       mutate(model = "Homogeneous mixing"),
+#     as.data.frame(nonepi_s1) %>% mutate(age = 3:9) %>% 
+#       gather(Q, value, -age) %>% 
+#       mutate(model = "Exogenous disease risk")
+#   ) %>% 
+#   filter(Q %in% c("0.3","0.8")) %>% 
+#   mutate(agegr = factor(age, levels = paste0(1:9), labels = colnames(pbc_spread))) %>%
+#   mutate(model = factor(model)) %>%
+#   ggplot(aes(x = agegr, y= value, group = interaction(model, Q), lty = model, color = Q)) + 
+#   geom_line(size = 1) +
+#   xlab("Age group") + ylab("Dose fraction") + ylim(0,1) +
+#   guides(color=guide_legend(title="Q (supply constraint)"))
+# 
+# ggsave("figures/dose_sharing_static.pdf", fig_static+theme(text = element_text(size=10)), width = 6.5, height=4.7)
 
 # plot1 <- 
 #   rbind(
@@ -138,7 +139,7 @@ ggsave("figures/dose_sharing_static.pdf", fig_static+theme(text = element_text(s
 
 ##Infection----
 # load("results/nlopt/wip-nl-solutions7-I-maxeval100-tol-4.Rdata")
-load("results/nlopt/wip-nl-solutions7-I-test_contact.Rdata")
+load("results/wip-nl-solutions7-I-test_contact.Rdata")
 
 #Infection plot - static/homogeneous
 plot_inf <- as.data.frame(nlopt_s1)[-1,] %>% mutate(age = 3:9) %>%

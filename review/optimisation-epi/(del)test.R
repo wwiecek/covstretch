@@ -1,3 +1,5 @@
+# APZ - should delete
+
 prop_adults <- sum(pop[3:9])/sum(pop) #for now I ignore children, so Q is scaled down to adult pop
 outcome_nlopt <- "D"
 q_seq <- c(0.1, 0.25, 0.5, 0.75, 1) #just try two quantities at first
@@ -89,16 +91,16 @@ nlopt_d0_decline <- opt_problem(nl_d_seq, 0, static = F, model = "pars_le_linear
 nlopt_d1 <- opt_problem(nl_d_seq, 1, static = F)
 
 #save(nl_q_seq, nlopt_s0, file = "results/wip-nl-solutions5-s-h0-D.Rdata")
-# save(nl_d_seq, nlopt_d0, nlopt_d1, file = "results/nlopt/wip-nl-solutions7-d-D-hic-newconstr.Rdata")
+# save(nl_d_seq, nlopt_d0, nlopt_d1, file = "results/wip-nl-solutions7-d-D-hic-newconstr.Rdata")
 save(nl_q_seq, nl_d_seq,
      nlopt_s0, nlopt_s1, nlopt_d0, nlopt_d0_slow, nlopt_d0_decline,
-     nlopt_d1, file = "results/nlopt/wip-nl-solutions7-D-lic-edit_contacts.Rdata")
+     nlopt_d1, file = "results/wip-nl-solutions7-D-lic-edit_contacts.Rdata")
 
 
 #Generating tables for report
 #LIC
 prop_adults_lic <- sum(lic_pop[3:9])/sum(lic_pop)
-load("results/nlopt/wip-nl-solutions7-D-lic-edit_contacts.Rdata")
+load("results/wip-nl-solutions7-D-lic-edit_contacts.Rdata")
 table_s0_lic<-data.frame(nlopt_s0[2:8,as.character(rev(nl_q_seq*prop_adults_lic))])
 colnames(table_s0_lic) <- as.character(rev(nl_q_seq))
 table_s0_lic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")
@@ -132,7 +134,7 @@ print(xtable(table_s1_lic, digits=2), include.rownames=FALSE)
 
 #HIC
 prop_adults_hic <- sum(hic_pop[3:9])/sum(hic_pop)
-load("results/nlopt/wip-nl-solutions7-D-hic-edit_contacts.Rdata")
+load("results/wip-nl-solutions7-D-hic-edit_contacts.Rdata")
 table_s0_hic<-data.frame(nlopt_s0[2:8,as.character(rev(nl_q_seq*prop_adults_hic))])
 colnames(table_s0_hic) <- as.character(rev(nl_q_seq))
 table_s0_hic["Age Group"] = c("20-30","30-40","40-50","50-60","60-70","70-80","80+")

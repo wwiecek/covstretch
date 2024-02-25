@@ -2,7 +2,7 @@
 library(nloptr)
 library(tidyverse)
 library(ggplot2)
-source("project-setup.R")
+source("project_setup.R")
 
 source("optimisation-epi/objective-functions.R")
 

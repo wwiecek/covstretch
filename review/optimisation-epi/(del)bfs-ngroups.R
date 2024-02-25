@@ -1,4 +1,4 @@
-source("project-setup.R")
+source("project_setup.R")
 
 # Set up N groups and search grid -----
 n_x <- 7
@@ -7,7 +7,7 @@ unroll_x <- function(x,sub=1) c(sub,sub,x[1],x[2],x[3],x[4],x[5],x[6],x[7])
 d1_opt <- c(1000,400,200,100,50) #dynamic model speeds
 # d1_opt <- c(1000,750,500,400,300,200,133,100,50,25) #dynamic model speeds
 
-source("extra/optimisation-epi/objective-functions.R")
+source("optimisation-epi/objective-functions.R")
 
 # Generate all vectors to search over -----
 # k <- lapply(as.list(1:n_x), function(i) search_grid_dynamic)
@@ -17,10 +17,10 @@ source("extra/optimisation-epi/objective-functions.R")
 # colnames(brute_force_inc_vectors) <- paste0("age", 1:9)
 
 #Test based on optimal solutions from nlopt
-load("results/extra/wip-nl-solutions7-D.Rdata")
+load("results/wip-nl-solutions7-D.Rdata")
 test.grid <- t(nlopt_d0[2:8,])
 test.grid <- rbind(test.grid,t(nlopt_d1[2:8,]))
-load("results/extra/wip-nl-solutions7-I.Rdata")
+load("results/wip-nl-solutions7-I.Rdata")
 test.grid <- rbind(test.grid,t(nlopt_d0[2:8,]))
 test.grid <- rbind(test.grid,t(nlopt_d1[2:8,]))
 test.grid <- rbind(ceiling(test.grid*10)/10,floor(test.grid*10)/10)
