@@ -181,3 +181,27 @@ nlopt_d1_all %>%
   ggplot(aes(x = d1, y = res, color = tol)) + 
   geom_point(size = 2.5) + facet_grid(outcome ~ .,scales="free")
 
+
+# Single plot - all models
+rbind(
+  as.data.frame(nlopt_d0)[-1,] %>% mutate(age = 3:9) %>% 
+    gather(s, value, -age) %>% 
+    mutate(model = "epi-dynamic",  mixing = "heterogeneous"),
+  as.data.frame(nlopt_d1)[-1,] %>% mutate(age = 3:9) %>% 
+    gather(s, value, -age) %>% 
+    mutate(model = "epi-dynamic",  mixing = "homogeneous"),
+  as.data.frame(nlopt_s0)[-1,] %>% mutate(age = 3:9) %>% 
+    gather(s, value, -age) %>% 
+    mutate(model = "epi-static", mixing = "heterogeneous"),
+  as.data.frame(nlopt_s1)[-1,] %>% mutate(age = 3:9) %>% 
+    gather(s, value, -age) %>% 
+    mutate(model = "epi-static", mixing = "homogeneous")
+) %>%
+  #filter(s %in% c("1000","400","100","0.3","0.6","0.9")) %>% 
+  mutate(agegr = factor(age, levels = paste0(1:9), labels = colnames(pbc_spread))) %>%
+  mutate(mixing = factor(mixing)) %>%
+  ggplot(aes(x = agegr, y= value, group = interaction(mixing, s, model), lty = mixing, color = s)) + 
+  facet_grid(model ~ .) +
+  geom_line(size = 1.5)
+
+
