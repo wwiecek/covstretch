@@ -280,6 +280,20 @@ apap_2v <- function(pars, len,
 
 
 
+# Note that in the raw output of a single run, the compartment values are normalized
+# percentages for each age group. This function scales the compartment values by
+# population of age groups so that we have the actual number of infected/death. 
+rescale_rcs <- function(y, pop_sizes=rep(1, dim(y)[3]), merge = FALSE) {
+  y_new <- y*rep(pop_sizes, each = dim(y)[1]*dim(y)[2])
+  if(merge)
+    y_new <- replicate(1, apply(y_new, c(1,2), sum))
+  y_new
+}
+
+
+
+
+
 
 # ------------------------------------------------------------------------------
 # 6. Seems important but don't really know the use
@@ -354,6 +368,17 @@ comp_to_display <- c("I", "D", "cumV", "cumI", "P1", "P2")
 as.percent <- function(x, d=2, perc=FALSE){
   if (perc) paste0(format(round(100*x, d), nsmall = d),'%')
   else format(round(100*x, d), nsmall = 2)
+}
+
+main_metrics <- function(y, pop, vat = 31) {
+  v1 <- b_any(y, pop, "cumV", vat)
+  c("i" = b_any(y, pop, "cumI"), 
+    "d" = b_any(y, pop, "D"), 
+    "v1" = v1, 
+    "tt50" = tthi(y, pop),
+    # Benefit integral, over vaccinations only:
+    # "harm_v"  = 1-benefit(y, pop),
+    "harm_vr" = harm(y))
 }
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------

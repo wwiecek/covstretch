@@ -1,32 +1,31 @@
-# Note that in the raw output of a single run, the compartment values are normalized
-# percentages for each age group. This function scales the compartment values by
-# population of age groups so that we have the actual number of infected/death. 
-rescale_rcs <- function(y, pop_sizes=rep(1, dim(y)[3]), merge = FALSE) {
-  y_new <- y*rep(pop_sizes, each = dim(y)[1]*dim(y)[2])
-  if(merge)
-    y_new <- replicate(1, apply(y_new, c(1,2), sum))
-  y_new
-}
+# ------------------------------------------------------------------------------
+# Define objective functions for the dynamic or static optimization problem
+# ------------------------------------------------------------------------------
 
+# Dynamic objective function
+# ------------------------------------------------------------------------------
+# - scenario: model scenario such as "pars_fast", "pars_slow", etc.
+# - length_campaign: length of the vaccination campaign in days, which regulates the supply constraint
+# - fd: dose fraction
+# - phi_x: dose response function
+# - rm: whether the raw output from single_run will be returned
+# - ret: whether the output compartment values are scaled by population
+# - objective: which compartment value to be minimized, either "D" (death) or "cumI" (total infection)
+# - homogen: whether the mixing (contacts across groups) is homogenous or heterogenous
 
-# Define the dose-response function -----
-phi_x <- function(x) 
-  # 3.49706*sqrt(x) - 1.74853*x  -0.798528
-  # sapply(3.49706*sqrt(x) - 1.74853*x  -0.798528, function(y) max(y,0))
-  -25.31701*x^1.037524 + 1.037524*25.31701*x
-
-
-# Define objective functions (static and dynamic cases) ------
-model_fd_dynamic <- function(model, d1, fd, default_e1 = 0.95, 
+model_fd_dynamic <- function(scenario, 
+                             length_campaign, 
+                             fd, 
+                             phi_x = function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x,
                              rm = FALSE,
                              ret = 0,
-                             outcome = "d",
+                             objective = "d",
                              homogen = FALSE) {
+
   e1 <- phi_x(fd)
-  pars <- apap_2v(grab_2v_parms(model), fractional_dose = fd, len = d1)
+  pars <- apap_2v(grab_2v_parms(scenario), fractional_dose = fd, len = length_campaign)
   pars <- list_modify(pars, e1 = e1)
   if(homogen){
-    # pars$contacts <- 1/Ngroups + 0*pars$contacts
     pars$contacts <- t(replicate(Ngroups, pop))
     pars$q <- ev*pars$q
   }
@@ -36,22 +35,42 @@ model_fd_dynamic <- function(model, d1, fd, default_e1 = 0.95,
     return(main_metrics(y, pop))
   if(ret == 1)
     y <- rescale_rcs(y, pop, TRUE)
-    return(y[360,outcome,1])
+    return(y[360,objective,1])
 }
+# ------------------------------------------------------------------------------
 
-model_fd_static <- function(v_prop, rm = FALSE, homogen = FALSE,
-                                    ret = 0,
-                                    outcome = "d",
-                                    full=0) {
-  e_vector <- phi_x(v_prop)
+
+# Static objective function
+# ------------------------------------------------------------------------------
+# - scenario: model scenario such as "pars_le_fast", "pars_le_slow", etc.
+# - fd: dose fraction
+# - phi_x: dose response function
+# - rm: whether the raw output from single_run will be returned
+# - ret: whether the output compartment values are scaled by population
+# - objective: which compartment value to be minimized, either "D" (death) or "cumI" (total infection)
+# - homogen: whether the mixing (contacts across groups) is homogenous or heterogenous
+# 
+# Note that the supply constraint is not built into the objective function, 
+# rather, it is built into the optimization problem as the optimization constraint. 
+# Refer to line xxx of nlopt_general.R for more detail. 
+
+model_fd_static <- function(scenario, 
+                            fd, 
+                            phi_x = function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x,
+                            rm = FALSE,
+                            ret = 0,
+                            objective = "d",
+                            homogen = FALSE,
+                            full = 0) {
+
+  e_vector <- phi_x(fd)
   if (full){
-    e_vector <- v_prop*phi_x(1)
+    e_vector <- fd*phi_x(1)
   }
   pars <- list_modify(
-    pars_le_fast,
+    grab_2v_parms(scenario),
     y0 = y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e_vector))
   if(homogen){
-    # pars$contacts <- 1/Ngroups + 0*pars$contacts
     pars$contacts <- t(replicate(Ngroups, pop))
     pars$q <- ev*pars$q
   }
