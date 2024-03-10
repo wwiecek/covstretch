@@ -24,8 +24,9 @@ unroll_x <- function(x, sub=1) #set sub to 0 for static model where no doses go 
 # - harm: either "homo" (homogeneous) or "hetero" (heterogenous)
 # - dose_response: function phi(x) of efficacy response to dose fraction
 # - supply_constraint:
-# - mixing: either "homo" (homogeneous) or "hetero" (heterogenous)
-# - dynamic: TRUE or FALSE for dynamic problem
+# - homogen_mixing: TRUE or FALSE
+# - static: TRUE or FALSE for static problem
+# - pdeath: mortality risk vector, default to high-income country case
 # - scenario: cases decreasing, slowly increasing, rapidly increasing, etc
 # - recurring: TRUE or FALSE for recurring periods with re-vaccination
 opt_general <- 
@@ -37,10 +38,12 @@ opt_general <-
            supply_constraint = T, 
            homogen_mixing = F, 
            static = T,
+           pdeath = ifr_hic,
            scenario = "slow",
            recurring = T) {
     # Redefine phi_x which is by default defined in objective-function.R
     phi_x <- dose_response
+    default_pdeath <- pdeath
   
     # Run optimization for each supply constraint
     sol <- sapply(q_seq, function(Q) {
