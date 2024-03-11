@@ -21,7 +21,6 @@ unroll_x <- function(x, sub=1) #set sub to 0 for static model where no doses go 
 #          * (static) total dose amount available (percentage of full dose for entire population)
 # - initial_value: initial value of dose fraction, same across all age groups
 # - objective: either "D" (death) or "cumI" (cumulative infection) 
-# - harm: either "homo" (homogeneous) or "hetero" (heterogenous)
 # - dose_response: function phi(x) of efficacy response to dose fraction
 # - supply_constraint:
 # - homogen_mixing: TRUE or FALSE
@@ -32,17 +31,13 @@ unroll_x <- function(x, sub=1) #set sub to 0 for static model where no doses go 
 opt_general <- 
   function(q_seq,
            initial_value,
-           objective = "D", 
-           harm = "hetero",
-           dose_response = function(x) -25.31701 * x ^ 1.037524 + 1.037524 * 25.31701 * x,
-           supply_constraint = T, 
+           objective = "D",
+           dose_response = function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x,
            homogen_mixing = F, 
            static = T,
            pdeath = ifr_hic,
-           scenario = "slow",
+           scenario = "pars_le_slow",
            recurring = T) {
-    # Redefine phi_x which is by default defined in objective-function.R
-    phi_x <- dose_response
     default_pdeath <- pdeath
   
     # Run optimization for each supply constraint
@@ -78,10 +73,10 @@ opt_general <-
     # Initial values
     if(static){
       lb <- rep(0,n_x)
-      x0 <- rep(x0, n_x)
+      x0 <- rep(initial_value, n_x)
     } else {
       lb <- rep(0.01,n_x)
-      x0 <- rep(x0, n_x)
+      x0 <- rep(initial_value, n_x)
     }
     # Set optimization options.
     opts <- list( "algorithm"= "NLOPT_LN_COBYLA",#"NLOPT_GN_ISRES"
