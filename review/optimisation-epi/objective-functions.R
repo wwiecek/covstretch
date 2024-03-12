@@ -80,6 +80,6 @@ model_fd_static <- function(scenario,
     return(main_metrics(y, pop)[1:2])
   if(ret == 1)
     y <- rescale_rcs(y, pop, TRUE)
-    return(y[360,outcome,1])
+    return(y[360,objective,1])
   
 }
