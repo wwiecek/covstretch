@@ -37,7 +37,8 @@ opt_general <-
            static = T,
            pdeath = ifr_hic,
            scenario = "pars_le_slow",
-           recurring = T) {
+           recurring = T,
+           iterations = 100) {
     default_pdeath <- pdeath
   
     # Run optimization for each supply constraint
@@ -80,8 +81,8 @@ opt_general <-
     }
     # Set optimization options.
     opts <- list( "algorithm"= "NLOPT_LN_COBYLA",#"NLOPT_GN_ISRES"
-                  "xtol_rel"= 1.0e-4,
-                  "maxeval"= 100,
+                  "xtol_rel"= 0,
+                  "maxeval"= iterations,
                   #"local_opts" = list( "algorithm" = "NLOPT_LN_NELDERMEAD",
                   #                     "xtol_rel" = 1.0e-4 ),
                   "print_level" = 0 )
