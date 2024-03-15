@@ -29,7 +29,7 @@ unroll_x <- function(x, sub=1) #set sub to 0 for static model where no doses go 
 # - scenario: cases decreasing, slowly increasing, rapidly increasing, etc
 # - recurring: TRUE or FALSE for recurring periods with re-vaccination
 opt_general <- 
-  function(q_seq,
+  function(q,
            initial_value,
            objective = "D",
            dose_response = function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x,
@@ -41,32 +41,30 @@ opt_general <-
            iterations = 100) {
     default_pdeath <- pdeath
   
-    # Run optimization for each supply constraint
-    sol <- sapply(q_seq, function(Q) {
-      # Select objective function
-      if(static)
-        eval_f <- function(x) model_fd_static(scenario = scenario,
-                                              fd = unroll_x(x,sub=0), 
-                                              phi_x = dose_response, 
-                                              objective = objective,
-                                              homogen = homogen_mixing,
-                                              ret = 1)
-      else
-        eval_f <- function(x) model_fd_dynamic(scenario = scenario,
-                                               fd = unroll_x(x), 
-                                               length_campaign = Q,
-                                               phi_x = dose_response,
-                                               objective = objective,
-                                               ret = 1,
-                                               homogen = homogen_mixing)
-      # Set equality constraints
-      if(static)
-        # In the static case, the total dose applied is equal to the total dose available
-        # Need to change this constraint according to the number of groups
-        eval_g_ineq <- function(x) c(x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-Q,
+    # Select objective function
+    if(static)
+      eval_f <- function(x) model_fd_static(scenario = scenario,
+                                            fd = unroll_x(x,sub=0), 
+                                            phi_x = dose_response, 
+                                            objective = objective,
+                                            homogen = homogen_mixing,
+                                            ret = 1)
+    else
+      eval_f <- function(x) model_fd_dynamic(scenario = scenario,
+                                             fd = unroll_x(x), 
+                                             length_campaign = Q,
+                                             phi_x = dose_response,
+                                             objective = objective,
+                                             ret = 1,
+                                             homogen = homogen_mixing)
+    # Set equality constraints
+    if(static)
+      # In the static case, the total dose applied is equal to the total dose available
+      # Need to change this constraint according to the number of groups
+      eval_g_ineq <- function(x) c(x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-Q,
                                    -x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+Q)
-      else
-        eval_g_ineq <- NULL
+    else
+      eval_g_ineq <- NULL
     
     # Lower and upper bounds
     ub <- rep(1,n_x)
@@ -89,16 +87,26 @@ opt_general <-
     
     
     # Solving
-    res <- nloptr ( x0 = x0,
-                    eval_f = eval_f,
-                    lb = lb,
-                    ub = ub,
-                    eval_g_ineq = eval_g_ineq,
-                    opts = opts
-    )
-    c(res$objective, res$solution)
-  })
-  
-  colnames(sol) <- c(q_seq)
-  sol
+    res <- nloptr(x0 = x0,
+                  eval_f = eval_f,
+                  lb = lb,
+                  ub = ub,
+                  eval_g_ineq = eval_g_ineq,
+                  opts = opts)
+    
+    data.frame(age_group = factor(3:9, levels = paste0(3:9), labels = colnames(pbc_spread)[3:9]), 
+               solution = res$solution) %>% 
+      mutate(q = q, 
+             initial_value = initial_value,
+             objective = objective,
+             dose_response = deparse(dose_response)[2], 
+             homogen_mixing = homogen_mixing, 
+             static = static, 
+             pdeath = list(pdeath), 
+             scenario = scenario, 
+             recurring = recurring, 
+             objective_value = res$objective, 
+             status = res$status, 
+             n_iterations = res$iterations, 
+             message = res$message)
   }
