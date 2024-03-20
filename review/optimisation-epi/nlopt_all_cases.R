@@ -1,69 +1,80 @@
 # ------------------------------------------------------------------------------
-# Add all cases to the (unnested) data frame of final results
-# Can be easily modified to add particular cases. 
+# Generate the aggregate list of optimization results with different options. 
+# 
+# Three general categories are: 
+# 1. Full dose
+# 2. Optimal universal fractional dose
+# 3. Optimal fractional dose for each age group
+# 
+# Output: three lists of results for the three categories. 
+# The first 10 columns are different combinations of options, the later 4 are:
+#   - result_solution: 
+#       - 
+#       - 
+#       - 7 x 2 tibble of age group and optimal dose fraction
+#   - result_objective: objective value evaluated at the solution
+#   - result_n_iterations: the number of iterations in the solving process
+#   - result_message: message from nloptr about the status of the optimization
 # ------------------------------------------------------------------------------
 
-result_all <- 
-  data.frame(age_group = character(), 
-             solution = numeric(),
-             q = numeric(),
-             initial_value = numeric(),
-             objective = character(),
-             dose_response = character(), 
-             homogen_mixing = logical(), 
-             static = logical(), 
-             pdeath = list(), 
-             scenario = character(), 
-             recurring = logical(), 
-             objective_value = numeric(), 
-             status = numeric(), 
-             n_iterations = numeric(), 
-             message = character())
+# ------------------------------------------------------------------------------
+# 1. Full dose
+# ------------------------------------------------------------------------------
 
-for (q in c(1000, 400, 200, 100)){
-  for (initial_value in c(0.5, 0.3, 0.1, 0.01)){
-    for (objective in c("D", "cumI")){
-      for (dose_response in list(function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x)){
-        for (homogen_mixing in c(T, F)){
-          for (pdeath in list(ifr_hic, ifr_lic)){
-            for (scenario in c("pars_le_slow", "pars_le_fast")){
-              for (recurring in c(T, F)){
-                result_all <- 
-                  result_all %>% 
-                  add_opt(q = q, 
-                          initial_value = initial_value, 
-                          objective = objective, 
-                          dose_response = dose_response, 
-                          homogen_mixing = homogen_mixing, 
-                          static = static, 
-                          pdeath = pdeath, 
-                          scenario = scenario, 
-                          recurring = recurring, 
-                          iterations = iterations)
-                save(result_all, file = "results/result_all_dynamic.RData")
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+
+
+
+# ------------------------------------------------------------------------------
+# 2. Optimal universal fractional dose
+# ------------------------------------------------------------------------------
 
 
 
 
 
+# ------------------------------------------------------------------------------
+# 3. Optimal fractional dose for each age group
+# ------------------------------------------------------------------------------
 
+results_frac_age_dynamic <- 
+  expand_grid(q = c(1000, 700, 300, 100),
+              initial_value = 0.01, 
+              objective = c("D", "cumI"), 
+              dose_response = "covid_default",
+              homogen_mixing = c(T, F),
+              static = F,
+              pdeath = c("ifr_hic", "ifr_lic"), 
+              scenario = c("pars_le_slow", "pars_le_fast"),
+              recurring = T,
+              iterations = 100
+              ) %>% 
+  mutate(result = pmap(., opt_general)) %>% 
+  unnest_wider(result, names_sep = "_")
 
+# save(results_frac_age_dynamic, file = "results/results_frac_age_dynamic.Rdata")
 
+results_frac_age_static <- 
+  expand_grid(q = c(0.1, 0.3, 0.7, 1),
+              initial_value = 0.01, 
+              objective = c("D", "cumI"), 
+              dose_response = "covid_default",
+              homogen_mixing = c(T, F),
+              static = T,
+              pdeath = c("ifr_hic", "ifr_lic"), 
+              scenario = c("pars_le_slow", "pars_le_fast"),
+              recurring = T,
+              iterations = 100
+              ) %>% 
+  mutate(result = pmap(., opt_general)) %>% 
+  mutate(solution = pluck(result, "solution"), 
+         objective_value = pluck(result, "objective"), 
+         n_iterations = pluck(result, "n_iterations"), 
+         message = pluck(result, "message")) %>% 
+  unnest_wider(result, names_sep = "_")
 
+# save(results_frac_age_static, file = "results/results_frac_age_static.Rdata")
 
+results_frac_age <- results_frac_age_dynamic %>% 
+  rbind(results_frac_age_static)
 
-
-
-
-
-
-
-
+save(results_frac_age, file = "results/results_frac_age.Rdata")
