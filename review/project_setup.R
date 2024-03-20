@@ -4,6 +4,7 @@ library(ggpubr)
 library(latex2exp)
 library(shades)
 library(grid)
+library(assertthat)
 # Optimization packages
 library(nloptr)
 library(odin)

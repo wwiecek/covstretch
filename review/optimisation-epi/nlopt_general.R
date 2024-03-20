@@ -32,15 +32,20 @@ opt_general <-
   function(q,
            initial_value,
            objective = "D",
-           dose_response = function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x,
+           dose_response = "covid_default",
            homogen_mixing = F, 
            static = T,
-           pdeath = ifr_hic,
+           pdeath = "ifr_hic",
            scenario = "pars_le_slow",
            recurring = T,
            iterations = 100) {
-    default_pdeath <- pdeath
-  
+    default_pdeath <- ifelse(pdeath == "ifr_hic", ifr_hic, ifr_lic)
+    
+    dose_response <- ifelse(dose_response == "covid_default", 
+                            function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x, 
+                            function(x) 0)
+    
+    
     # Select objective function
     if(static)
       eval_f <- function(x) model_fd_static(scenario = scenario,
@@ -52,7 +57,7 @@ opt_general <-
     else
       eval_f <- function(x) model_fd_dynamic(scenario = scenario,
                                              fd = unroll_x(x), 
-                                             length_campaign = Q,
+                                             length_campaign = q,
                                              phi_x = dose_response,
                                              objective = objective,
                                              ret = 1,
@@ -61,8 +66,8 @@ opt_general <-
     if(static)
       # In the static case, the total dose applied is equal to the total dose available
       # Need to change this constraint according to the number of groups
-      eval_g_ineq <- function(x) c(x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-Q,
-                                   -x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+Q)
+      eval_g_ineq <- function(x) c(x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-q,
+                                   -x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+q)
     else
       eval_g_ineq <- NULL
     
@@ -94,19 +99,10 @@ opt_general <-
                   eval_g_ineq = eval_g_ineq,
                   opts = opts)
     
-    data.frame(age_group = factor(3:9, levels = paste0(3:9), labels = colnames(pbc_spread)[3:9]), 
-               solution = res$solution) %>% 
-      mutate(q = q, 
-             initial_value = initial_value,
-             objective = objective,
-             dose_response = deparse(dose_response)[2], 
-             homogen_mixing = homogen_mixing, 
-             static = static, 
-             pdeath = list(pdeath), 
-             scenario = scenario, 
-             recurring = recurring, 
-             objective_value = res$objective, 
-             status = res$status, 
-             n_iterations = res$iterations, 
-             message = res$message)
+    list("solution" = tibble(age_group = factor(3:9, levels = paste0(3:9), 
+                                                labels = colnames(pbc_spread)[3:9]), 
+                             solution = res$solution), 
+         "objective" = res$objective, 
+         "n_iterations" = res$iterations, 
+         "message" = res$message)
   }
