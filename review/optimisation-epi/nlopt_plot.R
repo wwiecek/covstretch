@@ -37,7 +37,8 @@ plot_frac_age <-
                     color = !!sym(vary_1_name),
                     linetype = !!sym(vary_2_name))) +
       theme_bw() + 
-      labs(x = "Age Group", y = "Optimal Dose Fraction")
+      labs(x = "Age Group", y = "Optimal Dose Fraction") +
+      ylim(0, 1)
   }
 
 plot_frac_age("static", F, 
@@ -49,7 +50,7 @@ plot_frac_age("static", F,
 plot_frac_age("static", F, 
               "objective", "D",
               "pdeath", "ifr_hic", 
-              "scenario", "pars_le_slow", 
+              "scenario", "pars_le_fast", 
               "q", "homogen_mixing")
 
 plot_frac_age("static", F, 

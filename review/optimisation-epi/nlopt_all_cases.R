@@ -73,7 +73,7 @@ obj_full <- function(q, initial_value, objective, dose_response, homogen_mixing,
   } else {
     model_fd_dynamic(scenario = scenario, 
                      length_campaign = q, 
-                     fd = rep(1, 9), 
+                     fd = rep(1, 9),  # try (00111111)
                      phi_x = dose_response, 
                      ret = 1, 
                      objective = objective, 

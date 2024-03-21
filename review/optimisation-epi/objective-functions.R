@@ -16,15 +16,21 @@
 model_fd_dynamic <- function(scenario, 
                              length_campaign, 
                              fd, 
-                             phi_x = function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x,
+                             phi_x = "covid_default",
+                             pdeath = "ifr_hic",
                              rm = FALSE,
                              ret = 0,
-                             objective = "d",
+                             objective = "D",
                              homogen = FALSE) {
-
+  if (phi_x == "covid_default") {phi_x <- function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x
+  } else if (phi_x == "flu_default") {phi_x <- function(x) 0}
+  
   e1 <- phi_x(fd)
+  
+  if (pdeath == "ifr_hic") {pdeath <- ifr_hic} else {pdeath <- ifr_lic}
+  
   pars <- apap_2v(grab_2v_parms(scenario), fractional_dose = fd, len = length_campaign)
-  pars <- list_modify(pars, e1 = e1)
+  pars <- list_modify(pars, e1 = e1, pdeath = pdeath)
   if(homogen){
     pars$contacts <- t(replicate(Ngroups, pop))
     pars$q <- ev*pars$q
@@ -56,14 +62,22 @@ model_fd_dynamic <- function(scenario,
 
 model_fd_static <- function(scenario, 
                             fd, 
-                            phi_x = function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x,
+                            phi_x = "covid_default",
+                            pdeath = "ifr_hic",
                             rm = FALSE,
                             ret = 0,
-                            objective = "d",
+                            objective = "D",
                             homogen = FALSE,
                             full = 0) {
 
+  if (phi_x == "covid_default") {phi_x <- function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x
+  } else if (phi_x == "flu_default") {phi_x <- function(x) 0}
+  
   e_vector <- phi_x(fd)
+  
+  if (pdeath == "ifr_hic") {pdeath <- ifr_hic
+  } else if (pdeath == "ifr_lic") {pdeath <- ifr_lic}
+  
   if (full){
     e_vector <- fd*phi_x(1)
   }
@@ -74,6 +88,7 @@ model_fd_static <- function(scenario,
     pars$contacts <- t(replicate(Ngroups, pop))
     pars$q <- ev*pars$q
   }
+  pars <- list_modify(pars, pdeath = pdeath)
   # We do not update e1, because there is no vaccination past t=0 
   y <- sr(pars, "2v_v2")
   if(ret == 0)
