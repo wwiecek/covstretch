@@ -111,7 +111,7 @@ results_frac_uni_static <- cases_static %>%
   unnest_wider(result, names_sep = "_") %>% 
   mutate(result_solution = pull(result_solution, solution)[1])
 
-results_frac_uni <- results_frac_age_dynamic %>% rbind(results_frac_uni_static)
+results_frac_uni <- results_frac_uni_dynamic %>% rbind(results_frac_uni_static)
 
 save(results_frac_uni, file = "results/results_frac_uni.Rdata")
 
