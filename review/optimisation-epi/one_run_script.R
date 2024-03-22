@@ -3,9 +3,11 @@ source("optimisation-epi/nlopt_general.R")
 time_elapsed_vec <- c()
 results_list <- list()
 
-for (n_iter in c(1,10,100,1000,10000,100000)) {
+Q <- 365
+
+for (n_iter in c(1,10,100,1000,10000)) {
   a <- Sys.time()
-  results <- opt_general(q_seq = c(0.5), initial_value = 0.5, iterations = n_iter)[2:8,]  
+  results <- opt_general(q = c(0.5), initial_value = 0.2, iterations = n_iter, homogen_mixing = FALSE, static = FALSE, objective = "cumI")[2:8,]  
   b <- Sys.time()
   c <- b - a
   print(c)

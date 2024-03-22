@@ -25,10 +25,29 @@ odin_ode_2vaccines_v2 <- odin::odin({
   beta[] <- sum(beta_matrix[i,])
   
   va1[] <- 1/((1 + exp(ta1[i] - t))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03))*(1 + exp(t - ts1[i])))
+  # invva1[] <- vstop[i] - 1/((1 + exp(ta1[i] - (t - (ta1[i] - ts1[i]))))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03))*(1 + exp((t - (ta1[i] - ts1[i])) - ts1[i])))
+  # midva1[] <- 1/((1 + exp(ta1[i] - (t - (ta1[i] / 2 - ts1[i] / 2))))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03))*(1 + exp((t - (ta1[i] / 2 - ts1[i] / 2)) - ts1[i])))
+  
   va2[] <- 1/((1 + exp(ta2[i] - t))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03)))
+  # invva2[] <- vstop[i] - 1/((1 + exp(ta2[i] - (t - ta2[i])))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03)))
+  # midva2[] <- 1/((1 + exp(ta2[i] - (t - ta2[i] / 2)))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03)))
   # Expansion factor:
   va1[] <- (1 + 1/(1+exp(1e03*(tmore1[i] - t))))*va1[i]
   va2[] <- (1 + 1/(1+exp(1e03*(tmore2[i] - t))))*va2[i]
+  
+  del <- 100
+  
+  # va1[] <- va1[i] - (1 + 1/(1+exp(1e03*(tmore1[i] - (t - del))))) * 1/((1 + exp(ta1[i] - (t - del)))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03))*(1 + exp((t - del) - ts1[i])))
+  # va2[] <- va2[i] - 1/((1 + exp(ta1[i] - (t - vstop[i])))*(1 + exp(1e03*cumV[i] - vstop[i]*1e03))*(1 + exp(t - vstop[i] - ts1[i])))
+  
+  # invva1[] <- (1 + 1/(1+exp(1e03*(tmore1[i] - t))))*invva1[i]
+  # invva2[] <- (1 + 1/(1+exp(1e03*(tmore2[i] - t))))*invva2[i]
+  # 
+  # midva1[] <- (1 + 1/(1+exp(1e03*(tmore1[i] - t))))*midva1[i]
+  # midva2[] <- (1 + 1/(1+exp(1e03*(tmore2[i] - t))))*midva2[i]
+  
+  # va1[] <- va1[i] * (1 - midva1[i] / 0.8) + invva1[i] * (midva1[i] / 0.8)
+  # va2[] <- va2[i] * (1 - midva2[i] / 0.8) + invva2[i] * (midva2[i] / 0.8)
   
   # ODE equations are here:
   deriv(S[])      <- -(beta[i] + constantrisk)*S[i] + phi[i]*R[i] - 
@@ -89,6 +108,10 @@ odin_ode_2vaccines_v2 <- odin::odin({
   dim(vstop)        <- Ngroups
   dim(va1)          <- Ngroups
   dim(va2)          <- Ngroups
+  # dim(invva1)       <- Ngroups
+  # dim(invva2)       <- Ngroups
+  # dim(midva1)       <- Ngroups
+  # dim(midva2)       <- Ngroups
   dim(ta1)          <- Ngroups
   dim(ts1)          <- Ngroups
   dim(ta2)          <- Ngroups
