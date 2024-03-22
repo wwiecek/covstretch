@@ -39,18 +39,13 @@ opt_general <-
            scenario = "pars_le_slow",
            recurring = T,
            iterations = 100) {
-    default_pdeath <- ifelse(pdeath == "ifr_hic", ifr_hic, ifr_lic)
-    
-    dose_response <- ifelse(dose_response == "covid_default", 
-                            function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x, 
-                            function(x) 0)
-    
     
     # Select objective function
     if(static)
       eval_f <- function(x) model_fd_static(scenario = scenario,
                                             fd = unroll_x(x,sub=0), 
                                             phi_x = dose_response, 
+                                            pdeath = pdeath,
                                             objective = objective,
                                             homogen = homogen_mixing,
                                             ret = 1)
@@ -59,6 +54,7 @@ opt_general <-
                                              fd = unroll_x(x), 
                                              length_campaign = q,
                                              phi_x = dose_response,
+                                             pdeath = pdeath,
                                              objective = objective,
                                              ret = 1,
                                              homogen = homogen_mixing)

@@ -32,7 +32,6 @@ sr <- function(pars, f = "2v_v2") {
   # }
   if(f == "2v_v2") {
     mod <- odin_ode_2vaccines_v2$new(user = pars)
-    # mod <- odin_ode_2vaccines_v2(user = pars)
     cnames <- c("S", "E", "I", "R", "D", "P1", "N1", "P2", "N2", "cumV1", "cumV2", "cumV", "cumI")
   }
   y <- array(mod$run(times)[,-1], 
