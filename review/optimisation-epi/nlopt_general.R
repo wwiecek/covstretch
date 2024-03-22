@@ -62,8 +62,12 @@ opt_general <-
     if(static)
       # In the static case, the total dose applied is equal to the total dose available
       # Need to change this constraint according to the number of groups
-      eval_g_ineq <- function(x) c(x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-q,
-                                   -x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+q)
+      eval_g_ineq <- function(x) c(sum(x * pop[3:9]) - q, - sum(x * pop[3:9]) + q)
+      # eval_g_ineq <- function(x) c(x[1]*pop[3]+x[2]*pop[4]+x[3]*pop[5]+x[4]*pop[6]+x[5]*pop[7]+x[6]*pop[8]+x[7]*pop[9]-q,
+      #                              -x[1]*pop[3]-x[2]*pop[4]-x[3]*pop[5]-x[4]*pop[6]-x[5]*pop[7]-x[6]*pop[8]-x[7]*pop[9]+q)
+      #eval_g_ineq <- function(x) c(x*pop[3]+x*pop[4]+x*pop[5]+x*pop[6]+x*pop[7]+x*pop[8]+x*pop[9]-q,
+      #                            -x*pop[3]-x*pop[4]-x*pop[5]-x*pop[6]-x*pop[7]-x*pop[8]-x*pop[9]+q)
+      
     else
       eval_g_ineq <- NULL
     

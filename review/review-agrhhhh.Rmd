@@ -66,45 +66,39 @@ results_all <-
                    "recurring", "iterations")) %>% 
   rename(frac_age = result_objective,
          frac_age_sol = result_solution) %>% 
-  distinct()
+  distinct() %>% 
+  mutate(setting = paste(q, objective, dose_response, homogen_mixing, static,
+                         pdeath, scenario, recurring))
 ```
 
 ```{r}
-
-
-results_all <- results_all %>%
-  mutate(group = paste(q, objective, dose_response, homogen_mixing, static,
-                       pdeath, scenario, recurring)) %>% 
-  select(group, full_dose, frac_uni, frac_age)
+all_dynamic <- results_all %>% 
+  filter(static == F, q == 1000, homogen_mixing == T, pdeath == "ifr_hic") %>% 
+  select(setting, full_dose, frac_uni, frac_age) %>% 
+  mutate(across(c(full_dose, frac_uni), ~map_dbl(., 1))) %>%
   pivot_longer(cols = c(full_dose, frac_uni, frac_age), 
-               names_to = "measurement", 
-               values_to = "value")
-
-# Step 2: Pivot wider to get the desired structure
-df_wide <- df_long %>%
-  select(group, measurement, value) %>%  # Select relevant columns
-  mutate(group = as.character(group)) %>%  # Ensure 'group' is character for column names
-  pivot_wider(names_from = group, values_from = value, names_prefix = "group_")
-
-# View the resulting dataframe
-print(df_wide)
-
+               names_to = "group", 
+               values_to = "value") %>% 
+  pivot_wider(names_from = setting, values_from = value)
 ```
 
-
-
-
-results_all <- as_tibble(cbind(nms = names(results_all), t(results_all))) %>%
-  row_to_names(1) %>% 
-  as_tibble()
-results_all$group <- as.character(results_all$group)
-results_all <- results_all %>% 
-  mutate(across(where(is.list), ~map_dbl(., 1))) %>% 
-  select(where(~!any(is.na(.))))
-
-
+  
 ```{r}
-ggradar(results_all)
+lcols <- c("#EEA236", "#5CB85C", "#46B8DA")
+all_dynamic %>% 
+  ggradar(background.circle.colour = "white",
+          axis.label.size = 1,
+          grid.label.size = 5,
+          group.point.size = 1,
+          legend.text.size = 5,
+          group.line.width = 0.5,
+          grid.line.width = 0.1,
+          grid.min = 0, 
+          grid.max = 0.005,
+          grid.mid = 0.0025,
+          group.colours = lcols) + 
+  theme_bw(base_size = 5) +
+  theme(legend.position = "bottom")
 ```
 
 

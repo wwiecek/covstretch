@@ -57,12 +57,7 @@ cases_static <- expand_grid(q = c(0.1, 0.3, 0.7, 1),
 # The purpose of the wrapper is to fit the data frame structure defined above. 
 obj_full <- function(q, initial_value, objective, dose_response, homogen_mixing,
                      static, pdeath, scenario, recurring, iterations) {
-  dose_response <- ifelse(dose_response == "covid_default", 
-                          function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x, 
-                          function(x) 0)
-  
-  default_pdeath <- ifelse(pdeath == "ifr_hic", ifr_hic, ifr_lic)
-  
+
   if (static){
     model_fd_static(scenario = scenario, 
                     fd = c(0, 0, rep(1, 7)), 
@@ -104,12 +99,14 @@ unroll_x <- function(x, sub = 1) {c(sub, sub, rep(x, 7))}
 results_frac_uni_dynamic <- cases_dynamic %>% 
   mutate(result = pmap(., opt_general)) %>% 
   unnest_wider(result, names_sep = "_") %>% 
-  mutate(result_solution = pull(result_solution, solution)[1])
+  mutate(result_solution = map(result_solution, pluck, 2)) %>% 
+  mutate(result_solution = map(result_solution, pluck, 1))
 
 results_frac_uni_static <- cases_static %>% 
   mutate(result = pmap(., opt_general)) %>% 
   unnest_wider(result, names_sep = "_") %>% 
-  mutate(result_solution = pull(result_solution, solution)[1])
+  mutate(result_solution = map(result_solution, pluck, 2)) %>% 
+  mutate(result_solution = map(result_solution, pluck, 1))
 
 results_frac_uni <- results_frac_uni_dynamic %>% rbind(results_frac_uni_static)
 
