@@ -22,6 +22,7 @@ source("optimisation-epi/objective-functions.R")
 source("optimisation-epi/nlopt_general.R")
 
 # Visualization functions
+source("optimisation-epi/nlopt_plot.R")
 
 
 
