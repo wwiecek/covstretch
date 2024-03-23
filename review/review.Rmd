@@ -1,5 +1,5 @@
 ---
-title: "Covstretch Function Summary"
+title: "Covstretch Preliminary Result Summary"
 author: "Leonardo Wang"
 output: pdf_document
 header-includes: 
@@ -13,12 +13,12 @@ library(ggradar)
 library(janitor)
 ```
 
-# Introduction
+# 1. Introduction
 
 We are interested in three general vaccination strategies:
 
- - Full dose for anyone 
- - A single optimal fractional dose for anyone
+ - Full dose
+ - A single optimal uniform fractional dose
  - Optimal fractional dose for each 10-year age group
  
 We will compare their performances under different settings, namely the combinations of the options below: 
@@ -32,91 +32,145 @@ We will compare their performances under different settings, namely the combinat
  - scenario: "pars_le_slow" or "pars_le_fast", it essentially indicates how fast the virus spreads upon contact
  - recurring: True or False as an indicator of whether loss of immunity and re-vaccination are considered
  
-The code for generating all combinations and apply the three general strategies above can be found in **optimisation-epi/nlopt_al_cases.R**. Run **project_setup.R** before anything. 
+The code for generating all combinations and apply the three general strategies above can be found in **optimisation-epi/nlopt_all_cases.R**. Run **project_setup.R** before anything. 
 
-The results are stored in **results/results_full_dose.Rdata**, **results/results_frac_uni.Rdata**, and **results/results_frac_age.Rdata**, corresponding to the three general strategies. 
+The results for the three strategies are separately stored in **results/results_full_dose.Rdata**, **results/results_frac_uni.Rdata**, and **results/results_frac_age.Rdata**. They are merged together in **results/results_all.Rdata**. 
+
+Visualizations below use the plotting functions defined in **optimisation-epi/nlopt_plot.R**. 
 
 ```{r}
 load("results/results_all.Rdata")
+source("optimisation-epi/nlopt_plot.R")
 ```
 
-# Comparisons of Objective Values under Different Settings
+# 2. Comparisons of Objective Values under Different Settings
 
+In nonrecurring Covid-19 pandemic as in Figure 1-4, optimal age-specific dose fraction does not generally yield sizable improvement in terms of death or infection percent compared to optimal uniform dose fraction. 
 
+It appears that the improvment is greater when population mixing is heterogeneous. 
 
-```{r}
+```{r warning=FALSE, message=FALSE,fig.fullwidth=T, fig.cap="Percent of Death in Nonrecurring Covid Pandemic under Dynamic Optimization", fig.pos="H"}
 results_all %>% 
-  filter(static == T, objective == "D", scenario == "pars_le_slow") %>% 
-  mutate(setting = paste("q = ", q, 
-                         ", dose response = ", dose_response, 
-                        ", homogen mixing = ", homogen_mixing,
-                        ", mortality risk = ", pdeath,
-                        ", recurring = ", recurring, 
-                        sep = "")) %>% 
+  filter(static == F, objective == "D", dose_response == "covid_default", 
+         scenario == "pars_le_slow") %>% 
+  mutate(setting = paste("q=", q, 
+                         ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
+                         ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
+                         ifelse(recurring, ", recurring", ", non-recurring"),
+                         sep = "")) %>% 
   radar_plot()
 ```
-all_dynamic <- results_all %>% 
-  filter(objective == "D", scenario == "pars_le_slow") %>% 
-  mutate(setting = paste("q = ", q, 
-                         ", objective = ", objective, 
-                         ", dose response = ", dose_response, 
-                         ", homogen mixing = ", homogen_mixing, 
-                         ", static = ", static,
-                         ", mortality risk = ", pdeath, 
-                         ", scenario = ", scenario, 
-                         ", recurring = ", recurring, 
+
+```{r warning=FALSE, message=FALSE, fig.full_width=T, fig.cap="Percent of Cumulative Infections in Nonrecurring Covid Pandemic under Dynamic Optimization", fig.pos="H"}
+results_all %>% 
+  filter(static == F, objective == "cumI", dose_response == "covid_default", 
+         scenario == "pars_le_slow") %>% 
+  mutate(setting = paste("q=", q, 
+                         ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
+                         ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
+                         ifelse(recurring, ", recurring", ", non-recurring"),
                          sep = "")) %>% 
-  select(setting, full_dose, frac_uni, frac_age) %>% 
-  mutate(across(c(full_dose, frac_uni), ~map_dbl(., 1))) %>%
-  pivot_longer(cols = c(full_dose, frac_uni, frac_age), 
-               names_to = "group", 
-               values_to = "value") %>% 
-  pivot_wider(names_from = setting, values_from = value)
+  radar_plot()
 ```
 
-  
-```{r}
-lcols <- c("#D55E00", "#0072B2", "#009E73")
-all_dynamic %>% 
-  ggradar(background.circle.colour = "white",
-          axis.label.size = 1,
-          grid.label.size = 5,
-          group.point.size = 1,
-          legend.text.size = 5,
-          group.line.width = 0.5,
-          grid.line.width = 0.1,
-          grid.min = 0, 
-          grid.max = 0.005 / 4,
-          grid.mid = 0.0025 / 4,
-          group.colours = lcols) + 
-  theme_bw(base_size = 5) +
-  theme(legend.position = "bottom")
+For static problems, values of the supply constraint **q** need to be changed for more interesting results. When q = 1 or 0.7, which is the proportion of population that can be covered by full dose, the full dose and uniform fraction (with full-dose as the solution) strategies have the lowest possible objective value simply because the supply constraint is too loose. Note that the proportion of population aged above 20 is 0.778. 
+
+For more stringent constraints to the right side of Figure 3 & 4, we can see more reasonable results. In static problems, age-specific dose fraction does not always perform better than uniform fraction, and it appears to do so under heterogeneous mixing.  
+
+```{r warning=FALSE, message=FALSE,fig.fullwidth=T, fig.cap="Percent of Death in Nonrecurring Covid Pandemic under Static Optimization", fig.pos="H"}
+results_all %>% 
+  filter(static == T, objective == "D", dose_response == "covid_default", 
+         scenario == "pars_le_slow") %>% 
+  mutate(setting = paste("q=", q, 
+                         ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
+                         ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
+                         ifelse(recurring, ", recurring", ", non-recurring"),
+                         sep = "")) %>% 
+  radar_plot()
+```
+
+```{r warning=FALSE, message=FALSE,fig.fullwidth=T, fig.cap="Percent of Cumulative Infection in Nonrecurring Covid Pandemic under Static Optimization", fig.pos="H"}
+results_all %>% 
+  filter(static == T, objective == "cumI", dose_response == "covid_default", 
+         scenario == "pars_le_slow") %>% 
+  mutate(setting = paste("q=", q, 
+                         ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
+                         ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
+                         ifelse(recurring, ", recurring", ", non-recurring"),
+                         sep = "")) %>% 
+  radar_plot()
 ```
 
 
-# Optimal age-group-specific dose fraction
+# 3. Optimal Age-specific Dose Fraction
 
-```{r}
-plot_frac_age("static", F, 
-              "pdeath", "ifr_hic",
-              "homogen_mixing", F, 
-              "scenario", "pars_le_slow", 
-              "q", "objective")
+Subsequent figures plot the optimal dose fraction for each age group under different settings. Note that the option **show_frac_uni** specifies whether to overlay the optimal uniform dose fraction on the plot. For now, we consider only the solutions from dynamic problems. 
 
-plot_frac_age("static", F, 
-              "objective", "D",
-              "pdeath", "ifr_hic", 
-              "scenario", "pars_le_fast", 
-              "q", "homogen_mixing")
+Figure 5 presents the age-specific solutions under different mixing and campaign length in a nonrecurring slow Covid pandemic in high-income countries under dynamic optimization for minimizing death percent. Figure 6 overlays the uniform solutions. 
 
-plot_frac_age("static", F, 
-              "objective", "D",
-              "homogen_mixing", F, 
-              "scenario", "pars_le_slow", 
-              "q", "pdeath")
+When mixing is homogeneous, the variation in optimal fraction across age groups is greater, and the uniform fraction is higher. 
+
+```{r warning=FALSE, message=FALSE,fig.fullwidth=T, fig.height = 3, fig.cap="Optimal Age-specific Dose Fractions for Nonrecurring Slow Covid Pandemic in High-income Countries under Dynamic Optimization for Minimizing Death Percent", fig.pos="H"}
+results_all %>% 
+  plot_frac_age(fix_1_name = "objective", fix_1_value = "D", 
+                fix_2_name = "pdeath", fix_2_value = "ifr_hic",
+                fix_3_name = "scenario", fix_3_value = "pars_le_slow",
+                fix_4_name = "static", fix_4_value = F,
+                vary_1_name = "q", vary_2_name = "homogen_mixing",
+                show_frac_uni = F)
 ```
+
+```{r warning=FALSE, message=FALSE,fig.fullwidth=T, fig.height = 3, fig.cap="Optimal Age-specific and Uniform Dose Fraction for Nonrecurring Slow Covid Pandemic in High-income Countries under Dynamic Optimization for Minimizing Death Percent", fig.pos="H"}
+results_all %>% 
+  plot_frac_age(fix_1_name = "objective", fix_1_value = "D", 
+                fix_2_name = "pdeath", fix_2_value = "ifr_hic",
+                fix_3_name = "scenario", fix_3_value = "pars_le_slow",
+                fix_4_name = "static", fix_4_value = F,
+                vary_1_name = "q", vary_2_name = "homogen_mixing",
+                show_frac_uni = T)
+```
+
+As the curves take on similar shapes, we fix q = 0.3 with heterogeneous mixing and turn to vary the objective and mortality risk. The results are presented in Figure 7. 
+
+First, the solution does not change with mortality risk when the objective is cumulative infection, since mortality risk only concerns death.
+
+Second, switching the objective from death to cumulative infection significantly reduces the dose fraction for older population, as the optimization problem now prioritizes vaccine coverage more than efficacy. The dose fraction for younger population does not drop likely because they make more frequent contact with others, and preventing the spread is also part of the optimization's concern. 
+
+Third, when the objective is death, switching the mortality risk from high-income to low-income also significantly reduces the dose fraction for older population. Recall that the mortality risk for the nine age groups are 
+
+ - 0.00002 0.00006 0.00030 0.00080 0.00150 0.00600 0.02200 0.05100 0.09300 (high-income)
+ - 0.00021 0.00039 0.00122 0.00205 0.00240 0.00600 0.01375 0.01992 0.02271 (low-income) 
+ 
+The mortality risk of younger population is much higher in the low-income setting than in the high-income one. The opposite is true for older population. Therefore, the optimization turns to protect more young people at the expense of efficacy for older people. 
+
+```{r warning=FALSE, message=FALSE,fig.fullwidth=T, fig.height = 3, fig.cap="Optimal Age-specific Dose Fraction for Nonrecurring Slow Covid Pandemic with heterogeneous mixing and a 300-day campaign under Dynamic Optimization", fig.pos="H"}
+results_all %>% 
+  plot_frac_age(fix_1_name = "q", fix_1_value = "300", 
+                fix_2_name = "homogen_mixing", fix_2_value = F,
+                fix_3_name = "scenario", fix_3_value = "pars_le_slow",
+                fix_4_name = "static", fix_4_value = F,
+                vary_1_name = "objective", vary_2_name = "pdeath",
+                show_frac_uni = F)
+```
+
+Finally, we turn to compare the results from different pandemic scenarios. Again we fix q = 0.3 with heterogeneous mixing, along with the high-income setting, switching which will have a predictable effect of bending the curve downward for older population. 
+
+The solutions in a fast-spreading pandemic are generally greater than in a slow pandemic, regardless of the objective. This suggests that efficacy and prevention of spreading take priority before coverage. 
+
+```{r warning=FALSE, message=FALSE,fig.fullwidth=T, fig.height = 3, fig.cap="Optimal Age-specific Dose Fraction for Nonrecurring Covid Pandemic in High-income Country with heterogeneous mixing and a 300-day campaign under Dynamic Optimization", fig.pos="H"}
+results_all %>% 
+  plot_frac_age(fix_1_name = "q", fix_1_value = "300", 
+                fix_2_name = "homogen_mixing", fix_2_value = F,
+                fix_3_name = "pdeath", fix_3_value = "ifr_hic",
+                fix_4_name = "static", fix_4_value = F,
+                vary_1_name = "objective", vary_2_name = "scenario",
+                show_frac_uni = F)
+```
+
 
 \newpage
+
+# Appendix: Previous notes on Model and Parametrization (Unfinished)
 
 This note will summarize main functions for simulation and optimization from the **covstretch** repository that can potentially be utilized by the new theoretical paper on optimal doze stretching. 
 
@@ -168,7 +222,15 @@ Note the **main_matrics** function
 
 
 
-
+```{r fig.fullwidth=T, fig.height = 3, fig.cap="Optimal Age-specific Dose Fraction for Nonrecurring Slow Covid Pandemic in High-income Countries under Dynamic Optimization for Minimizing Death Percent", fig.pos="H", eval=FALSE}
+results_all %>% 
+  plot_frac_age(fix_1_name = "objective", fix_1_value = "D", 
+                fix_2_name = "pdeath", fix_2_value = "ifr_hic",
+                fix_3_name = "scenario", fix_3_value = "pars_le_slow",
+                fix_4_name = "static", fix_4_value = T,
+                vary_1_name = "q", vary_2_name = "homogen_mixing",
+                show_frac_uni = F)
+```
 
 
 
