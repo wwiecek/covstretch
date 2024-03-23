@@ -46,7 +46,7 @@ load("results/results_all.Rdata")
 
 ```{r}
 results_all %>% 
-  filter(static == F, objective == "D", scenario == "pars_le_slow") %>% 
+  filter(static == T, objective == "D", scenario == "pars_le_slow") %>% 
   mutate(setting = paste("q = ", q, 
                          ", dose response = ", dose_response, 
                         ", homogen mixing = ", homogen_mixing,

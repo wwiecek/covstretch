@@ -59,14 +59,41 @@ obj_full <- function(q, initial_value, objective, dose_response, homogen_mixing,
                      static, pdeath, scenario, recurring, iterations) {
 
   if (static){
-    model_fd_static(scenario = scenario, 
-                    fd = c(0, 0, rep(1, 7)), 
-                    phi_x = dose_response, 
-                    pdeath = pdeath, 
-                    ret = 1, 
-                    objective = objective, 
-                    homogen = homogen_mixing)
-  } else {
+      fd <- c(0, 0, rep(1, 7))
+      phi_x <- dose_response
+      vac_perc <- rep(0, 9)
+      
+      for (i in c(9:1)) {
+        q <- q - pop[i]
+        if (q > 0) {
+          vac_perc[i] <- 1
+        } else {
+          vac_perc[i] <- q + pop[i]
+          break
+        }
+      }
+      
+      if (phi_x == "covid_default") {phi_x <- function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x
+      } else if (phi_x == "flu_default") {phi_x <- function(x) 0}
+      
+      e_vector <- vac_perc * phi_x(fd)
+      
+      if (pdeath == "ifr_hic") {pdeath <- ifr_hic
+      } else if (pdeath == "ifr_lic") {pdeath <- ifr_lic}
+      
+      pars <- list_modify(
+        grab_2v_parms(scenario),
+        y0 = y0_gen(13, Ngroups, pre_immunity = pre_immunity + (1-pre_immunity)*e_vector))
+      if(homogen_mixing){
+        pars$contacts <- t(replicate(Ngroups, pop))
+        pars$q <- ev*pars$q
+      }
+      pars <- list_modify(pars, pdeath = pdeath)
+      
+      y <- sr(pars, "2v_v2")
+      y <- rescale_rcs(y, pop, TRUE)
+      return(y[360,objective,1])
+    } else {
     model_fd_dynamic(scenario = scenario, 
                      length_campaign = q, 
                      fd = rep(1, 9),  # try (00111111)
@@ -75,8 +102,8 @@ obj_full <- function(q, initial_value, objective, dose_response, homogen_mixing,
                      ret = 1, 
                      objective = objective, 
                      homogen = homogen_mixing)
+    }
   }
-}
 
 # Apply all combinations of options to the wrapper function.
 results_full_dose_dynamic <- cases_dynamic %>% 
@@ -144,6 +171,9 @@ save(results_frac_age, file = "results/results_frac_age.Rdata")
 # ------------------------------------------------------------------------------
 # 4. Merge 
 # ------------------------------------------------------------------------------
+
+load("results/results_frac_age.Rdata")
+load("results/results_frac_uni.Rdata")
 
 results_frac_uni <- results_frac_uni %>% 
   select(-result_message, -result_n_iterations)
