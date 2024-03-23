@@ -1,3 +1,5 @@
+library(abind)
+
 sr <- function(pars, f = "2v_v2") { 
   gnames <- 1:pars$Ngroups
   times <- 1:(pars$Ndays)
@@ -38,4 +40,34 @@ sr <- function(pars, f = "2v_v2") {
              dim = c(max(times), pars$Ngroups, pars$Nc), 
              dimnames = list(times, gnames, cnames)) %>%
     aperm(c(1, 3, 2))
+}
+
+# Chain a few models
+multi_year_run <- function(par, f = "2v_v2", takeup = c(0.8)) {
+  nperiods = length(takeup)
+  y <- sr(par) #"joined" result (see below)
+  cy <- y #current result
+  if(nperiods == 1)
+    return(y)
+  
+  for(i in 1:(nperiods-1)){
+    # each new period just takes the last day of last period as starting condition
+    last_state <- cy[par$Ndays,,]
+    # reset vaccination indicators to zero ahead of the new season
+    last_state["S",] <- last_state["S",] + last_state["N1",]
+    last_state["R",] <- last_state["R",] + last_state["P1",]
+    last_state["cumV1",] <-
+      last_state["cumV2",] <-
+      last_state["cumV",] <-
+      last_state["P1",] <- 
+      last_state["N1",] <- 
+      0.0005 + 0*last_state["cumV1",]
+    # simulate another period
+    cpar <- list_modify(par, y0 = last_state, vstop = rep(takeup[i], 9))
+    cy <- sr(cpar, f)
+    # append new simulation at the end of previous one
+    y <- abind(y, cy, along = 1)
+  }
+  dimnames(y)[[1]] <- as.character(1:dim(y)[1])
+  y
 }

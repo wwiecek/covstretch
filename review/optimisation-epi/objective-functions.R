@@ -12,6 +12,7 @@
 # - ret: whether the output compartment values are scaled by population
 # - objective: which compartment value to be minimized, either "D" (death) or "cumI" (total infection)
 # - homogen: whether the mixing (contacts across groups) is homogenous or heterogenous
+# - rep: how many times vaccination recurs
 
 model_fd_dynamic <- function(scenario, 
                              length_campaign, 
@@ -21,7 +22,8 @@ model_fd_dynamic <- function(scenario,
                              rm = FALSE,
                              ret = 0,
                              objective = "D",
-                             homogen = FALSE) {
+                             homogen = FALSE,
+                             rep = c(0.8)) {
   if (phi_x == "covid_default") {phi_x <- function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x
   } else if (phi_x == "flu_default") {phi_x <- function(x) 0}
   
@@ -35,13 +37,17 @@ model_fd_dynamic <- function(scenario,
     pars$contacts <- t(replicate(Ngroups, pop))
     pars$q <- ev*pars$q
   }
-  y <- sr(pars, "2v_v2")
+  if (length(rep) == 1) {
+    y <- sr(pars, "2v_v2")
+  } elif (length(rep) > 1) {
+    y <- multi_year_run(par, "2v_v2", rep)
+  }
   if(rm) return(y)
   if(ret == 0)
     return(main_metrics(y, pop))
   if(ret == 1)
     y <- rescale_rcs(y, pop, TRUE)
-    return(y[360,objective,1])
+    return(y[360 * length(rep),objective,1])
 }
 # ------------------------------------------------------------------------------
 
@@ -68,7 +74,8 @@ model_fd_static <- function(scenario,
                             ret = 0,
                             objective = "D",
                             homogen = FALSE,
-                            full = 0) {
+                            full = 0,
+                            rep) {
 
   if (phi_x == "covid_default") {phi_x <- function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x
   } else if (phi_x == "flu_default") {phi_x <- function(x) 0}
@@ -90,11 +97,15 @@ model_fd_static <- function(scenario,
   }
   pars <- list_modify(pars, pdeath = pdeath)
   # We do not update e1, because there is no vaccination past t=0 
-  y <- sr(pars, "2v_v2")
+  if (length(rep) == 1) {
+    y <- sr(pars, "2v_v2")
+  } elif (length(rep) > 1) {
+    y <- multi_year_run(par, "2v_v2", rep)
+  }
   if(ret == 0)
     return(main_metrics(y, pop)[1:2])
   if(ret == 1)
     y <- rescale_rcs(y, pop, TRUE)
-    return(y[360,objective,1])
+    return(y[360 * length(rep),objective,1])
   
 }

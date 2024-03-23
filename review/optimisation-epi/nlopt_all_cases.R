@@ -35,7 +35,7 @@ cases_dynamic <- expand_grid(q = c(1000, 700, 300, 100),
                              static = F,
                              pdeath = c("ifr_hic", "ifr_lic"), 
                              scenario = c("pars_le_slow", "pars_le_fast"),
-                             recurring = T,
+                             recurring = 1,
                              iterations = 100)
 
 cases_static <- expand_grid(q = c(0.1, 0.3, 0.7, 1),
@@ -46,7 +46,7 @@ cases_static <- expand_grid(q = c(0.1, 0.3, 0.7, 1),
                             static = T,
                             pdeath = c("ifr_hic", "ifr_lic"), 
                             scenario = c("pars_le_slow", "pars_le_fast"),
-                            recurring = T,
+                            recurring = 1,
                             iterations = 100)
 
 # ------------------------------------------------------------------------------

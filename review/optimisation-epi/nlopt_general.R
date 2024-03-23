@@ -27,7 +27,7 @@ unroll_x <- function(x, sub=1) #set sub to 0 for static model where no doses go 
 # - static: TRUE or FALSE for static problem
 # - pdeath: mortality risk vector, default to high-income country case
 # - scenario: cases decreasing, slowly increasing, rapidly increasing, etc
-# - recurring: TRUE or FALSE for recurring periods with re-vaccination
+# - recurring: vector with vaccine hesitancy parameter for each year of the campaign
 opt_general <- 
   function(q,
            initial_value,
@@ -37,7 +37,7 @@ opt_general <-
            static = T,
            pdeath = "ifr_hic",
            scenario = "pars_le_slow",
-           recurring = T,
+           recurring = c(0.8),
            iterations = 100) {
     
     # Select objective function
@@ -48,7 +48,8 @@ opt_general <-
                                             pdeath = pdeath,
                                             objective = objective,
                                             homogen = homogen_mixing,
-                                            ret = 1)
+                                            ret = 1,
+                                            rep = recurring)
     else
       eval_f <- function(x) model_fd_dynamic(scenario = scenario,
                                              fd = unroll_x(x), 
@@ -57,7 +58,8 @@ opt_general <-
                                              pdeath = pdeath,
                                              objective = objective,
                                              ret = 1,
-                                             homogen = homogen_mixing)
+                                             homogen = homogen_mixing,
+                                             rep = recurring)
     # Set equality constraints
     if(static)
       # In the static case, the total dose applied is equal to the total dose available
