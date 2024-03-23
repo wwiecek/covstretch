@@ -62,6 +62,7 @@ obj_full <- function(q, initial_value, objective, dose_response, homogen_mixing,
     model_fd_static(scenario = scenario, 
                     fd = c(0, 0, rep(1, 7)), 
                     phi_x = dose_response, 
+                    pdeath = pdeath, 
                     ret = 1, 
                     objective = objective, 
                     homogen = homogen_mixing)
@@ -70,6 +71,7 @@ obj_full <- function(q, initial_value, objective, dose_response, homogen_mixing,
                      length_campaign = q, 
                      fd = rep(1, 9),  # try (00111111)
                      phi_x = dose_response, 
+                     pdeath = pdeath,
                      ret = 1, 
                      objective = objective, 
                      homogen = homogen_mixing)
@@ -138,3 +140,32 @@ results_frac_age <- results_frac_age_dynamic %>%
   rbind(results_frac_age_static)
 
 save(results_frac_age, file = "results/results_frac_age.Rdata")
+
+# ------------------------------------------------------------------------------
+# 4. Merge 
+# ------------------------------------------------------------------------------
+
+results_frac_uni <- results_frac_uni %>% 
+  select(-result_message, -result_n_iterations)
+
+results_frac_age <- results_frac_age %>% 
+  select(-result_message, -result_n_iterations)
+
+results_all <- 
+  results_full_dose %>% 
+  left_join(results_frac_uni, 
+            by = c("q", "initial_value", "objective","dose_response", 
+                   "homogen_mixing", "static", "pdeath", "scenario", 
+                   "recurring", "iterations")) %>% 
+  rename(full_dose = result_objective.x, 
+         frac_uni = result_objective.y,
+         frac_uni_sol = result_solution) %>% 
+  left_join(results_frac_age,
+            by = c("q", "initial_value", "objective","dose_response", 
+                   "homogen_mixing", "static", "pdeath", "scenario", 
+                   "recurring", "iterations")) %>% 
+  rename(frac_age = result_objective,
+         frac_age_sol = result_solution) %>% 
+  mutate(across(c(full_dose, frac_uni, frac_age, frac_uni_sol), ~map_dbl(., 1)))
+
+save(results_all, file = "results/results_all.Rdata")

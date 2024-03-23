@@ -37,43 +37,35 @@ The code for generating all combinations and apply the three general strategies 
 The results are stored in **results/results_full_dose.Rdata**, **results/results_frac_uni.Rdata**, and **results/results_frac_age.Rdata**, corresponding to the three general strategies. 
 
 ```{r}
-load("results/results_full_dose.Rdata")
-load("results/results_frac_uni.Rdata")
-load("results/results_frac_age.Rdata")
+load("results/results_all.Rdata")
 ```
 
-```{r}
-results_frac_uni <- results_frac_uni %>% 
-  select(-result_message, -result_n_iterations)
+# Comparisons of Objective Values under Different Settings
 
-results_frac_age <- results_frac_age %>% 
-  select(-result_message, -result_n_iterations)
+
+
+```{r}
+results_all %>% 
+  filter(static == F, objective == "D", scenario == "pars_le_slow") %>% 
+  mutate(setting = paste("q = ", q, 
+                         ", dose response = ", dose_response, 
+                        ", homogen mixing = ", homogen_mixing,
+                        ", mortality risk = ", pdeath,
+                        ", recurring = ", recurring, 
+                        sep = "")) %>% 
+  radar_plot()
 ```
-
-```{r}
-results_all <- 
-  results_full_dose %>% 
-  left_join(results_frac_uni, 
-            by = c("q", "initial_value", "objective","dose_response", 
-                   "homogen_mixing", "static", "pdeath", "scenario", 
-                   "recurring", "iterations")) %>% 
-  rename(full_dose = result_objective.x, 
-         frac_uni = result_objective.y,
-         frac_uni_sol = result_solution) %>% 
-  left_join(results_frac_age,
-            by = c("q", "initial_value", "objective","dose_response", 
-                   "homogen_mixing", "static", "pdeath", "scenario", 
-                   "recurring", "iterations")) %>% 
-  rename(frac_age = result_objective,
-         frac_age_sol = result_solution) %>% 
-  distinct() %>% 
-  mutate(setting = paste(q, objective, dose_response, homogen_mixing, static,
-                         pdeath, scenario, recurring))
-```
-
-```{r}
 all_dynamic <- results_all %>% 
-  filter(static == F, q == 1000, homogen_mixing == T, pdeath == "ifr_hic") %>% 
+  filter(objective == "D", scenario == "pars_le_slow") %>% 
+  mutate(setting = paste("q = ", q, 
+                         ", objective = ", objective, 
+                         ", dose response = ", dose_response, 
+                         ", homogen mixing = ", homogen_mixing, 
+                         ", static = ", static,
+                         ", mortality risk = ", pdeath, 
+                         ", scenario = ", scenario, 
+                         ", recurring = ", recurring, 
+                         sep = "")) %>% 
   select(setting, full_dose, frac_uni, frac_age) %>% 
   mutate(across(c(full_dose, frac_uni), ~map_dbl(., 1))) %>%
   pivot_longer(cols = c(full_dose, frac_uni, frac_age), 
@@ -84,7 +76,7 @@ all_dynamic <- results_all %>%
 
   
 ```{r}
-lcols <- c("#EEA236", "#5CB85C", "#46B8DA")
+lcols <- c("#D55E00", "#0072B2", "#009E73")
 all_dynamic %>% 
   ggradar(background.circle.colour = "white",
           axis.label.size = 1,
@@ -94,14 +86,35 @@ all_dynamic %>%
           group.line.width = 0.5,
           grid.line.width = 0.1,
           grid.min = 0, 
-          grid.max = 0.005,
-          grid.mid = 0.0025,
+          grid.max = 0.005 / 4,
+          grid.mid = 0.0025 / 4,
           group.colours = lcols) + 
   theme_bw(base_size = 5) +
   theme(legend.position = "bottom")
 ```
 
 
+# Optimal age-group-specific dose fraction
+
+```{r}
+plot_frac_age("static", F, 
+              "pdeath", "ifr_hic",
+              "homogen_mixing", F, 
+              "scenario", "pars_le_slow", 
+              "q", "objective")
+
+plot_frac_age("static", F, 
+              "objective", "D",
+              "pdeath", "ifr_hic", 
+              "scenario", "pars_le_fast", 
+              "q", "homogen_mixing")
+
+plot_frac_age("static", F, 
+              "objective", "D",
+              "homogen_mixing", F, 
+              "scenario", "pars_le_slow", 
+              "q", "pdeath")
+```
 
 \newpage
 
