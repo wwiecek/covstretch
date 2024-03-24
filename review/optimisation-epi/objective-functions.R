@@ -40,7 +40,7 @@ model_fd_dynamic <- function(scenario,
   if (length(rep) == 1) {
     y <- sr(pars, "2v_v2")
   } else if (length(rep) > 1) {
-    y <- multi_year_run(par, "2v_v2", rep)
+    y <- multi_year_run(pars, "2v_v2", rep)
   }
   if(rm) return(y)
   if(ret == 0)
@@ -100,7 +100,7 @@ model_fd_static <- function(scenario,
   if (length(rep) == 1) {
     y <- sr(pars, "2v_v2")
   } else if (length(rep) > 1) {
-    y <- multi_year_run(par, "2v_v2", rep)
+    y <- multi_year_run(pars, "2v_v2", rep)
   }
   if(ret == 0)
     return(main_metrics(y, pop)[1:2])
