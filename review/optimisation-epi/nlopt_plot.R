@@ -63,20 +63,15 @@ plot_frac_age <-
 # 
 # As an example:
 #
-results_all_filter <- results_all %>%
-  filter(static == T, objective == "D", scenario == "pars_le_slow") %>%
-  mutate(setting = paste("q = ", q,
-                         ", dose response = ", dose_response,
-                         ", homogen mixing = ", homogen_mixing,
-                         ", mortality risk = ", pdeath,
-                         ", recurring = ", recurring,
-                         sep = "")) %>% 
-  select(setting, full_dose, frac_uni, frac_age) %>% 
-  pivot_longer(cols = c(full_dose, frac_uni, frac_age), 
-               names_to = "group", 
-               values_to = "value") %>% 
-  pivot_wider(names_from = setting, values_from = value)
-  
+# results_all_filter <- results_all %>%
+#   filter(static == T, objective == "D", scenario == "pars_le_slow") %>%
+#   mutate(setting = paste("q = ", q,
+#                          ", dose response = ", dose_response,
+#                          ", homogen mixing = ", homogen_mixing,
+#                          ", mortality risk = ", pdeath,
+#                          ", recurring = ", recurring,
+#                          sep = ""))
+
 radar_plot <- function(results_all_filter) {
     
   results_all_filter %>% 
@@ -87,7 +82,7 @@ radar_plot <- function(results_all_filter) {
     pivot_wider(names_from = setting, values_from = value) %>% 
     ggradar(background.circle.colour = "white",
             values.radar = c("", "", ""),
-            axis.label.size = 1,
+            axis.label.size = 1.5,
             grid.label.size = 5,
             group.point.size = 1,
             legend.text.size = 5,
@@ -96,9 +91,12 @@ radar_plot <- function(results_all_filter) {
             grid.min = 0, 
             grid.max = 0.005 / 8,
             grid.mid = 0.0025 / 8,
-            group.colours = c("#E69F00", "#56B4E9", "#009E73")) + 
+            plot.extent.x.sf = 1.3) + 
     theme_bw(base_size = 5) +
-    theme(legend.position = "bottom")
+    scale_color_manual(labels = c("Age-specific Fraction", "Uniform Fraction", "Full Dose"),
+                       values = c("#E69F00", "#56B4E9", "#009E73")) +
+    theme(legend.position = "bottom") +
+    labs(x = "Objective", y = "Objective")
 }
   
 
