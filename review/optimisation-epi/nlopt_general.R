@@ -27,7 +27,7 @@ unroll_x <- function(x, sub=1) #set sub to 0 for static model where no doses go 
 # - static: TRUE or FALSE for static problem
 # - pdeath: mortality risk vector, default to high-income country case
 # - scenario: cases decreasing, slowly increasing, rapidly increasing, etc
-# - recurring: vector with vaccine hesitancy parameter for each year of the campaign
+# - recurring: list with vectors vaccine hesitancy parameter for each year of the campaign
 opt_general <- 
   function(q,
            initial_value,
@@ -37,7 +37,7 @@ opt_general <-
            static = T,
            pdeath = "ifr_hic",
            scenario = "pars_le_slow",
-           recurring = c(0.8),
+           recurring = list(rep(0.8, 9)),
            iterations = 100) {
     
     # Select objective function

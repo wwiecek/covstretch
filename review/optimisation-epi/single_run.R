@@ -63,7 +63,7 @@ multi_year_run <- function(par, f = "2v_v2", takeup = c(0.8)) {
       last_state["N1",] <- 
       0.0005 + 0*last_state["cumV1",]
     # simulate another period
-    cpar <- list_modify(par, y0 = last_state, vstop = rep(takeup[i], 9))
+    cpar <- list_modify(par, y0 = last_state, vstop = rep(takeup[[i]], 9))
     cy <- sr(cpar, f)
     # append new simulation at the end of previous one
     y <- abind(y, cy, along = 1)

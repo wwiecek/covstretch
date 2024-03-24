@@ -39,7 +39,7 @@ model_fd_dynamic <- function(scenario,
   }
   if (length(rep) == 1) {
     y <- sr(pars, "2v_v2")
-  } elif (length(rep) > 1) {
+  } else if (length(rep) > 1) {
     y <- multi_year_run(par, "2v_v2", rep)
   }
   if(rm) return(y)
@@ -99,7 +99,7 @@ model_fd_static <- function(scenario,
   # We do not update e1, because there is no vaccination past t=0 
   if (length(rep) == 1) {
     y <- sr(pars, "2v_v2")
-  } elif (length(rep) > 1) {
+  } else if (length(rep) > 1) {
     y <- multi_year_run(par, "2v_v2", rep)
   }
   if(ret == 0)
