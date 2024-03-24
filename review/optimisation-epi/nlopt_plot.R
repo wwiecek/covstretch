@@ -8,7 +8,7 @@
 # - static = c(T, F),
 # - pdeath = c("ifr_hic", "ifr_lic"), 
 # - scenario = c("pars_le_slow", "pars_le_fast"),
-# - recurring = T,
+# - recurring = list(rep(0.8,9)),
 # - iterations = 100)
 # ------------------------------------------------------------------------------
 
