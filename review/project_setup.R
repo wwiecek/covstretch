@@ -8,6 +8,7 @@ library(assertthat)
 # Optimization packages
 library(nloptr)
 library(odin)
+library(furrr)
 
 # Basic plotting setting
 theme_set(theme_minimal(base_size = 10))

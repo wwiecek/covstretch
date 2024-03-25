@@ -53,11 +53,13 @@ It appears that the improvement is greater when population mixing is heterogeneo
 results_all %>% 
   filter(static == F, objective == "D", dose_response == "covid_default", 
          scenario == "pars_le_slow") %>% 
+  rowwise() %>% 
   mutate(setting = paste("q=", q,
                          ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
                          ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"),
                          ifelse(toString(recurring) != toString(list(rep(0.8,9))), ", recurring", ", non-recurring"),
-                         sep = "")) %>%
+                         sep = "")) %>% 
+  ungroup() %>%
   radar_plot()
 ```
 
@@ -65,11 +67,13 @@ results_all %>%
 results_all %>% 
   filter(static == F, objective == "cumI", dose_response == "covid_default", 
          scenario == "pars_le_slow") %>% 
+  rowwise() %>% 
   mutate(setting = paste("q=", q, 
                          ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
                          ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
                          ifelse(toString(recurring) != toString(list(rep(0.8,9))), ", recurring", ", non-recurring"),
                          sep = "")) %>% 
+  ungroup() %>%
   radar_plot()
 ```
 
@@ -81,11 +85,13 @@ For more stringent constraints to the right side of Figure 3 & 4, we can see mor
 results_all %>% 
   filter(static == T, objective == "D", dose_response == "covid_default", 
          scenario == "pars_le_slow") %>% 
+  rowwise() %>% 
   mutate(setting = paste("q=", q, 
                          ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
                          ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
                          ifelse(toString(recurring) != toString(list(rep(0.8,9))), ", recurring", ", non-recurring"),
                          sep = "")) %>% 
+  ungroup() %>% 
   radar_plot()
 ```
 
@@ -93,11 +99,13 @@ results_all %>%
 results_all %>% 
   filter(static == T, objective == "cumI", dose_response == "covid_default", 
          scenario == "pars_le_slow") %>% 
+  rowwise() %>% 
   mutate(setting = paste("q=", q, 
                          ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
                          ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
                          ifelse(toString(recurring) != toString(list(rep(0.8,9))), ", recurring", ", non-recurring"),
                          sep = "")) %>% 
+  ungroup() %>% 
   radar_plot()
 ```
 
