@@ -47,17 +47,17 @@ source("optimisation-epi/nlopt_plot.R")
 
 In nonrecurring Covid-19 pandemic as in Figure 1-4, optimal age-specific dose fraction does not generally yield sizable improvement in terms of death or infection percent compared to optimal uniform dose fraction. 
 
-It appears that the improvment is greater when population mixing is heterogeneous. 
+It appears that the improvement is greater when population mixing is heterogeneous. 
 
 ```{r warning=FALSE, message=FALSE,fig.fullwidth=T, fig.cap="Percent of Death in Nonrecurring Covid Pandemic under Dynamic Optimization", fig.pos="H"}
 results_all %>% 
   filter(static == F, objective == "D", dose_response == "covid_default", 
          scenario == "pars_le_slow") %>% 
-  mutate(setting = paste("q=", q, 
+  mutate(setting = paste("q=", q,
                          ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
-                         ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
-                         ifelse(recurring, ", recurring", ", non-recurring"),
-                         sep = "")) %>% 
+                         ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"),
+                         ifelse(toString(recurring) != toString(list(rep(0.8,9))), ", recurring", ", non-recurring"),
+                         sep = "")) %>%
   radar_plot()
 ```
 
@@ -68,7 +68,7 @@ results_all %>%
   mutate(setting = paste("q=", q, 
                          ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
                          ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
-                         ifelse(recurring, ", recurring", ", non-recurring"),
+                         ifelse(toString(recurring) != toString(list(rep(0.8,9))), ", recurring", ", non-recurring"),
                          sep = "")) %>% 
   radar_plot()
 ```
@@ -84,7 +84,7 @@ results_all %>%
   mutate(setting = paste("q=", q, 
                          ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
                          ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
-                         ifelse(recurring, ", recurring", ", non-recurring"),
+                         ifelse(toString(recurring) != toString(list(rep(0.8,9))), ", recurring", ", non-recurring"),
                          sep = "")) %>% 
   radar_plot()
 ```
@@ -96,7 +96,7 @@ results_all %>%
   mutate(setting = paste("q=", q, 
                          ifelse(homogen_mixing, ", homogeneous", ", heterogeneous"),
                          ifelse(pdeath == "ifr_hic", ", high-income", ", low-income"), 
-                         ifelse(recurring, ", recurring", ", non-recurring"),
+                         ifelse(toString(recurring) != toString(list(rep(0.8,9))), ", recurring", ", non-recurring"),
                          sep = "")) %>% 
   radar_plot()
 ```
