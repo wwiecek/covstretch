@@ -370,12 +370,12 @@ as.percent <- function(x, d=2, perc=FALSE){
   else format(round(100*x, d), nsmall = 2)
 }
 
-main_metrics <- function(y, pop, vat = 31) {
-  v1 <- b_any(y, pop, "cumV", vat)
-  c("i" = b_any(y, pop, "cumI"), 
-    "d" = b_any(y, pop, "D"), 
+main_metrics <- function(y, pop, vat = 31, t = dim(sr)[1]) {
+  v1 <- b_any(y, pop, "cumV", vat, t)
+  c("i" = b_any(y, pop, "cumI", t), 
+    "d" = b_any(y, pop, "D", t), 
     "v1" = v1, 
-    "tt50" = tthi(y, pop),
+    "tt50" = tthi(y, pop, t),
     # Benefit integral, over vaccinations only:
     # "harm_v"  = 1-benefit(y, pop),
     "harm_vr" = harm(y))

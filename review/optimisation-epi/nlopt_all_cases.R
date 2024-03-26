@@ -92,9 +92,14 @@ obj_full <- function(q, initial_value, objective, dose_response, homogen_mixing,
       }
       pars <- list_modify(pars, pdeath = pdeath)
       
-      y <- sr(pars, "2v_v2")
+      rep <- unroll_vaccine_hesitancy(recurring[1], recurring[2], recurring[3], recurring[4])
+      if (length(rep) == 1) {
+        y <- sr(pars, "2v_v2")
+      } else if (length(rep) > 1) {
+        y <- multi_year_run(pars, "2v_v2", rep)
+      }
       y <- rescale_rcs(y, pop, TRUE)
-      return(y[360,objective,1])
+      return(y[360 * recurring[4],objective,1])
     } else {
     model_fd_dynamic(scenario = scenario, 
                      length_campaign = q, 

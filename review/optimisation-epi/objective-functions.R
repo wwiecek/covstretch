@@ -61,7 +61,7 @@ model_fd_dynamic <- function(scenario,
   }
   if(rm) return(y)
   if(ret == 0)
-    return(main_metrics(y, pop))
+    return(main_metrics(y, pop, t = nrow(y)))
   if(ret == 1)
     y <- rescale_rcs(y, pop, TRUE)
     return(y[360 * length(rep),objective,1])
@@ -122,7 +122,7 @@ model_fd_static <- function(scenario,
     y <- multi_year_run(pars, "2v_v2", rep)
   }
   if(ret == 0)
-    return(main_metrics(y, pop)[1:2])
+    return(main_metrics(y, pop, t = nrow(y))[1:2])
   if(ret == 1)
     y <- rescale_rcs(y, pop, TRUE)
     return(y[360 * length(rep),objective,1])
