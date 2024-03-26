@@ -1,3 +1,17 @@
+
+unroll_vaccine_hesitancy <- function(a,b,c, nyears) {
+  
+  lst <- list()
+  lst[[1]] <- rep(a, 9)
+  
+  if (nyears > 1) {
+    for (i in (2:nyears)) {
+      lst[[i]] <- c(0,0,b,b,b,b,b,c,c)
+    }
+  }
+  return(lst)
+}
+
 # ------------------------------------------------------------------------------
 # Define objective functions for the dynamic or static optimization problem
 # ------------------------------------------------------------------------------
@@ -23,7 +37,10 @@ model_fd_dynamic <- function(scenario,
                              ret = 0,
                              objective = "D",
                              homogen = FALSE,
-                             rep = c(0.8)) {
+                             rep = c(0.8, 0.2, 0.5, 1)) {
+  
+  rep <- unroll_vaccine_hesitancy(rep[1], rep[2], rep[3], rep[4])
+  
   if (phi_x == "covid_default") {phi_x <- function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x
   } else if (phi_x == "flu_default") {phi_x <- function(x) 0}
   
@@ -75,7 +92,9 @@ model_fd_static <- function(scenario,
                             objective = "D",
                             homogen = FALSE,
                             full = 0,
-                            rep) {
+                            rep = c(0.8, 0.2, 0.5, 1)) {
+  
+  rep <- unroll_vaccine_hesitancy(rep[1], rep[2], rep[3], rep[4])
 
   if (phi_x == "covid_default") {phi_x <- function(x) -25.31701*x^1.037524 + 1.037524*25.31701*x
   } else if (phi_x == "flu_default") {phi_x <- function(x) 0}

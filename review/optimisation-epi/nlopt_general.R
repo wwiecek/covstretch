@@ -37,7 +37,7 @@ opt_general <-
            static = T,
            pdeath = "ifr_hic",
            scenario = "pars_le_slow",
-           recurring = list(rep(0.8, 9)),
+           recurring = c(0.8,0.2,0.5,1),
            iterations = 100) {
     
     # Select objective function
